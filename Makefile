@@ -14,7 +14,7 @@ INCFLAGS +=-I$(APP_PATH)
 # rtos includes
 INCFLAGS += -I$(RTOS_PATH)
 INCFLAGS += -I$(RTOS_INCLUDES_PATH)
-CFLAGS = -c -g -Wall
+CFLAGS = -c -g -Wall -DDEBUG_APP
 
 # build
 COBJS = $(patsubst %.c,%.o,$(APP_SRC))

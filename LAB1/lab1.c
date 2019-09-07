@@ -10,6 +10,7 @@ ch_t ch_num(char* ch)
     int j = 0;
     return u8_nextchar(ch, &j);
 }
+
 bool ch_is_same(ch_t ch1, ch_t ch2)
 {
     if(ch1 == ch2) {
@@ -69,3 +70,4 @@ bool ch_is_same(ch_t ch1, ch_t ch2)
         return true;
     return false;
 }
+
