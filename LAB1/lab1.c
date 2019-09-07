@@ -2,6 +2,7 @@
 #include <locale.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include "utf8.h"
 #include "lab1.h"
 
@@ -71,3 +72,43 @@ bool ch_is_same(ch_t ch1, ch_t ch2)
     return false;
 }
 
+int ch_utf_strcmp(char* str1, char* str2)
+{
+    int i;
+    int j;
+    int count=0;
+    for(i=0, j=0; ;) {
+        ch_t ch1 = u8_nextchar(str1, &i);
+        ch_t ch2 = u8_nextchar(str2, &j);
+        if(ch1 == 0 || ch2 == 0)
+            break;
+        if(!ch_is_same(ch1, ch2)) {
+            break;
+        }
+        count++;
+    }
+    return count;
+}
+int ch_utf_memcmp(char* str1, char* str2)
+{
+    int i;
+    int j;
+    for(i=0, j=0; ;) {
+        ch_t ch1 = u8_nextchar(str1, &i);
+        ch_t ch2 = u8_nextchar(str2, &j);
+        if(ch1 == 0 || ch2 == 0)
+            break;
+        if(!ch_is_same(ch1, ch2)) {
+            break;
+        }
+    }
+    u8_dec(str1,&i);
+    u8_dec(str1,&j);
+    return i;
+}
+char* ch_utf_diff_alloc(char*str1, char*str2)
+{
+    int sz = ch_utf_memcmp(str1, str2);
+    char* diff = (char*)malloc(strlen(str1)+strlen(str2));
+    memcpy(diff, str1, sz);
+}
