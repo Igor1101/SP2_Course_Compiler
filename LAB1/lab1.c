@@ -43,6 +43,8 @@ bool ch_is_same(ch_t ch1, ch_t ch2)
         return true;
     if(ch_num("п") == ch_utf && ch_ascii == 'n')
         return true;
+    if(ch_num("о") == ch_utf && ch_ascii == 'o')
+        return true;
     if(ch_num("г") == ch_utf && ch_ascii == 'r')
         return true;
     if(ch_num("х") == ch_utf && ch_ascii == 'x')
@@ -62,6 +64,8 @@ bool ch_is_same(ch_t ch1, ch_t ch2)
     if(ch_num("К") == ch_utf && ch_ascii == 'K')
         return true;
     if(ch_num("М") == ch_utf && ch_ascii == 'M')
+        return true;
+    if(ch_num("О") == ch_utf && ch_ascii == 'O')
         return true;
     if(ch_num("Р") == ch_utf && ch_ascii == 'P')
         return true;
