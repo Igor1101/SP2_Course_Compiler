@@ -15,7 +15,7 @@ void tests(void)
     char * res = ch_utf_diff_alloc("123456", "1234556");
     assert(strlen(res) == 5);
 }
-char * strs[] = { "Вакуоль", "Вакула", "Византия", "Baker Street", "Baku", "Baobab", "binocular", "END"};
+char * strs[] = { "Вакуоль", "Вакула", "Византия", "BakerStreet", "Baku", "Baobab", "binocular", "END"};
 int
 main(){
     /* tests */
@@ -29,10 +29,10 @@ main(){
         for(i=0; ; i++) {
             if(!strcmp(strs[i], "END"))
                 break;
-            char* same = ch_utf_diff_alloc(key, strs[i]);
+            char* same = ch_utf_diff_alloc(strs[i], key);
             printf(" " COLOR_RED "%s" COLOR_DEF "%s", 
                 same,
-                &strs[i][ch_utf_memcmp(key,strs[i])]
+                &strs[i][ch_utf_memcmp(strs[i], key)]
                 );
             free(same);
         }
