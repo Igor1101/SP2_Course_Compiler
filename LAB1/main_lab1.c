@@ -15,27 +15,26 @@ void tests(void)
     char * res = ch_utf_diff_alloc("123456", "1234556");
     assert(strlen(res) == 5);
 }
-
+char * strs[] = { "Вакуоль", "Вакула", "Византия", "Baker Street", "Baku", "Baobab", "binocular", "END"};
 int
 main(){
     /* tests */
     tests();
-    char*c = "Ы";
-    int j=0;
-    pr_debug("могем писать кирилицай");
-    pr_info("char %s, sym %d", c, u8_nextchar(c, &j));
 	pr_info("locale: %s\n",setlocale(LC_ALL,""));
-    char * key = "Вакуоль";
-    char str[1000];
+    char key[1000];
 	while(1) {
         printf("\nkey-> ");
-		fgets(str, sizeof str, stdin);
-		pr_info("str: %s key: %s, size %d", str,key, u8_strlen(str));
-        char* same = ch_utf_diff_alloc(str, key);
-        pr_info("res:" COLOR_RED "%s" COLOR_DEF "%s", 
+		fgets(key, sizeof key, stdin);
+        int i;
+        for(i=0; ; i++) {
+            if(!strcmp(strs[i], "END"))
+                break;
+            char* same = ch_utf_diff_alloc(key, strs[i]);
+            printf(" " COLOR_RED "%s" COLOR_DEF "%s", 
                 same,
-                &key[ch_utf_memcmp(key, str)]
+                &strs[i][ch_utf_memcmp(key,strs[i])]
                 );
-        free(same);
+            free(same);
+        }
 	}
 }
