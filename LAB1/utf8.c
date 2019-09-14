@@ -474,3 +474,54 @@ int u8_printf(char *fmt, ...)
     va_end(args);
     return cnt;
 }
+
+static const size_t utf8_skip_data[256] = {
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+    3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,6,6,1,1
+};
+
+char *u8_strncpy(char *dst, const char *src, size_t maxncpy)
+{
+    char *dst_r = dst;
+    size_t utf8_size;
+
+    if (maxncpy > 0) {
+        while (*src != '\0' && (utf8_size = utf8_skip_data[*((unsigned char *)src)]) < maxncpy) {
+            maxncpy -= utf8_size;
+            switch (utf8_size) {
+                case 6: *dst ++ = *src ++;
+                case 5: *dst ++ = *src ++;
+                case 4: *dst ++ = *src ++;
+                case 3: *dst ++ = *src ++;
+                case 2: *dst ++ = *src ++;
+                case 1: *dst ++ = *src ++;
+            }
+        }
+        *dst= '\0';
+    }
+    return dst_r;
+}
+
+char* u8_strncpy_part(char* dst, char* src, size_t sizeDest )
+{
+	/* offset 0 0 = first char is ascii */
+	/* offset 0 2 = first char is utf8 */
+	/* offset 0 1 = first char is NULL */
+	int srci=0;
+	uint32_t ch;
+	//printf("offset=%d\n", u8_offset(src-1, 0));
+	//printf("offset1=%d\n", u8_offset(src-1, 1));
+	if(u8_offset(src-1, 1)>=2)
+		ch = u8_nextchar(src-1, &srci);
+	else
+		ch = u8_nextchar(src, &srci);
+    u8_toutf8(dst, sizeDest, &ch, sizeof ch);
+    return u8_strncpy(dst + u8_offset(dst, 1),
+            		src+u8_offset(src, 1), sizeDest);
+}

@@ -1,3 +1,5 @@
+#ifndef UTF_8_
+#define UTF_8_
 #include <stdarg.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -72,3 +74,8 @@ int u8_is_locale_utf8(char *locale);
    locale is UTF-8. */
 int u8_vprintf(char *fmt, va_list ap);
 int u8_printf(char *fmt, ...);
+
+char* u8_strncpy(char* dst, const char* src, size_t sizeDest );
+char* u8_strncpy_part(char* dst, char* src, size_t sizeDest );
+
+#endif /* UTF_8_ */
