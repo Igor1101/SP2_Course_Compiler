@@ -77,14 +77,14 @@ bool ch_is_same(ch_t ch1, ch_t ch2)
     return false;
 }
 
-int ch_utf_strcmp(char* str1, char* str2)
+int ch_utf_strcmp(char* str, char* key)
 {
     int i;
     int j;
     int count=0;
     for(i=0, j=0; ;) {
-        ch_t ch1 = u8_nextchar(str1, &i);
-        ch_t ch2 = u8_nextchar(str2, &j);
+        ch_t ch1 = u8_nextchar(str, &i);
+        ch_t ch2 = u8_nextchar(key, &j);
         if(ch1 == 0 || ch2 == 0)
             break;
         if(!ch_is_same(ch1, ch2)) {
@@ -94,27 +94,27 @@ int ch_utf_strcmp(char* str1, char* str2)
     }
     return count;
 }
-int ch_utf_memcmp(char* str1, char* str2)
+int ch_utf_memcmp(char* str, char* key)
 {
     int i;
     int j;
     for(i=0, j=0; ;) {
-        ch_t ch1 = u8_nextchar(str1, &i);
-        ch_t ch2 = u8_nextchar(str2, &j);
+        ch_t ch1 = u8_nextchar(str, &i);
+        ch_t ch2 = u8_nextchar(key, &j);
         if(ch1 == 0 || ch2 == 0)
             break;
         if(!ch_is_same(ch1, ch2)) {
             break;
         }
     }
-    u8_dec(str1,&i);
-    u8_dec(str1,&j);
+    u8_dec(str,&i);
+    u8_dec(str,&j);
     return i;
 }
-char* ch_utf_diff_alloc(char*str1, char*str2)
+char* ch_utf_diff_alloc(char*str, char*key)
 {
-    int sz = ch_utf_memcmp(str1, str2);
-    char* diff = (char*)malloc(strlen(str1)+strlen(str2));
-    memcpy(diff, str1, sz);
+    int sz = ch_utf_memcmp(str, key);
+    char* diff = (char*)malloc(strlen(str)+strlen(key));
+    memcpy(diff, str, sz);
     return diff;
 }
