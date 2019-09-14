@@ -1,10 +1,11 @@
+#include "ch_utf8.h"
+
 #include <stdio.h>
 #include <locale.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include "utf8.h"
-#include "lab1.h"
 
 ch_t ch_num(char* ch)
 {

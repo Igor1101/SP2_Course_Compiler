@@ -7,7 +7,7 @@ LAB1_PATH = $(APP_PATH)/LAB1
 # main src file
 APP_SRC += main_lab1.c
 # app sources
-APP_SRC += lab1.c
+APP_SRC += ch_utf8.c
 APP_SRC += utf8.c
 # app includes
 INCFLAGS +=-I$(APP_PATH)

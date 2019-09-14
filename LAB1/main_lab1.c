@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <defs.h>
+#include "ch_utf8.h"
 #include "utf8.h"
-#include "lab1.h"
 void tests(void)
 {
     char A_ascii = 'A';

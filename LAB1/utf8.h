@@ -1,5 +1,6 @@
 #include <stdarg.h>
 #include <stdint.h>
+#include <stddef.h>
 
 typedef uint32_t u_int32_t;
 /* is c the start of a utf8 sequence? */
