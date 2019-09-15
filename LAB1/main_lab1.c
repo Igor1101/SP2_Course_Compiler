@@ -32,11 +32,11 @@ void tests(void)
 void printall(void)
 {
     for(int i=0; i<str_array.amount; i++) {
-    	printf("%d %s\n", i, str_get_inst(i));
+    	printf("%d %s \t\tcoinc: %d\n", i, str_get_inst(i), str_get(i)->ch_coincidence);
     }
 }
 
-void printres(void)
+void printres(bool binary)
 {
 	void callback(int ind)
 	{
@@ -51,7 +51,10 @@ void printres(void)
 
 	}
 	str_max_update();
-	str_get_max(callback);
+	if(binary)
+		str_get_max_bin(callback);
+	else
+		str_get_max(callback);
 }
 
 void rmall(void)
@@ -70,13 +73,16 @@ int main()
 		fgets(cli_line, sizeof cli_line, stdin);
 		cli_get_words();
 		pr_debug("w0:%s, w1:%s", ARG_0, ARG_1);
-		if(CLI_IS("key")) { key_set(ARG_1); printf("key=%s", key.inst);}
+		if(CLI_IS("key")) { key_set(ARG_1); printf("key=%s", key.inst); str_max_update();}
 		if(CLI_IS("all")) printall();
-		if(CLI_IS("res")) printres();
+		if(CLI_IS("res")) printres(false);
 		if(CLI_IS("add")) str_add(ARG_1);
 		if(CLI_IS("del")) str_del(strtol(ARG_1, NULL, 10));
 		if(CLI_IS("modify")) str_modify(strtol(ARG_1, NULL, 10), ARG_2);
 		if(CLI_IS("reset")) rmall();
 		if(CLI_IS("exit")) { rmall(); exit(0); }
+		if(CLI_IS("sort")) { str_sort(); }
+		if(CLI_IS("resbin")) printres(true);
+		str_max_update();
 	}
 }
