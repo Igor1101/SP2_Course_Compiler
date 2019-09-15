@@ -17,14 +17,22 @@ void tests(void)
     char * res = ch_utf_diff_alloc("123456", "1234556");
     assert(strlen(res) == 5);
     free(res);
+    char * strs[] = { "Вакуоль", "Вакула", "Византия",
+    		"BakerStreet", "Baku", "Baobab", "binocular", "END"};
+    str_array_remove();
+    int i;
+    for(i=0; ; i++) {
+    	if(!strcmp(strs[i], "END"))
+    		break;
+    	str_add(strs[i]);
+    }
+    assert(i == str_array.amount);
 }
-char * strs[] = { "Вакуоль", "Вакула", "Византия", "BakerStreet", "Baku", "Baobab", "binocular", "END"};
 
 void printall(void)
 {
-	printf("all:\n");
     for(int i=0; i<str_array.amount; i++) {
-    	printf("str:%d %s\n", str_get(i)->ch_coincidence, str_get_inst(i));
+    	printf("%d %s\n", i, str_get_inst(i));
     }
 }
 
@@ -45,15 +53,18 @@ void printres(void)
 	str_max_update();
 	str_get_max(callback);
 }
+
+void rmall(void)
+{
+	str_array_remove();
+	str_free(key.inst);
+}
+
 int main()
 {
     /* tests */
 	pr_info("locale: %s\n",setlocale(LC_ALL,""));
     tests();
-    str_add("Вакуоль");
-    str_add("Воронежь");
-    str_add("Воронежь");
-    str_add("Криворож");
 	while(1) {
         printf("\n-> ");
 		fgets(cli_line, sizeof cli_line, stdin);
@@ -64,18 +75,7 @@ int main()
 		if(CLI_IS("res")) printres();
 		if(CLI_IS("add")) str_add(ARG_1);
 		if(CLI_IS("del")) str_del(strtol(ARG_1, NULL, 10));
-		//fgets(key, sizeof key, stdin);
-        int i;
-        /*
-        for(i=0; ; i++) {
-            if(!strcmp(strs[i], "END"))
-                break;
-            char* same = ch_utf_diff_alloc(strs[i], key);
-            printf(" " COLOR_RED "%s" COLOR_DEF "%s", 
-                same,
-                &strs[i][ch_utf_memcmp(strs[i], key)]
-                );
-            free(same);
-        }*/
+		if(CLI_IS("reset")) rmall();
+		if(CLI_IS("exit")) { rmall(); exit(0); }
 	}
 }
