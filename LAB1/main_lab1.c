@@ -54,17 +54,15 @@ int main()
     str_add("Воронежь");
 		fgets(cli_line, sizeof cli_line, stdin);
 		cli_get_words();
-    printres();
 	pr_info("locale: %s\n",setlocale(LC_ALL,""));
 	while(1) {
         printf("\n-> ");
 		fgets(cli_line, sizeof cli_line, stdin);
 		cli_get_words();
 		pr_debug("w0:%s, w1:%s", ARG_0, ARG_1);
-		if(CLI_IS("ключ")) { key_set(ARG_1); printf("key=%s", key.inst);}
-		if(CLI_IS("printall")) printall();
-		if(CLI_IS("все")) printall();
-		if(CLI_IS("результат")) printres();
+		if(CLI_IS("key")) { key_set(ARG_1); printf("key=%s", key.inst);}
+		if(CLI_IS("all")) printall();
+		if(CLI_IS("res")) printres();
 		//fgets(key, sizeof key, stdin);
         int i;
         /*
