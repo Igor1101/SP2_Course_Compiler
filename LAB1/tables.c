@@ -58,6 +58,7 @@ void str_free(char*str)
 	if(str == NULL)
 		return;
 	free(str);
+	str = NULL;
 }
 
 char* str_get_inst(int index)
@@ -86,6 +87,7 @@ void str_array_remove(void)
 		str_free(str_array.instcs[i].inst);
 	}
 	free(str_array.instcs);
+	str_array.amount = 0;
 }
 
 void str_coincidence(int index)
