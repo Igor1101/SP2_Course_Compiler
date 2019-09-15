@@ -132,6 +132,7 @@ void key_set(char* str)
 
 void str_del(int index)
 {
+	str_free(str_get_inst(index));
 	if(str_array.amount == 0)
 		return;
 	if(str_array.amount <= index)
