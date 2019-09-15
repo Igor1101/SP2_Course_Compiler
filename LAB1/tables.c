@@ -127,3 +127,16 @@ void key_set(char* str)
 	str_free(key.inst);
 	key.inst = str_alloc(str);
 }
+
+void str_del(int index)
+{
+	if(str_array.amount == 0)
+		return;
+	if(str_array.amount <= index)
+		return;
+	for(int i=index+1; i<str_array.amount; i++) {
+		str_array.instcs[i-1] = str_array.instcs[i];
+	}
+	str_array.amount--;
+	str_array.instcs = reallocarray(str_array.instcs, str_array.amount, sizeof(str_t));
+}

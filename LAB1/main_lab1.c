@@ -63,6 +63,7 @@ int main()
 		if(CLI_IS("all")) printall();
 		if(CLI_IS("res")) printres();
 		if(CLI_IS("add")) str_add(ARG_1);
+		if(CLI_IS("del")) str_del(strtol(ARG_1, NULL, 10));
 		//fgets(key, sizeof key, stdin);
         int i;
         /*
