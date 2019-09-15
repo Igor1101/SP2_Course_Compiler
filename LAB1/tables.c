@@ -25,7 +25,7 @@ int str_add(char*str)
 {
 	int strindex = str_array.amount;
 	if(str_array.instcs == NULL) {
-		str_array.instcs = (str_t*)malloc(sizeof(str_t));
+		str_array.instcs = (str_t*)calloc(1,sizeof(str_t));
 		str_array.amount = 1;
 	} else {
 		str_array.amount++;
@@ -87,6 +87,7 @@ void str_array_remove(void)
 		str_free(str_array.instcs[i].inst);
 	}
 	free(str_array.instcs);
+	str_array.instcs = NULL;
 	str_array.amount = 0;
 }
 
