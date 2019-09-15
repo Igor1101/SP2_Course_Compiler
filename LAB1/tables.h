@@ -16,7 +16,6 @@ typedef struct {
 typedef struct {
 	char* inst;
 	int ch_coincidence;
-	int byte_coincidence;
 }str_t;
 
 typedef struct {
