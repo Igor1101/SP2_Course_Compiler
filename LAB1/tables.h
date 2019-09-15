@@ -28,6 +28,7 @@ extern keys_t key;
 
 int str_add(char*str);
 void str_del(int index);
+void str_modify(int index, char* new);
 char* str_get_inst(int index);
 str_t* str_get(int index);
 void str_array_remove(void);

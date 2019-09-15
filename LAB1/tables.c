@@ -144,3 +144,13 @@ void str_del(int index)
 	str_array.amount--;
 	str_array.instcs = reallocarray(str_array.instcs, str_array.amount, sizeof(str_t));
 }
+
+void str_modify(int index, char* new)
+{
+	if(str_array.amount == 0)
+		return;
+	if(str_array.amount <= index)
+		return;
+	str_free(str_get_inst(index));
+	str_get(index)->inst = str_alloc(new);
+}
