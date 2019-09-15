@@ -114,7 +114,7 @@ int ch_utf_memcmp(char* str, char* key)
 char* ch_utf_diff_alloc(char*str, char*key)
 {
     int sz = ch_utf_memcmp(str, key);
-    char* diff = (char*)malloc(strlen(str)+strlen(key));
+    char* diff = (char*)calloc(strlen(str)+strlen(key), 1);
     memcpy(diff, str, sz);
     return diff;
 }

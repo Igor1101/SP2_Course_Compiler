@@ -48,13 +48,12 @@ void printres(void)
 int main()
 {
     /* tests */
+	pr_info("locale: %s\n",setlocale(LC_ALL,""));
     tests();
     str_add("Вакуоль");
     str_add("Воронежь");
     str_add("Воронежь");
-		fgets(cli_line, sizeof cli_line, stdin);
-		cli_get_words();
-	pr_info("locale: %s\n",setlocale(LC_ALL,""));
+    str_add("Криворож");
 	while(1) {
         printf("\n-> ");
 		fgets(cli_line, sizeof cli_line, stdin);
@@ -63,6 +62,7 @@ int main()
 		if(CLI_IS("key")) { key_set(ARG_1); printf("key=%s", key.inst);}
 		if(CLI_IS("all")) printall();
 		if(CLI_IS("res")) printres();
+		if(CLI_IS("add")) str_add(ARG_1);
 		//fgets(key, sizeof key, stdin);
         int i;
         /*

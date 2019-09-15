@@ -44,7 +44,7 @@ int str_add(char*str)
 char* str_alloc(char* str)
 {
 	size_t sz = strlen(str);
-	char* alloc = (char*)malloc(sz);
+	char* alloc = (char*)calloc(sz, 1);
 	if(alloc == NULL) {
 		pr_err("out of memory");
 		exit(-1);
