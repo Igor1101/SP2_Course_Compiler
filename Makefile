@@ -10,6 +10,7 @@ APP_SRC += main_lab1.c
 APP_SRC += ch_utf8.c
 APP_SRC += utf8.c
 APP_SRC += cli.c
+APP_SRC += tables.c
 # app includes
 INCFLAGS +=-I$(APP_PATH)
 # rtos includes
