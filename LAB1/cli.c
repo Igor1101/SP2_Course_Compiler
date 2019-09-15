@@ -19,6 +19,10 @@ static char* find_space(char* str);
 
 void cli_get_words(void)
 {
+    for (char* p = cli_line; (p = strchr(p, '\n')); ++p)
+        *p = '\0';
+    for (char* p = cli_line; (p = strchr(p, '\r')); ++p)
+        *p = '\0';
     memset(cli_word, 0, sizeof cli_word);
     int w_num = 0;
     char* w_n_start = find_notspace(cli_line);
