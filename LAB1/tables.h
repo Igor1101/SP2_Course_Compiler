@@ -40,5 +40,6 @@ void str_free(char*str);
 void key_set(char* str);
 void str_sort(void);
 void str_insert(int index, char* str);
+void str_del_max(void);
 
 #endif /* LAB1_TABLES_H_ */

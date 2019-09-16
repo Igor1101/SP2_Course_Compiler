@@ -329,3 +329,16 @@ void str_insert(int index, char* str)
 		str_array.instcs[i] = str_array.instcs[i-1];
 	str_array.instcs[index].inst = str_alloc(str);
 }
+
+void str_del_max(void)
+{
+	printf("removing...");
+	try_removing_anothertime: for(int i=0; i<str_array.amount; i++) {
+		if(key.max_coincidence == str_array.instcs[i].ch_coincidence) {
+			printf("%s ", str_get_inst(i));
+			str_del(i);
+			goto try_removing_anothertime;
+		}
+	}
+	puts("");
+}

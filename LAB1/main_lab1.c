@@ -88,6 +88,7 @@ int main()
 		if(CLI_IS("exit")) { rmall(); exit(0); }
 		if(CLI_IS("sort")) { str_sort(); }
 		if(CLI_IS("resbin")) printres(true);
+		if(CLI_IS("delres")) str_del_max();
 		str_max_update();
 	}
 }
