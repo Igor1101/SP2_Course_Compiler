@@ -33,6 +33,7 @@ char* str_get_inst(int index);
 str_t* str_get(int index);
 void str_array_remove(void);
 void str_get_max(void(*func)(int));
+void str_get_max_bin(void(*func)(int));
 void str_max_update(void);
 void str_coincidence(int index);
 char* str_alloc(char* str);
