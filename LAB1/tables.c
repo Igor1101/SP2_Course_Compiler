@@ -248,60 +248,19 @@ static int bin_first(str_t arr[], int low, int high, int key)
     return ans;
 }
 
-/* Find last occurrence index of key in array
- * Returns: an index in range [0, n-1] if key
-             belongs to array,
- *          -1 if key doesn't belong to array
- */
-static int bin_last(str_t arr[], int low, int high, int key)
-{
-    int ans = -1;
-
-    while (low <= high) {
-        int mid = low + (high - low + 1) / 2;
-        int midVal = arr[mid].ch_coincidence;
-
-        if (midVal < key) {
-
-            // if mid is less than key, then all elements
-            // in range [low, mid - 1] are also less
-            // so we now search in [mid + 1, high]
-            low = mid + 1;
-        }
-        else if (midVal > key) {
-
-            // if mid is greater than key, then all
-            // elements in range [mid + 1, high] are
-            // also greater so we now search in
-            // [low, mid - 1]
-            high = mid - 1;
-        }
-        else if (midVal == key) {
-
-            // if mid is equal to key, we note down
-            // the last found index then we search
-            // for more in right side of mid
-            // so we now search in [mid + 1, high]
-            ans = mid;
-            low = mid + 1;
-        }
-    }
-
-    return ans;
-}
-
 void str_get_max_bin(void(*func)(int))
 {
 	if(func == NULL)
 		return;
 	/* find max here */
 	int lowest = bin_first(str_array.instcs, 0, str_array.amount-1, key.max_coincidence);
-	int highest = bin_last(str_array.instcs, 0, str_array.amount-1, key.max_coincidence);
-	if(lowest == -1 || highest == -1) {
+	if(lowest == -1 ) {
 		pr_err("Array not sorted");
 		return;
 	}
-	for(int i=lowest; i<=highest; i++) {
+	for(int i=lowest; i<str_array.amount; i++) {
+		if(str_get(i)->ch_coincidence != key.max_coincidence)
+			break;
 		func(i);
 	}
 }
