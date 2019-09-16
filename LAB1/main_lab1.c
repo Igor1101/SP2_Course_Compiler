@@ -18,7 +18,8 @@ void tests(void)
     assert(strlen(res) == 5);
     free(res);
     char * strs[] = { "Вакуоль", "Вакула", "Византия",
-    		"BakerStreet", "Baku", "Baobab", "binocular", "END"};
+    		"BakerStreet", "Baku", "Baobab", "binocular", "Banana", "Ваниль",
+			"1223","END"};
     str_array_remove();
     int i;
     for(i=0; ; i++) {
