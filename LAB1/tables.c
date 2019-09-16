@@ -101,6 +101,9 @@ void str_coincidence(int index)
 		return;
 	}
 	str_array.instcs[index].ch_coincidence = ch_utf_strcmp(str_array.instcs[index].inst, key.inst);
+	if(str_array.instcs[index].ch_coincidence > key.max_coincidence) {
+		key.max_coincidence = str_array.instcs[index].ch_coincidence;
+	}
 }
 
 void str_max_update(void)
