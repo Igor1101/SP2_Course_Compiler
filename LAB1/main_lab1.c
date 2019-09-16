@@ -70,7 +70,10 @@ int main()
     tests();
 	while(1) {
         printf("\n-> ");
-		fgets(cli_line, sizeof cli_line, stdin);
+		if(fgets(cli_line, sizeof cli_line, stdin) == NULL) {
+			rmall();
+			exit(0);
+		}
 		cli_get_words();
 		pr_debug("w0:%s, w1:%s", ARG_0, ARG_1);
 		if(CLI_IS("key")) { key_set(ARG_1); printf("key=%s", key.inst); str_max_update();}
