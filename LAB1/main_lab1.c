@@ -81,6 +81,7 @@ int main()
 		if(CLI_IS("all")) printall();
 		if(CLI_IS("res")) printres(false);
 		if(CLI_IS("add")) str_add(ARG_1);
+		if(CLI_IS("insert")) str_insert(strtol(ARG_1, NULL, 10), ARG_2);
 		if(CLI_IS("del")) str_del(strtol(ARG_1, NULL, 10));
 		if(CLI_IS("modify")) str_modify(strtol(ARG_1, NULL, 10), ARG_2);
 		if(CLI_IS("reset")) rmall();

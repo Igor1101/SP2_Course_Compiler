@@ -305,3 +305,27 @@ void str_get_max_bin(void(*func)(int))
 		func(i);
 	}
 }
+
+void str_insert(int index, char* str)
+{
+	if(str_array.instcs == NULL) {
+		pr_err("cant insert str into empty array");
+		return;
+	}
+	if(index >= str_array.amount) {
+		pr_err("index out of bounds");
+		return;
+	}
+	/* realloc array */
+	str_array.amount++;
+	str_array.instcs =
+			reallocarray(str_array.instcs, str_array.amount, sizeof(str_t));
+	if(str_array.instcs == NULL) {
+		pr_err("array alloc failed");
+		exit(-1);
+	}
+	/* shift all elements higher index to the right */
+	for(int i=str_array.amount - 1; i>index; i--)
+		str_array.instcs[i] = str_array.instcs[i-1];
+	str_array.instcs[index].inst = str_alloc(str);
+}

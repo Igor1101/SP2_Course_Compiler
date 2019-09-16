@@ -39,5 +39,6 @@ char* str_alloc(char* str);
 void str_free(char*str);
 void key_set(char* str);
 void str_sort(void);
+void str_insert(int index, char* str);
 
 #endif /* LAB1_TABLES_H_ */
