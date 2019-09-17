@@ -70,14 +70,22 @@ int main()
 	pr_info("locale: %s\n",setlocale(LC_ALL,""));
     tests();
 	while(1) {
-        printf("\n-> ");
+        printf("-> ");
 		if(fgets(cli_line, sizeof cli_line, stdin) == NULL) {
 			rmall();
 			exit(0);
 		}
 		cli_get_words();
 		pr_debug("w0:%s, w1:%s", ARG_0, ARG_1);
-		if(CLI_IS("key")) { key_set(ARG_1); printf("key=%s", key.inst); str_max_update();}
+		if(CLI_IS("key")) {
+			if(strlen(ARG_1) == 0)
+				pr_info("key=%s", key.inst);
+			else {
+				key_set(ARG_1);
+				pr_info("key=%s", key.inst);
+			}
+
+		}
 		if(CLI_IS("all")) printall();
 		if(CLI_IS("res")) printres(false);
 		if(CLI_IS("add")) str_add(ARG_1);

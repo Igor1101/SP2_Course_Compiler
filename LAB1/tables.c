@@ -110,6 +110,7 @@ void str_max_update(void)
 {
 	if(str_array.instcs == NULL)
 		return;
+	key.max_coincidence = 0;
 	for(int i=0; i<str_array.amount; i++)
 		str_coincidence(i);
 	pr_debug("key max coincidence=%d", key.max_coincidence);
