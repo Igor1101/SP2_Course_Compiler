@@ -97,6 +97,7 @@ int main()
 		if(CLI_IS("sort")) { str_sort(); }
 		if(CLI_IS("resbin")) printres(true);
 		if(CLI_IS("delres")) str_del_max();
+		if(CLI_IS("modifyres")) str_modify_max(ARG_1);
 		str_max_update();
 	}
 }

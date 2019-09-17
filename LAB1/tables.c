@@ -205,6 +205,17 @@ void str_modify(int index, char* new)
 	str_get(index)->inst = str_alloc(new);
 }
 
+void str_modify_max(char* new)
+{
+	if(str_array.amount == 0)
+		return;
+	void callback(int i)
+	{
+		str_modify(i, new);
+	}
+	str_get_max(callback);
+}
+
 /* Find first occurrence index of key in array
  * Returns: an index in range [0, n-1] if key belongs
  *          to array, -1 if key doesn't belong to array
