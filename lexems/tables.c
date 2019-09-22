@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <defs.h>
-#include <LAB1/ch_utf8.h>
+#include <lexems/ch_utf8.h>
 #include "tables.h"
 
 keys_t key = {

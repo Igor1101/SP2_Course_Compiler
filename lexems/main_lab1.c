@@ -4,10 +4,10 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <defs.h>
-#include <LAB1/tables.h>
+#include <lexems/tables.h>
 #include "ch_utf8.h"
 #include "utf8.h"
-#include <LAB1/cli.h>
+#include <lexems/cli.h>
 void tests(void)
 {
     char A_ascii = 'A';

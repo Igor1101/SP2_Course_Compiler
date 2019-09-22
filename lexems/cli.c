@@ -7,8 +7,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <LAB1/utf8.h>
-#include <LAB1/ch_utf8.h>
+#include <lexems/utf8.h>
+#include <lexems/ch_utf8.h>
 #include "cli.h"
 
 char cli_line[1000];

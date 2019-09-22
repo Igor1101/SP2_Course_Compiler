@@ -3,7 +3,7 @@ PLATFORM ?= posix
 CC ?= gcc
 # path
 APP_PATH = $(abspath ./)
-LAB1_PATH = $(APP_PATH)/LAB1
+LAB1_PATH = $(APP_PATH)/lexems
 # main src file
 APP_SRC += main_lab1.c
 # app sources
