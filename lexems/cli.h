@@ -7,6 +7,7 @@
 
 #ifndef LAB1_CLI_H_
 #define LAB1_CLI_H_
+#include <string.h>
 
 #define CLI_IS(X) !strcmp(cli_word[0], X)
 #define ARG_0 cli_word[0]
