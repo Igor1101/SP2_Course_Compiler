@@ -1,5 +1,5 @@
 /*
- * PDA.h
+ * MooreMachine.h
  *
  *  Created on: Sep 22, 2019
  *      Author: igor
