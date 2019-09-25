@@ -26,6 +26,7 @@ MOORE_SIGNAL moore_str_to_sig(char*sig);
 char* moore_sig_to_str(MOORE_SIGNAL sig);
 char* moore_state_to_str(MOORE_STATE st);
 MOORE_STATE moore_getstate(void);
+MOORE_STATE moore_next_state_move_str(char* sig_s);
 
 
 #endif /* TREES_MOOREMACHINE_H_ */

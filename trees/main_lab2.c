@@ -23,11 +23,10 @@ int main(void)
 		}
 		cli_get_words();
 		if(CLI_IS("sig")) {
-			MOORE_SIGNAL sig = moore_str_to_sig(ARG_1);
 			MOORE_STATE lastst = moore_getstate();
-			moore_next_state_move(sig);
+			moore_next_state_move_str(ARG_1);
 			pr_info(" sig %s State %s => State: %s",
-					moore_sig_to_str(sig),
+					ARG_1,
 					moore_state_to_str(lastst),
 					moore_state_to_str(moore_getstate()));
 		}

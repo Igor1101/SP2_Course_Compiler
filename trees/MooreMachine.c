@@ -104,3 +104,9 @@ MOORE_STATE moore_getstate(void)
 {
 	return cur_state;
 }
+
+MOORE_STATE moore_next_state_move_str(char* sig_s)
+{
+	MOORE_SIGNAL sig = moore_str_to_sig(sig_s);
+	return moore_next_state_move(sig);
+}
