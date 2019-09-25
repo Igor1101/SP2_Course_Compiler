@@ -30,6 +30,20 @@ int main(void)
 					moore_state_to_str(lastst),
 					moore_state_to_str(moore_getstate()));
 		}
+		if(CLI_IS("sigall")) {
+			for(int i=1; i< CLI_WORDS;i++) {
+				if(strlen(cli_word[i])==0) {
+					pr_info("no more signals");
+					break;
+				}
+				MOORE_STATE lastst = moore_getstate();
+				moore_next_state_move_str(cli_word[i]);
+				pr_info(" sig %s State %s => State: %s",
+					cli_word[i],
+					moore_state_to_str(lastst),
+					moore_state_to_str(moore_getstate()));
+			}
+		}
 	}
 	return 0;
 };
