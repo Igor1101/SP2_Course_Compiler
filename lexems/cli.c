@@ -11,7 +11,7 @@
 #include <lexems/ch_utf8.h>
 #include "cli.h"
 
-char cli_line[1000];
+char cli_line[CLI_LINE_SIZE];
 char cli_word[CLI_WORDS][100];
 
 static char* find_notspace(char* str);

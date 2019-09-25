@@ -16,9 +16,10 @@
 #define ARG_3 cli_word[3]
 #define ARG_4 cli_word[4]
 #define ARG_5 cli_word[5]
-#define CLI_WORDS 1000
+#define CLI_WORDS 3000
+#define CLI_LINE_SIZE 10000
 
-extern char cli_line[1000];
+extern char cli_line[CLI_LINE_SIZE];
 extern char cli_word[CLI_WORDS][100];
 
 
