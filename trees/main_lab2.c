@@ -25,7 +25,10 @@ int main(void)
 		if(CLI_IS("sig")) {
 			MOORE_STATE lastst = moore_getstate();
 			moore_next_state_move_str(ARG_1);
-			pr_info(" sig %s State %s => State: %s",
+			pr_info(" sig "
+						COLOR_GREEN "%s " COLOR_DEF
+						"State " COLOR_GREEN "%s" COLOR_DEF
+						" => State: " COLOR_GREEN " %s" COLOR_DEF,
 					ARG_1,
 					moore_state_to_str(lastst),
 					moore_state_to_str(moore_getstate()));
@@ -38,7 +41,10 @@ int main(void)
 				}
 				MOORE_STATE lastst = moore_getstate();
 				moore_next_state_move_str(cli_word[i]);
-				pr_info(" sig %s State %s => State: %s",
+				pr_info(" sig "
+						COLOR_GREEN "%s " COLOR_DEF
+						"State " COLOR_GREEN "%s" COLOR_DEF
+						" => State: " COLOR_GREEN " %s" COLOR_DEF,
 					cli_word[i],
 					moore_state_to_str(lastst),
 					moore_state_to_str(moore_getstate()));
