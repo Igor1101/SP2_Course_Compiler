@@ -27,7 +27,7 @@ int main(void)
 			moore_next_state_move_str(ARG_1);
 			pr_info(" sig "
 						COLOR_GREEN "%s " COLOR_DEF
-						"State " COLOR_GREEN "%s" COLOR_DEF
+						"State: " COLOR_GREEN "%s" COLOR_DEF
 						" => State: " COLOR_GREEN " %s" COLOR_DEF,
 					ARG_1,
 					moore_state_to_str(lastst),
@@ -43,7 +43,7 @@ int main(void)
 				moore_next_state_move_str(cli_word[i]);
 				pr_info(" sig "
 						COLOR_GREEN "%s " COLOR_DEF
-						"State " COLOR_GREEN "%s" COLOR_DEF
+						"State: " COLOR_GREEN "%s" COLOR_DEF
 						" => State: " COLOR_GREEN " %s" COLOR_DEF,
 					cli_word[i],
 					moore_state_to_str(lastst),
