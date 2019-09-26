@@ -110,3 +110,8 @@ MOORE_STATE moore_next_state_move_str(char* sig_s)
 	MOORE_SIGNAL sig = moore_str_to_sig(sig_s);
 	return moore_next_state_move(sig);
 }
+
+void moore_reset(void)
+{
+	cur_state = S0;
+}

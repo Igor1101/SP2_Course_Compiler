@@ -50,6 +50,9 @@ int main(void)
 					moore_state_to_str(moore_getstate()));
 			}
 		}
+		if(CLI_IS("reset")) {
+			moore_reset();
+		}
 	}
 	return 0;
 };
