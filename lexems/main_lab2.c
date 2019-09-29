@@ -6,7 +6,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include <trees/MooreMachine.h>
+#include <lexems/MooreMachine.h>
 #include <lexems/cli.h>
 #include <defs.h>
 
