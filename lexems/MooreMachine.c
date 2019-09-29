@@ -7,16 +7,35 @@
 
 #include <string.h>
 #include "MooreMachine.h"
-MOORE_STATE graph[Se+1][SIG_E+1] = {
-		/* DLM,CFR,LTR, SIG_E */
-		{ S1, S1, S1, S0 },// S0
-		{ S2, S2, S2, S1 },// S1
-		{ S3, S3, S3, S2 },// S2
-		{ Se, S4, S4, S3 },// S3
-		{ S5, S5, S4, S4 },// S4
-		{ S6, S3, S6, S5 },// S5
-		{ Se, Se, Se, S6 },// S6
-		{ Se, Se, Se, Se }// S7
+MOORE_STATE graph[Eo+1][SIG_LTRCODE+1] = {
+	//DIG EXP HEX CONST NAME STRLIM STRBEG NC DOT SIGN
+	//EMPTY SEPOP SPGROUP SEPLST OPENBR CLOSEBR LTRCODE
+		// Eu
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu },
+	{ Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu, Eu }
 };
 static MOORE_STATE cur_state;
 
@@ -33,35 +52,43 @@ MOORE_STATE moore_next_state_move(MOORE_SIGNAL sig)
 
 MOORE_SIGNAL moore_str_to_sig(char*sig)
 {
-	if(sig == NULL)
-		return SIG_E;
-	if(!strcmp(sig, "cfr"))
-		return SIG_CFR;
-	if(!strcmp(sig, "dlm"))
-		return SIG_DLM;
-	if(!strcmp(sig, "ltr"))
-		return SIG_LTR;
-	return SIG_E;
+	return SIG_EMPTY;
+}
+
+MOORE_SIGNAL moore_char_to_sig(unsigned num)
+{
 }
 
 char* moore_sig_to_str(MOORE_SIGNAL sig)
 {
 	char*str;
 	switch(sig) {
-	case SIG_CFR:
-		str = "cfr";
+	case SIG_CLOSEDBR:
+		str = "CLOSEDBR";
 		break;
-	case SIG_DLM:
-		str = "dlm";
+	case SIG_CONST:
+		str = "CONST";
 		break;
-	case SIG_LTR:
-		str = "ltr";
+	case SIG_DIGIT:
+		str = "DIGIT";
 		break;
-	case SIG_E:
-		str = "e";
+	case SIG_DOT:
+		str = "DOT";
+		break;
+	case SIG_EMPTY:
+		str = "EMPTY";
+		break;
+	case SIG_EXP:
+		str = "EXP";
+		break;
+	case SIG_HEX:
+		str = "HEX";
+		break;
+	case SIG_LTRCODE:
+		str = "LTRCODE";
 		break;
 	default:
-		str = "e";
+		str = "UNKNOWN SIGNAL";
 	}
 	return str;
 }
@@ -72,27 +99,6 @@ char* moore_state_to_str(MOORE_STATE st)
 	switch(st) {
 	case S0:
 		str = "S0";
-		break;
-	case S1:
-		str = "S1";
-		break;
-	case S2:
-		str = "S2";
-		break;
-	case S3:
-		str = "S3";
-		break;
-	case S4:
-		str = "S4";
-		break;
-	case S5:
-		str = "S5";
-		break;
-	case S6:
-		str = "S6";
-		break;
-	case Se:
-		str = "Se";
 		break;
 	default:
 		str = "Undefined";

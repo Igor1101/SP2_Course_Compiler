@@ -9,7 +9,7 @@
 #define TREES_MOOREMACHINE_H_
 
 typedef enum {
-    EU,             // UNKNOWN OBJECT
+    Eu,             // UNKNOWN OBJECT
     S0,             // ANY SEPARATOR
     S1g,            // SIGN OF CONSTANT
     S1c,            //DIGIT OF INTEGER NUMBER(CONSTANT)
