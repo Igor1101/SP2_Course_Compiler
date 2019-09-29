@@ -9,30 +9,31 @@
 #define TREES_MOOREMACHINE_H_
 
 typedef enum {
-    S_U,            // UNKNOWN OBJECT
-    S_SEP,          // ANY SEPARATOR
-    S_SIGNNUM,      // + OR -
-    S_DIGIT,        //DIGIT, PART OF NUMBER(CONSTANT)
-    S_DOTNUM,       //NUMBER WITH DOT
-    S_E,            //EXPONENT
-    S_ENUM,         //NUMBER WITH EXPONENT
-    S_EDIG,         //ADD DIGIT TO EXP NUMBER
-    S_CONST,        //DIGIT OR LETTER FOR CONST
-    S_NAME,         //NAME
-    S_SYMBOL,       //SYMBOL OR SYMBOL STRING
-    S_CODEDSYM,     //ENCODED SYMBOL
-    S_SYMEND,       //SYMBOL END
-    S_BASESTART,    //NUMBER BASE POINTER "0"
-    S_BASE,         //BASE NUMBER
-    S_NUMB,         //NUMBER BODY
-    S_GROUPSEP,     //INTERMEDIATE GROUP SEPARATOR
-    S_GROUPSEPEND,  //GROUP END SEPARATOR
-    S_SEPAN,        // SEP ANALYSIS
-    S_ERR_CONST,    // ERROR IN CONSTANT
-    S_ERR_ECONST,   // ERROR IN DOT\EXP CONSTANT
-    S_ERR_NAME,     // ERROR IN NAME(LETTER ETC)
-    S_ERR_SEP,      // ERROR IN TERM
-    S_ERR_OP       // UNACCEPTABLE COMBINATION IN OPERATION
+    EU,             // UNKNOWN OBJECT
+    S0,             // ANY SEPARATOR
+    S1g,            // SIGN OF CONSTANT
+    S1c,            //DIGIT OF INTEGER NUMBER(CONSTANT)
+    S2c,            //NUMBER WITH DOT
+    S1e,            //EXPONENT
+    S1q,            //SIGN
+    S1p,            //DEC DIGIT OF EXPONENT
+    S1n,            //NAME
+    S1s,            //SYMBOL OR SYMBOL STRING
+    S1t,            //ENCODED SYMBOL
+    S2s,            //SYMBOL OR SYMBOL STRING END
+    SB,             //NUMBER BASE POINTER "0"
+    SBN,            //BASE NUMBER
+    SBNB,           //NUMBER BODY
+    S2,             //START GROUP SEPARATOR
+    S3,             //NEXT GROUP SEPARATOR
+    Scr,            // COMMENT
+    Scl,            // SEPARATED COMMENT
+    Ec,             // ERROR IN CONSTANT
+    Ep,             // ERROR IN DOT CONSTANT
+    Eq,             // ERROR IN EXP CONSTANT
+    En,             // ERROR IN NAME(LETTER ETC)
+    Es,             // ERROR IN TERM
+    Eo              // UNACCEPTABLE COMBINATION IN OPERATION
 }MOORE_STATE;
 
 typedef enum{
