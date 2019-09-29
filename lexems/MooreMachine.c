@@ -55,10 +55,6 @@ MOORE_SIGNAL moore_str_to_sig(char*sig)
 	return SIG_EMPTY;
 }
 
-MOORE_SIGNAL moore_char_to_sig(unsigned num)
-{
-}
-
 char* moore_sig_to_str(MOORE_SIGNAL sig)
 {
 	char*str;
@@ -86,6 +82,33 @@ char* moore_sig_to_str(MOORE_SIGNAL sig)
 		break;
 	case SIG_LTRCODE:
 		str = "LTRCODE";
+		break;
+	case SIG_NAME:
+		str = "NAME";
+		break;
+	case SIG_NC:
+		str = "NC";
+		break;
+	case SIG_OPENBR:
+		str = "OPENBR";
+		break;
+	case SIG_SEPGROUP:
+		str = "SEPGROUP";
+		break;
+	case SIG_SEPLST:
+		str = "SEPLST";
+		break;
+	case SIG_SEPOP:
+		str = "SEPOP";
+		break;
+	case SIG_SIGN:
+		str = "SIGN";
+		break;
+	case SIG_STRBEG:
+		str = "STRBEG";
+		break;
+	case SIG_STRLIM:
+		str = "STRLIM";
 		break;
 	default:
 		str = "UNKNOWN SIGNAL";

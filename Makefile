@@ -5,13 +5,14 @@ CC ?= gcc
 APP_PATH = $(abspath ./)
 LAB1_PATH = $(APP_PATH)/lexems
 # main src file
-APP_SRC += main_lab2.c
+APP_SRC += main_lab3.c
 # app sources
 APP_SRC += ch_utf8.c
 APP_SRC += utf8.c
 APP_SRC += cli.c
 APP_SRC += tables.c
 APP_SRC += MooreMachine.c
+APP_SRC += lex.c
 # app includes
 INCFLAGS +=-I$(APP_PATH)
 # rtos includes
