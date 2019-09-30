@@ -7,6 +7,7 @@
 
 #ifndef LAB1_TABLES_H_
 #define LAB1_TABLES_H_
+#include <lexems/lex.h>
 
 typedef struct {
 	char* inst;
@@ -16,6 +17,7 @@ typedef struct {
 typedef struct {
 	char* inst;
 	int ch_coincidence;
+	lexem_t lext;
 }str_t;
 
 typedef struct {

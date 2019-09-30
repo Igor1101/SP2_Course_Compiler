@@ -136,6 +136,9 @@ int lex_parse(char*str)
 			u8_dec(str, &i);
 			char* lex = get_next_lexem_alloc(str, &i);
 			/* parse lexem to find out what is it */
+			if(is_keyword(lex)) {
+
+			}
 		}
 	}
 	return ret_status;
