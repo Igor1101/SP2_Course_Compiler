@@ -8,12 +8,15 @@
 #ifndef LEXEMS_LEX_H_
 #define LEXEMS_LEX_H_
 
-#include <lexems/MooreMachine.h>
+#include <stdbool.h>
 
 bool is_keyword(char* str);
 bool is_name(char* str);
 bool is_char_in(unsigned ch, const char*str);
-MOORE_SIGNAL ch_to_moore_signal(unsigned ch);
+bool is_acc_char(char c);
+bool is_sacc_char(char c);
+int lex_parse(char*str);
+char* get_next_lexem_alloc(char*str, int* i);
 
 
 

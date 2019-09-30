@@ -6,7 +6,6 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include <lexems/MooreMachine.h>
 #include <defs.h>
 #include <stdbool.h>
 #include <lexems/utf8.h>
@@ -24,20 +23,7 @@ int main(void)
 		if(fgets(code, sizeof code, stdin) == NULL) {
 			prg_exit(0);
 		}
-		moore_reset();
-		int i=0;
-		while(true) {
-			unsigned ch = u8_nextchar(code, &i);
-			if(ch == 0)
-				break;
-			MOORE_SIGNAL sig = ch_to_moore_signal(ch);
-			MOORE_STATE oldst = moore_getstate();
-			MOORE_STATE st = moore_next_state_move(sig);
-			printf("sig=%s from %s to %s\n",
-					moore_sig_to_str(sig),
-					moore_state_to_str(oldst),
-					moore_state_to_str(st));
-		}
+		lex_parse(code);
 	}
 	return 0;
 };
