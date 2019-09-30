@@ -21,7 +21,7 @@ str_array_t str_array = {
 		.amount = 0
 };
 
-int str_add(char*str)
+int str_add(char*str, lexem_t lt)
 {
 	int strindex = str_array.amount;
 	if(str_array.instcs == NULL) {
@@ -37,6 +37,7 @@ int str_add(char*str)
 		}
 	}
 	str_array.instcs[strindex].inst = str_alloc(str);
+	str_array.instcs[strindex].lext = lt;
 	/* return index */
 	return strindex;
 }

@@ -28,7 +28,7 @@ typedef struct {
 extern str_array_t str_array;
 extern keys_t key;
 
-int str_add(char*str);
+int str_add(char*str, lexem_t lt);
 void str_del(int index);
 void str_modify(int index, char* new);
 void str_modify_max(char* new);

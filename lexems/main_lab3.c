@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <lexems/utf8.h>
 #include <lexems/lex.h>
+#include <lexems/tables.h>
 
 void prg_exit(int r)
 {
@@ -24,6 +25,10 @@ int main(void)
 			prg_exit(0);
 		}
 		lex_parse(code);
+		/* print result */
+		for(int i=0; i<str_array.amount;i++) {
+			pr_info("lexem: %s:<%s> ", str_get_inst(i), lex_to_str(str_get(i)->lext));
+		}
 	}
 	return 0;
 };
