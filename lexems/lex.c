@@ -82,7 +82,7 @@ bool is_name(char* str)
 	return true;
 }
 
-char* get_next_lexem_alloc(char*str, int* i)
+char* get_next_lexem_alloc(char*str, int* i, lexem_t* lexerror)
 {
 	char*lex;
 	const char* op_ch = "?!~|%^&*-+=/<>";
@@ -90,10 +90,18 @@ char* get_next_lexem_alloc(char*str, int* i)
 		return NULL;
 	unsigned ch = u8_nextchar(str, i);
 	pr_debug("char %c indentifying", ch);
-	if(is_char_in(ch, ";, ")) {
+	if(is_char_in(ch, ";,:. ")) {
 		pr_debug("lex is delimiter");
-		lex = calloc(1, 1);
+		lex = calloc(1, 2);
 		lex[0] = (char)ch;
+		lex[1] = 0;
+		return lex;
+	}
+	if(is_char_in(ch, "()[]{}")) {
+		pr_debug("lex is brace");
+		lex = calloc(1, 2);
+		lex[0] = (char)ch;
+		lex[1] = 0;
 		return lex;
 	}
 	char* get_full_lexem(unsigned ch)
@@ -101,13 +109,18 @@ char* get_next_lexem_alloc(char*str, int* i)
 		char*lex = calloc(1, 1);
 		int index = 0;
 		do {
+			if(ch > 255) {
+				ch = '?';
+				*lexerror = L_UNACCEPTABLE_CHAR;
+			}
 			lex = reallocarray(lex, index+1, 1);
 			lex[index++] = ch;
 			ch = u8_nextchar(str, i);
 		} while((ch != 0 ) &&
 				(!isspace(ch)) &&
 				(!is_char_in(ch, ";,:")) &&
-				(!is_char_in(ch, op_ch)));
+				(!is_char_in(ch, op_ch)) &&
+				(!is_char_in(ch, "()[]{}<>")));
 		/* set null char */
 		lex = reallocarray(lex, index+1, 1);
 		lex[index] = '\0';
@@ -121,6 +134,9 @@ char* get_next_lexem_alloc(char*str, int* i)
 		lex = calloc(1, 1);
 		int index = 0;
 		do {
+			if(ch > 255) {
+				ch = '?';
+			}
 			lex = reallocarray(lex, index+1, 1);
 			lex[index++] = ch;
 			ch = u8_nextchar(str, i);
@@ -141,14 +157,13 @@ char* get_next_lexem_alloc(char*str, int* i)
 		/* does look like dec binary or hex number */
 		return get_full_lexem(ch);
 	}
+	return NULL;
 }
 
 
 int lex_parse(char*str)
 {
 	str_array_remove();
-	bool inside_quat = false;
-	bool inside_lexem = false;
 	int ret_status = 0;
 	int i = 0;
 	while(1) {
@@ -156,39 +171,66 @@ int lex_parse(char*str)
 		if(ch == 0) {
 			break;
 		}
-		if(ch > 255 && (inside_quat == false)) {
+		if(ch > 255 ) {
 			pr_err("non ascii character detected outside quatation");
+			ret_status++;
+			continue;
 		}
-		if(inside_lexem == false) {
-			/* may be we are just at the beginning */
-			u8_dec(str, &i);
-			char* lex = get_next_lexem_alloc(str, &i);
-			if(lex == NULL) {
-				return ret_status;
-			}
-			/* parse lexem to find out what is it */
-			if(isspace(lex[0])) {
-				pr_debug("ignoring space");
-			}
-			if(is_char_in(ch, ";,:")) {
-				pr_debug("found delimiter");
-				char _del[2];
-				_del[0] = ch;
-				_del[1] = 0;
-				str_add(_del, L_DELIMITER);
-			}
-			if(is_keyword(lex)) {
-				pr_debug("found keyword");
-				str_add(lex, L_KEYWORD_);
-			} else if(is_name(lex)) {
-				pr_debug("found identifier");
-				str_add(lex, L_IDENTIFIER);
-			} else if(is_hex(lex)) {
-				pr_debug("found hex number");
-				str_add(lex, L_CONSTANT_HEX);
-			}
-			free(lex);
+		if(is_char_in(ch, ";,:")) {
+			pr_debug("found delimiter");
+			char _del[2];
+			_del[0] = ch;
+			_del[1] = 0;
+			str_add(_del, L_DELIMITER);
+			continue;
 		}
+		if(isspace(ch)) {
+			pr_debug("ignoring space");
+			continue;
+		}
+		if(is_char_in(ch, "([{")) {
+			pr_debug("found opening brace");
+			char _br[2];
+			_br[0] = ch;
+			_br[1] = 0;
+			str_add(_br, L_BRACE_OPENING);
+			continue;
+		}
+		if(is_char_in(ch, ")]}")) {
+			pr_debug("found closing brace");
+			char _br[2];
+			_br[0] = ch;
+			_br[1] = 0;
+			str_add(_br, L_BRACE_CLOSING);
+			continue;
+		}
+		/* parse lexem to find out what is it */
+		lexem_t lerror ;
+		/* may be we are just at the beginning */
+		u8_dec(str, &i);
+		lerror = L_NOTDEFINED;
+		char* lex = get_next_lexem_alloc(str, &i, &lerror);
+		if(lex == NULL) {
+			return ret_status;
+		}
+		if(lerror == L_UNACCEPTABLE_CHAR || lerror == L_UNACCEPTABLE_WORD) {
+			str_add(lex, lerror);
+			ret_status++;
+		}
+		if(is_keyword(lex)) {
+			pr_debug("found keyword");
+			str_add(lex, L_KEYWORD_);
+		} else if(is_name(lex)) {
+			pr_debug("found identifier");
+			str_add(lex, L_IDENTIFIER);
+		} else if(is_hex(lex)) {
+			pr_debug("found hex number");
+			str_add(lex, L_CONSTANT_HEX);
+		} else if(is_dec(lex)) {
+			pr_debug("found decimal number");
+			str_add(lex, L_CONSTANT);
+		}
+		free(lex);
 	}
 	return ret_status;
 }
@@ -205,6 +247,17 @@ bool is_hex(char* lex)
 		if(!is_char_in(lex[i], "1234567890abcdefABCDEF")) {
 			return false;
 		}
+	}
+	return true;
+}
+
+bool is_dec(char*lex)
+{
+	if(lex == NULL)
+		return false;
+	for(int i=0; i<strlen(lex); i++) {
+		if(!isdigit(lex[i]))
+			return false;
 	}
 	return true;
 }
@@ -228,6 +281,10 @@ char* lex_to_str(lexem_t lt)
 	switch(lt) {
 	case L_DELIMITER:
 		return "delimiter";
+	case L_BRACE_CLOSING:
+		return "closing brace";
+	case L_BRACE_OPENING:
+		return "opening brace";
 	case  L_CONSTANT:
 		return "constant";
 	case L_CONSTANT_BIN:

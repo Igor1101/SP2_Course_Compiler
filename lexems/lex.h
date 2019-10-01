@@ -11,6 +11,9 @@
 #include <stdbool.h>
 
 typedef enum {
+	L_NOTDEFINED,
+	L_BRACE_OPENING,
+	L_BRACE_CLOSING,
 	L_DELIMITER,
 	L_KEYWORD_,
 	L_IDENTIFIER,
@@ -33,9 +36,10 @@ bool is_char_in(unsigned ch, const char*str);
 bool is_acc_char(char c);
 bool is_sacc_char(char c);
 int lex_parse(char*str);
-char* get_next_lexem_alloc(char*str, int* i);
+char* get_next_lexem_alloc(char*str, int* i, lexem_t* lexerror);
 char* lex_to_str(lexem_t lt);
 bool is_hex(char* lex);
+bool is_dec(char*lex);
 
 
 
