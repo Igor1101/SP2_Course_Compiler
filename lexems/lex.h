@@ -11,7 +11,8 @@
 #include <stdbool.h>
 
 typedef enum {
-	L_KEYWORD,
+	L_DELIMITER,
+	L_KEYWORD_,
 	L_IDENTIFIER,
 	L_CONSTANT,
 	L_CONSTANT_HEX,
@@ -34,6 +35,7 @@ bool is_sacc_char(char c);
 int lex_parse(char*str);
 char* get_next_lexem_alloc(char*str, int* i);
 char* lex_to_str(lexem_t lt);
+bool is_hex(char* lex);
 
 
 

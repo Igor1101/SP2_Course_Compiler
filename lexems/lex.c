@@ -15,7 +15,7 @@
 #include "lex.h"
 
 static const char * c_reservedwords[] = {
-		"auto", "signed", "const", "extern", "register", "unsigned",
+		"auto", "signed", "const", "extern", "register", "unsigned", "static"
 		"int", "float", "char", "double", "long",
 		"void",
 		"if", "else", "switch", "case", "default",
@@ -90,10 +90,30 @@ char* get_next_lexem_alloc(char*str, int* i)
 		return NULL;
 	unsigned ch = u8_nextchar(str, i);
 	pr_debug("char %c indentifying", ch);
-	if(is_char_in(ch, ";,. ")) {
+	if(is_char_in(ch, ";, ")) {
 		pr_debug("lex is delimiter");
 		lex = calloc(1, 1);
 		lex[0] = (char)ch;
+		return lex;
+	}
+	char* get_full_lexem(unsigned ch)
+	{
+		char*lex = calloc(1, 1);
+		int index = 0;
+		do {
+			lex = reallocarray(lex, index+1, 1);
+			lex[index++] = ch;
+			ch = u8_nextchar(str, i);
+		} while((ch != 0 ) &&
+				(!isspace(ch)) &&
+				(!is_char_in(ch, ";,:")) &&
+				(!is_char_in(ch, op_ch)));
+		/* set null char */
+		lex = reallocarray(lex, index+1, 1);
+		lex[index] = '\0';
+		/* move to previous char */
+		u8_dec(str, i);
+		pr_debug("alloc %s", lex);
 		return lex;
 	}
 	if(is_char_in(ch, op_ch)) {
@@ -109,23 +129,17 @@ char* get_next_lexem_alloc(char*str, int* i)
 		/* set null char */
 		lex = reallocarray(lex, index+1, 1);
 		lex[index] = '\0';
+		/* move to previous char */
+		u8_dec(str, i);
 		return lex;
 	}
 	if(is_sacc_char(ch)) {
 		/* this may be identifier */
-		lex = calloc(1, 1);
-		int index = 0;
-		do {
-			lex = reallocarray(lex, index+1, 1);
-			lex[index++] = ch;
-			ch = u8_nextchar(str, i);
-			pr_debug("char is %c", ch);
-		} while(is_acc_char(ch));
-		/* set null char */
-		lex = reallocarray(lex, index+1, 1);
-		lex[index] = '\0';
-		pr_debug("alloc %s", lex);
-		return lex;
+		return get_full_lexem(ch);
+	}
+	if(is_char_in(ch, "0123456789") ) {
+		/* does look like dec binary or hex number */
+		return get_full_lexem(ch);
 	}
 }
 
@@ -135,7 +149,7 @@ int lex_parse(char*str)
 	str_array_remove();
 	bool inside_quat = false;
 	bool inside_lexem = false;
-	int ret_status;
+	int ret_status = 0;
 	int i = 0;
 	while(1) {
 		unsigned ch = u8_nextchar(str, &i);
@@ -153,17 +167,46 @@ int lex_parse(char*str)
 				return ret_status;
 			}
 			/* parse lexem to find out what is it */
+			if(isspace(lex[0])) {
+				pr_debug("ignoring space");
+			}
+			if(is_char_in(ch, ";,:")) {
+				pr_debug("found delimiter");
+				char _del[2];
+				_del[0] = ch;
+				_del[1] = 0;
+				str_add(_del, L_DELIMITER);
+			}
 			if(is_keyword(lex)) {
 				pr_debug("found keyword");
-				str_add(lex, L_KEYWORD);
+				str_add(lex, L_KEYWORD_);
 			} else if(is_name(lex)) {
 				pr_debug("found identifier");
 				str_add(lex, L_IDENTIFIER);
+			} else if(is_hex(lex)) {
+				pr_debug("found hex number");
+				str_add(lex, L_CONSTANT_HEX);
 			}
 			free(lex);
 		}
 	}
 	return ret_status;
+}
+
+bool is_hex(char* lex)
+{
+	if(lex == NULL)
+		return false;
+	if(strlen(lex)<3)
+		return false;
+	if(lex[0] != '0' || (lex[1] != 'x' && lex[1] != 'X'))
+		return false;
+	for(int i=2; i<strlen(lex); i++) {
+		if(!is_char_in(lex[i], "1234567890abcdefABCDEF")) {
+			return false;
+		}
+	}
+	return true;
 }
 
 const char*acc_start =
@@ -183,6 +226,8 @@ bool is_sacc_char(char c)
 char* lex_to_str(lexem_t lt)
 {
 	switch(lt) {
+	case L_DELIMITER:
+		return "delimiter";
 	case  L_CONSTANT:
 		return "constant";
 	case L_CONSTANT_BIN:
@@ -191,7 +236,7 @@ char* lex_to_str(lexem_t lt)
 		return "constant hexademical";
 	case L_IDENTIFIER:
 		return "identifier";
-	case L_KEYWORD:
+	case L_KEYWORD_:
 		return "ckeyword";
 	case L_OPERAT_ARITHMETIC:
 		return "arithmetic op";
