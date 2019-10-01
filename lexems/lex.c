@@ -136,6 +136,7 @@ char* get_next_lexem_alloc(char*str, int* i, lexem_t* lexerror)
 		do {
 			if(ch > 255) {
 				ch = '?';
+				*lexerror = L_UNACCEPTABLE_CHAR;
 			}
 			lex = reallocarray(lex, index+1, 1);
 			lex[index++] = ch;
