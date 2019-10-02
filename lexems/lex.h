@@ -18,6 +18,7 @@ typedef enum {
 	L_KEYWORD_,
 	L_IDENTIFIER,
 	L_CONSTANT,
+	L_CONSTANT_FLOAT,
 	L_CONSTANT_HEX,
 	L_CONSTANT_BIN,
 	L_OPERAT_RELATION,
@@ -42,6 +43,7 @@ bool is_hex(char* lex);
 bool is_dec(char*lex);
 bool is_operator(char*str);
 bool is_op_chars(char*str);
+bool is_float(char*lex);
 
 
 

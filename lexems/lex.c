@@ -246,7 +246,11 @@ int lex_parse(char*str)
 				lex[strlen(lex)-1] = '\0';
 				i--;
 			}
-		} else {
+		} else if(is_float(lex)){
+			pr_debug("found floating number");
+			str_add(lex, L_CONSTANT_FLOAT);
+		}
+		else {
 			pr_warn("unknown word detected");
 			str_add(lex, L_UNKNOWN_WORD);
 			ret_status++;
@@ -279,6 +283,26 @@ bool is_dec(char*lex)
 	for(int i=0; i<strlen(lex); i++) {
 		if(!isdigit(lex[i]))
 			return false;
+	}
+	return true;
+}
+bool is_float(char*lex)
+{
+	bool point_once = false;
+	if(lex == NULL)
+		return false;
+	for(int i=0; i<strlen(lex); i++) {
+		if(!isdigit(lex[i])) {
+			if(lex[i] == '.' && i<(strlen(lex) - 1)) {
+				if(point_once)
+					return false;
+				else {
+					point_once = true;
+				}
+			} else {
+				return false;
+			}
+		}
 	}
 	return true;
 }
@@ -318,6 +342,8 @@ bool is_operator(char*str)
 char* lex_to_str(lexem_t lt)
 {
 	switch(lt) {
+	case L_CONSTANT_FLOAT:
+		return "constant float";
 	case L_DELIMITER:
 		return "delimiter";
 	case L_BRACE_CLOSING:
