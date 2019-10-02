@@ -12,10 +12,13 @@
 
 typedef enum {
 	L_NOTDEFINED,
+	L_STRUCT_DELIMITER,
+	L_STRUCT_POINTER,
+	L_POINTER,
 	L_BRACE_OPENING,
 	L_BRACE_CLOSING,
 	L_DELIMITER,
-	L_KEYWORD_,
+	L_KEYWORD,
 	L_IDENTIFIER,
 	L_CONSTANT,
 	L_CONSTANT_FLOAT,
@@ -31,7 +34,6 @@ typedef enum {
 	L_UNACCEPTABLE_WORD
 }lexem_t;
 
-bool is_keyword(char* str);
 bool is_name(char* str);
 bool is_char_in(unsigned ch, const char*str);
 bool is_acc_char(char c);
@@ -41,9 +43,9 @@ char* get_next_lexem_alloc(char*str, int* i, lexem_t* lexerror);
 char* lex_to_str(lexem_t lt);
 bool is_hex(char* lex);
 bool is_dec(char*lex);
-bool is_operator(char*str);
 bool is_op_chars(char*str);
 bool is_float(char*lex);
+bool is_str_in(char*str, const char*arr[], size_t arr_size);
 
 
 

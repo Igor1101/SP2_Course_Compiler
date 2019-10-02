@@ -15,7 +15,7 @@
 #include "lex.h"
 
 static const char * c_reservedwords[] = {
-		"auto", "signed", "const", "extern", "register", "unsigned", "static"
+		"auto", "signed", "const", "extern", "register", "unsigned", "static",
 		"int", "float", "char", "double", "long",
 		"void",
 		"if", "else", "switch", "case", "default",
@@ -37,19 +37,21 @@ static const char* c_operators[] = {
 		"&&", "||", "!",
 		"&", "|", "^", "~", "<<", ">>", "->", "."
 };
-
-bool is_keyword(char* str)
-{
-	if(str == NULL) {
-		return NULL;
-	}
-	for(int i=0; i < sizeof c_reservedwords / sizeof c_reservedwords[0]; i++) {
-		if(!strcmp(str, c_reservedwords[i])) {
-			return true;
-		}
-	}
-	return false;
-}
+static const char* c_op_arithmetic[] = {
+		"+", "-", "*", "/", "%", "++", "--"
+};
+static const char* c_op_assign[] = {
+		"=", "+=", "-=", "*=", "/=", "%="
+};
+static const char* c_op_bitwise[] = {
+		"&", "|", "^", "~", "<<", ">>"
+};
+static const char* c_op_logic[] = {
+		"&&", "||", "!",
+};
+static const char* c_op_relation[] = {
+		"==", ">","<", "!=", ">=", "<=",
+};
 
 bool is_char_in(unsigned ch, const char*str)
 {
@@ -169,6 +171,7 @@ char* get_next_lexem_alloc(char*str, int* i, lexem_t* lexerror)
 int lex_parse(char*str)
 {
 	str_array_remove();
+	lexem_t lastlexem = L_NOTDEFINED;
 	int ret_status = 0;
 	int i = 0;
 	while(1) {
@@ -187,6 +190,7 @@ int lex_parse(char*str)
 			_del[0] = ch;
 			_del[1] = 0;
 			str_add(_del, L_DELIMITER);
+			lastlexem = L_DELIMITER;
 			continue;
 		}
 		if(isspace(ch)) {
@@ -199,6 +203,7 @@ int lex_parse(char*str)
 			_br[0] = ch;
 			_br[1] = 0;
 			str_add(_br, L_BRACE_OPENING);
+			lastlexem = L_BRACE_OPENING;
 			continue;
 		}
 		if(is_char_in(ch, ")]}")) {
@@ -207,11 +212,13 @@ int lex_parse(char*str)
 			_br[0] = ch;
 			_br[1] = 0;
 			str_add(_br, L_BRACE_CLOSING);
+			lastlexem = L_BRACE_CLOSING;
 			continue;
 		}
 		/* parse lexem to find out what is it */
 		lexem_t lerror ;
-		/* may be we are just at the beginning */
+		/* may be we are just at the beginning
+		 * of lexem */
 		u8_dec(str, &i);
 		lerror = L_NOTDEFINED;
 		char* lex = get_next_lexem_alloc(str, &i, &lerror);
@@ -223,25 +230,100 @@ int lex_parse(char*str)
 			ret_status++;
 			continue;
 		}
-		if(is_keyword(lex)) {
+		if(is_str_in(lex, c_reservedwords, sizeof c_reservedwords)) {
 			pr_debug("found keyword");
-			str_add(lex, L_KEYWORD_);
+			str_add(lex, L_KEYWORD);
+			lastlexem = L_KEYWORD;
 		} else if(is_name(lex)) {
 			pr_debug("found identifier");
 			str_add(lex, L_IDENTIFIER);
+			lastlexem = L_IDENTIFIER;
 		} else if(is_hex(lex)) {
 			pr_debug("found hex number");
 			str_add(lex, L_CONSTANT_HEX);
+			lastlexem = L_CONSTANT_HEX;
 		} else if(is_dec(lex)) {
 			pr_debug("found decimal number");
 			str_add(lex, L_CONSTANT);
+			lastlexem = L_CONSTANT;
 		} else if(is_op_chars(lex)) {
 			pr_debug("may be operator");
 			while(strlen(lex) > 0) {
 				pr_debug("lex=%s", lex);
-				if(is_operator(lex)) {
-					str_add(lex, L_OPERAT_ARITHMETIC);
-					break;
+				if(is_str_in(lex, c_operators, sizeof c_operators)) {
+					if(is_str_in(lex, c_op_arithmetic, sizeof c_op_arithmetic)) {
+						/* verify if it is arithmetic or
+						 * pointer
+						 */
+						if(!strcmp(lex, "*")) {
+							if(lastlexem == L_BRACE_OPENING ||
+									lastlexem == L_DELIMITER ||
+									lastlexem == L_NOTDEFINED ||
+									lastlexem == L_KEYWORD ||
+									lastlexem == L_OPERAT_ARITHMETIC||
+									lastlexem == L_OPERAT_ASSIGNMENT||
+									lastlexem == L_OPERAT_BITWISE||
+									lastlexem == L_OPERAT_LOGIC||
+									lastlexem == L_OPERAT_RELATION||
+									lastlexem == L_POINTER) {
+								/* this looks like pointer! */
+								pr_debug("pointer found!");
+								str_add(lex, L_POINTER);
+								lastlexem = L_POINTER;
+								break;
+							}
+						}
+						str_add(lex, L_OPERAT_ARITHMETIC);
+						lastlexem = L_OPERAT_ARITHMETIC;
+						break;
+					}
+					if(is_str_in(lex, c_op_assign, sizeof c_op_assign)) {
+						str_add(lex, L_OPERAT_ASSIGNMENT);
+						lastlexem = L_OPERAT_ASSIGNMENT;
+						break;
+					}
+					if(is_str_in(lex, c_op_bitwise, sizeof c_op_bitwise)) {
+					/* verify if it is arithmetic or
+					* pointer
+					*/
+						if(!strcmp(lex, "&")) {
+							if(lastlexem == L_BRACE_OPENING ||
+									lastlexem == L_DELIMITER ||
+									lastlexem == L_NOTDEFINED ||
+									lastlexem == L_KEYWORD ||
+									lastlexem == L_OPERAT_ARITHMETIC||
+									lastlexem == L_OPERAT_ASSIGNMENT||
+									lastlexem == L_OPERAT_BITWISE||
+									lastlexem == L_OPERAT_LOGIC||
+									lastlexem == L_OPERAT_RELATION) {
+								/* this looks like pointer! */
+								pr_debug("pointer found!");
+								str_add(lex, L_POINTER);
+								lastlexem = L_POINTER;
+								break;
+							}
+						}
+						str_add(lex, L_OPERAT_BITWISE);
+						lastlexem = L_OPERAT_BITWISE;
+						break;
+					}
+					if(is_str_in(lex, c_op_logic, sizeof c_op_logic)) {
+						str_add(lex, L_OPERAT_LOGIC);
+						lastlexem = L_OPERAT_LOGIC;
+						break;
+					}
+					if(is_str_in(lex, c_op_relation, sizeof c_op_relation)) {
+						str_add(lex, L_OPERAT_RELATION);
+						lastlexem = L_OPERAT_RELATION;
+						break;
+					}
+					const char*struct_p[] = {"->" };
+					if(is_str_in(lex, struct_p, sizeof struct_p)){
+						/* struct pointer  */
+						str_add(lex, L_STRUCT_POINTER);
+						lastlexem = L_STRUCT_POINTER;
+						break;
+					}
 				}
 				lex[strlen(lex)-1] = '\0';
 				i--;
@@ -289,6 +371,7 @@ bool is_dec(char*lex)
 bool is_float(char*lex)
 {
 	bool point_once = false;
+	bool exp_once = false;
 	if(lex == NULL)
 		return false;
 	for(int i=0; i<strlen(lex); i++) {
@@ -298,6 +381,19 @@ bool is_float(char*lex)
 					return false;
 				else {
 					point_once = true;
+				}
+			} else if((lex[i] == 'e' || lex[i] == 'E') && i<strlen(lex) - 1){
+				if(exp_once)
+					return false;
+				else {
+					exp_once = true;
+				}
+			} else if((lex[i] == '-' || lex[i] == '+') && i<strlen(lex) - 1 &&
+					i > 1) {
+				if(lex[i-1] == 'E' || lex[i-1] == 'e') {
+					continue;
+				} else {
+					return false;
 				}
 			} else {
 				return false;
@@ -330,18 +426,20 @@ bool is_op_chars(char*str)
 	}
 	return true;
 }
-bool is_operator(char*str)
+
+bool is_str_in(char*str, const char*arr[], size_t arr_size)
 {
-	for(int i=0; i<sizeof c_operators / sizeof c_operators[0]; i++) {
-		if(!strcmp(str, c_operators[i]))
+	for(int i=0; i<arr_size / sizeof arr[0]; i++) {
+		if(!strcmp(str, arr[i]))
 			return true;
 	}
 	return false;
 }
-
 char* lex_to_str(lexem_t lt)
 {
 	switch(lt) {
+	case L_POINTER:
+		return "pointer";
 	case L_CONSTANT_FLOAT:
 		return "constant float";
 	case L_DELIMITER:
@@ -358,8 +456,8 @@ char* lex_to_str(lexem_t lt)
 		return "constant hexademical";
 	case L_IDENTIFIER:
 		return "identifier";
-	case L_KEYWORD_:
-		return "ckeyword";
+	case L_KEYWORD:
+		return "Ckeyword";
 	case L_OPERAT_ARITHMETIC:
 		return "arithmetic op";
 	case L_OPERAT_ASSIGNMENT:
