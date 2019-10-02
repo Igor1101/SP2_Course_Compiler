@@ -40,6 +40,8 @@ char* get_next_lexem_alloc(char*str, int* i, lexem_t* lexerror);
 char* lex_to_str(lexem_t lt);
 bool is_hex(char* lex);
 bool is_dec(char*lex);
+bool is_operator(char*str);
+bool is_op_chars(char*str);
 
 
 

@@ -35,7 +35,7 @@ static const char* c_operators[] = {
 		"=", "+=", "-=", "*=", "/=", "%=",
 		"==", ">","<", "!=", ">=", "<=",
 		"&&", "||", "!",
-		"&", "|", "^", "~", "<<", ">>"
+		"&", "|", "^", "~", "<<", ">>", "->", "."
 };
 
 bool is_keyword(char* str)
@@ -43,7 +43,7 @@ bool is_keyword(char* str)
 	if(str == NULL) {
 		return NULL;
 	}
-	for(int i=0; i< sizeof c_reservedwords / sizeof c_reservedwords[0]; i++) {
+	for(int i=0; i < sizeof c_reservedwords / sizeof c_reservedwords[0]; i++) {
 		if(!strcmp(str, c_reservedwords[i])) {
 			return true;
 		}
@@ -158,7 +158,11 @@ char* get_next_lexem_alloc(char*str, int* i, lexem_t* lexerror)
 		/* does look like dec binary or hex number */
 		return get_full_lexem(ch);
 	}
-	return NULL;
+	/* something is unknown */
+	lex = calloc(1,2);
+	lex[0] = ch;
+	lex[1] = 0;
+	return lex;
 }
 
 
@@ -217,6 +221,7 @@ int lex_parse(char*str)
 		if(lerror == L_UNACCEPTABLE_CHAR || lerror == L_UNACCEPTABLE_WORD) {
 			str_add(lex, lerror);
 			ret_status++;
+			continue;
 		}
 		if(is_keyword(lex)) {
 			pr_debug("found keyword");
@@ -230,6 +235,21 @@ int lex_parse(char*str)
 		} else if(is_dec(lex)) {
 			pr_debug("found decimal number");
 			str_add(lex, L_CONSTANT);
+		} else if(is_op_chars(lex)) {
+			pr_debug("may be operator");
+			while(strlen(lex) > 0) {
+				pr_debug("lex=%s", lex);
+				if(is_operator(lex)) {
+					str_add(lex, L_OPERAT_ARITHMETIC);
+					break;
+				}
+				lex[strlen(lex)-1] = '\0';
+				i--;
+			}
+		} else {
+			pr_warn("unknown word detected");
+			str_add(lex, L_UNKNOWN_WORD);
+			ret_status++;
 		}
 		free(lex);
 	}
@@ -275,6 +295,24 @@ bool is_acc_char(char c)
 bool is_sacc_char(char c)
 {
 	return is_char_in(c, acc_start);
+}
+
+bool is_op_chars(char*str)
+{
+	for(int i=0; i<strlen(str); i++) {
+		if(!is_char_in(str[i], ".~|&!-+/<>=^%*")) {
+			return false;
+		}
+	}
+	return true;
+}
+bool is_operator(char*str)
+{
+	for(int i=0; i<sizeof c_operators / sizeof c_operators[0]; i++) {
+		if(!strcmp(str, c_operators[i]))
+			return true;
+	}
+	return false;
 }
 
 char* lex_to_str(lexem_t lt)
