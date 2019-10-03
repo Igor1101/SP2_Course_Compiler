@@ -23,6 +23,7 @@ int main(void)
 	while(1) {
 		printf("code:\t");
 		memset(code, 0, sizeof code);
+		//strcpy(code, "ewe.wewr.rere.re");
 		if(fgets(code, sizeof code, stdin) == NULL) {
 			prg_exit(0);
 		}

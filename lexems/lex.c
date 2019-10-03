@@ -340,8 +340,21 @@ int lex_parse(char*str)
 		} else if(is_float(lex)){
 			pr_debug("found floating number");
 			str_add(lex, L_CONSTANT_FLOAT);
+			lastlexem = L_CONSTANT_FLOAT;
 		} else if(is_structident(lex)) {
 			pr_debug("found struct element");
+			/* separate parts of struct element */
+			char*next_word = lex;
+			char*point = ".";
+			char*next_point = strchr(next_word, '.');
+			while(next_point != NULL) {
+				*next_point = '\0';
+				str_add(next_word, L_IDENTIFIER);
+				str_add(point, L_STRUCT_DELIMITER);
+				next_word = next_point+1;
+				next_point = strchr(next_word, '.');
+			}
+			str_add(next_word, L_IDENTIFIER);
 		}
 		else {
 			pr_warn("unknown word detected");
@@ -473,6 +486,7 @@ bool is_structident(char*str)
 	for(int i=1; i<strlen(str); i++) {
 		if((!is_acc_char(str[i])) && (!is_point(str[i])))
 			return false;
+		is_point(str[i]);
 	}
 	return true;
 }
