@@ -215,6 +215,44 @@ int lex_parse(char*str)
 			lastlexem = L_BRACE_CLOSING;
 			continue;
 		}
+		if(is_char_in(ch, "'")) {
+			/* looks like char symbol */
+			pr_debug("looks like char");
+			unsigned ch1 = u8_nextchar(str, &i);
+			char ch2 = u8_nextchar(str, &i);
+			if(is_char_in(ch2, "'") && ch1 < 255) {
+				/* it is char symbol */
+				char s[4] = { ch, (char)ch1, ch2, 0};
+				str_add(s, L_CHAR);
+				lastlexem = L_CHAR;
+				continue;
+			} else {
+				u8_dec(str, &i);
+				u8_dec(str, &i);
+			}
+		}
+		if(is_char_in(ch, "\"")) {
+			/* looks like string */
+			pr_debug("string process");
+			/* save str pointer */
+			int iold = i;
+			char* strend = strchr(&str[i+1], '"');
+			if(strend == NULL) {
+				pr_err("string without end \" ");
+			} else {
+				int iend = (int)(strend - &str[i]+2);
+				char*newstr = str_alloc(&str[i - 1]);
+				char*newstrend = strchr(newstr+1, '"');
+				if(newstrend == NULL) {
+					free(newstr);
+				} else {
+					*(newstrend+1) = '\0';
+					str_add(newstr, L_STRING);
+					lastlexem = L_STRING;
+					i = iend + 1;
+				}
+			}
+		}
 		/* parse lexem to find out what is it */
 		lexem_t lerror ;
 		/* may be we are just at the beginning
@@ -493,6 +531,10 @@ bool is_structident(char*str)
 char* lex_to_str(lexem_t lt)
 {
 	switch(lt) {
+	case L_STRING:
+		return "string";
+	case L_CHAR:
+		return "char";
 	case L_STRUCT_DELIMITER:
 		return "struct delimiter";
 	case L_STRUCT_POINTER:
