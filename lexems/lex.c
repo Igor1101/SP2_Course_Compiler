@@ -340,6 +340,8 @@ int lex_parse(char*str)
 		} else if(is_float(lex)){
 			pr_debug("found floating number");
 			str_add(lex, L_CONSTANT_FLOAT);
+		} else if(is_structident(lex)) {
+			pr_debug("found struct element");
 		}
 		else {
 			pr_warn("unknown word detected");
@@ -444,9 +446,43 @@ bool is_str_in(char*str, const char*arr[], size_t arr_size)
 	}
 	return false;
 }
+
+bool is_structident(char*str)
+{
+	bool lastp_near = false;
+	bool is_point(char ch)
+	{
+		if(ch=='.') {
+			if(lastp_near) {
+				return false;
+			} else {
+				lastp_near = true;
+				return true;
+			}
+		} else {
+			lastp_near = false;
+		}
+		return false;
+	}
+	if(!is_sacc_char(str[0])) {
+		return false;
+	}
+	if((str[strlen(str)-1] == '.')) {
+		return false;
+	}
+	for(int i=1; i<strlen(str); i++) {
+		if((!is_acc_char(str[i])) && (!is_point(str[i])))
+			return false;
+	}
+	return true;
+}
 char* lex_to_str(lexem_t lt)
 {
 	switch(lt) {
+	case L_STRUCT_DELIMITER:
+		return "struct delimiter";
+	case L_STRUCT_POINTER:
+		return "struct pointer";
 	case L_POINTER:
 		return "pointer";
 	case L_CONSTANT_FLOAT:

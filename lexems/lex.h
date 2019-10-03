@@ -46,6 +46,7 @@ bool is_dec(char*lex);
 bool is_op_chars(char*str);
 bool is_float(char*lex);
 bool is_str_in(char*str, const char*arr[], size_t arr_size);
+bool is_structident(char*str);
 
 
 
