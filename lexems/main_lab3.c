@@ -21,6 +21,7 @@ int main(void)
 	char code[1000];
 	while(1) {
 		printf("code:\t");
+		memset(code, 0, sizeof code);
 		if(fgets(code, sizeof code, stdin) == NULL) {
 			prg_exit(0);
 		}
