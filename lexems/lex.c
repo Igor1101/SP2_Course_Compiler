@@ -324,6 +324,15 @@ int lex_parse(char*str)
 						lastlexem = L_STRUCT_POINTER;
 						break;
 					}
+					const char*struct_elem[] = {"." };
+					if(is_str_in(lex, struct_elem, sizeof struct_elem)){
+						/* if point is standalone
+						 * */
+						str_add(lex, L_UNKNOWN_WORD);
+						lastlexem = L_UNKNOWN_WORD;
+						break;
+						ret_status++;
+					}
 				}
 				lex[strlen(lex)-1] = '\0';
 				i--;
