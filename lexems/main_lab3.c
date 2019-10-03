@@ -11,6 +11,7 @@
 #include <lexems/utf8.h>
 #include <lexems/lex.h>
 #include <lexems/tables.h>
+#include <string.h>
 
 void prg_exit(int r)
 {
