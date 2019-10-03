@@ -249,7 +249,10 @@ int lex_parse(char*str)
 					*(newstrend+1) = '\0';
 					str_add(newstr, L_STRING);
 					lastlexem = L_STRING;
-					i = iend + 1;
+					for(int j=0; j<u8_strlen(newstr)-1;j++) {
+						u8_inc(str, &i);
+					}
+					continue;
 				}
 			}
 		}
