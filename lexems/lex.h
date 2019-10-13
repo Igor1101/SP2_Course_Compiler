@@ -9,6 +9,7 @@
 #define LEXEMS_LEX_H_
 
 #include <stdbool.h>
+#include <stdlib.h>
 
 typedef enum {
 	L_NOTDEFINED,

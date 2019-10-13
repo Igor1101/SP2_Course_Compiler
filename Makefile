@@ -4,8 +4,9 @@ CC ?= gcc
 # path
 APP_PATH = $(abspath ./)
 LAB1_PATH = $(APP_PATH)/lexems
+SYN_PATH = $(APP_PATH)/syntax
 # main src file
-APP_SRC += main_lab3.c
+APP_SRC += main_lab4.c
 # app sources
 APP_SRC += ch_utf8.c
 APP_SRC += utf8.c
@@ -13,6 +14,7 @@ APP_SRC += cli.c
 APP_SRC += tables.c
 APP_SRC += MooreMachine.c
 APP_SRC += lex.c
+APP_SRC += syntax.c
 # app includes
 INCFLAGS +=-I$(APP_PATH)
 # rtos includes
@@ -25,7 +27,7 @@ COBJS = $(patsubst %.c,%.o,$(APP_SRC))
 # deps rules
 .PHONY: all clean
 # Path to directories containing application source 
-vpath %.c $(APP_PATH):$(LAB1_PATH):trees
+vpath %.c $(APP_PATH):$(LAB1_PATH):$(SYN_PATH):trees
 
 
 all: $(APP_SRC) $(COBJS) $(TARGET).elf 

@@ -98,12 +98,12 @@ void str_coincidence(int index)
 		return;
 	}
 	if(key.inst == NULL) {
-		str_array.instcs[index].ch_coincidence = 0;
+		str_array.instcs[index].level = 0;
 		return;
 	}
-	str_array.instcs[index].ch_coincidence = ch_utf_strcmp(str_array.instcs[index].inst, key.inst);
-	if(str_array.instcs[index].ch_coincidence > key.max_coincidence) {
-		key.max_coincidence = str_array.instcs[index].ch_coincidence;
+	str_array.instcs[index].level = ch_utf_strcmp(str_array.instcs[index].inst, key.inst);
+	if(str_array.instcs[index].level > key.max_coincidence) {
+		key.max_coincidence = str_array.instcs[index].level;
 	}
 }
 
@@ -123,7 +123,7 @@ void str_get_max(void(*func)(int))
 		return;
 	/* find max here */
 	for(int i=0; i<str_array.amount; i++) {
-		if(key.max_coincidence == str_array.instcs[i].ch_coincidence)
+		if(key.max_coincidence == str_array.instcs[i].level)
 			func(i);
 	}
 }
@@ -154,7 +154,7 @@ static void quicksort(str_t arr[], int l, int r)
     for (int i = l; i <= r; i++)
     {
         // If an element less than or equal to the pivot is found...
-        if (arr[i].ch_coincidence <= pivot.ch_coincidence)
+        if (arr[i].level <= pivot.level)
         {
             // Then swap arr[cnt] and arr[i] so that the smaller element arr[i]
             // is to the left of all elements greater than pivot
@@ -227,7 +227,7 @@ static int bin_first(str_t arr[], int low, int high, int key)
 
     while (low <= high) {
         int mid = low + (high - low + 1) / 2;
-        int midVal = arr[mid].ch_coincidence;
+        int midVal = arr[mid].level;
 
         if (midVal < key) {
 
@@ -268,7 +268,7 @@ void str_get_max_bin(void(*func)(int))
 		return;
 	}
 	for(int i=lowest; i<str_array.amount; i++) {
-		if(str_get(i)->ch_coincidence != key.max_coincidence)
+		if(str_get(i)->level != key.max_coincidence)
 			break;
 		func(i);
 	}
@@ -302,7 +302,7 @@ void str_del_max(void)
 {
 	printf("removing...");
 	try_removing_anothertime: for(int i=0; i<str_array.amount; i++) {
-		if(key.max_coincidence == str_array.instcs[i].ch_coincidence) {
+		if(key.max_coincidence == str_array.instcs[i].level) {
 			printf("%s ", str_get_inst(i));
 			str_del(i);
 			goto try_removing_anothertime;

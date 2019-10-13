@@ -16,7 +16,7 @@ typedef struct {
 
 typedef struct {
 	char* inst;
-	int ch_coincidence;
+	int level;
 	lexem_t lext;
 }str_t;
 
