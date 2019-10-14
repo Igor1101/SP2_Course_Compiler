@@ -8,6 +8,7 @@
 #ifndef LAB1_TABLES_H_
 #define LAB1_TABLES_H_
 #include <lexems/lex.h>
+#include <syntax/syntax.h>
 
 typedef struct {
 	char* inst;
@@ -18,6 +19,7 @@ typedef struct {
 	char* inst;
 	int level;
 	lexem_t lext;
+	syn_t synt;
 }str_t;
 
 typedef struct {

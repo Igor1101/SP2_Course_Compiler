@@ -25,6 +25,7 @@ int main(void)
 	while(1) {
 		printf("code:\t");
 		memset(code, 0, sizeof code);
+		//memcpy(code, "f(sd,ds)", strlen("f(sd,ds)"));
 		if(fgets(code, sizeof code, stdin) == NULL) {
 			prg_exit(0);
 		}
@@ -38,6 +39,15 @@ int main(void)
             pr_err("lerrors detected, wont start syntax analyzer");
             return lerr_amount;
         }
+        int serr_amount = syn_analyze();
+		pr_info("syntax error amount: %d", serr_amount);
+		for(int i=0; i<str_array.amount;i++) {
+			for(int j=0; j<str_get(i)->level; j++) {
+				printf(" ");// print level
+			}
+			pr_info("%s\t:\t<%s>\t<%s> ", str_get_inst(i),
+					lex_to_str(str_get(i)->lext), syn_to_str(str_get(i)->synt));
+		}
 	}
 	return 0;
 };
