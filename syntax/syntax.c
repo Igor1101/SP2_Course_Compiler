@@ -158,6 +158,7 @@ int process_ident(int num, int level, bool maybeparam, bool inside_expr)
 				str_get(num+1)->lext == L_OPERAT_LOGIC||
 				str_get(num+1)->lext == L_OPERAT_RELATION||
 				str_get(num-1)->lext == L_OPERAT_ARITHMETIC||
+				str_get(num+1)->lext == L_OPERAT_ASSIGNMENT||
 				str_get(num-1)->lext == L_OPERAT_BITWISE||
 				str_get(num-1)->lext == L_OPERAT_LOGIC||
 				str_get(num-1)->lext == L_OPERAT_RELATION||
@@ -217,16 +218,22 @@ char* syn_to_str(syn_t t)
 		return "ERR ID UNDEFINED";
 	case S_ID_VARIABLE:
 		return "ID_VARIABLE";
+	case S_ID_VARIABLE_UNEXPECTED:
+		return "ID VARIABLE UNEXPECTED";
 	case S_OPERAT_ARITHMETIC:
 		return "OPERAT_ARITHMETIC";
 	case S_OPERAT_ASSIGNMENT:
 		return "OPERAT_ASSIGNMENT";
+	case S_OPERAT_ASSIGNMENT_UNEXPECTED:
+		return "OPERAT ASSIGNMENT UNEXPECTED";
 	case S_OPERAT_BITWISE:
 		return "OPERAT_BITWISE";
 	case S_OPERAT_IF:
 		return "OPERAT_IF";
 	case S_OPERAT_BINARY:
 		return "OPERAT BINARY";
+	case S_OPERAT_BINARY_UNEXPECTED:
+		return "OPERATION BINARY UNEXPECTED";
 	case S_OPERAT_LOGIC:
 		return "OPERAT_LOGIC";
 	case S_OPERAT_RELATION:
@@ -371,6 +378,26 @@ int process_expression(int num, int level, bool inside_expr)
 			str_get(num)->level = numlevel;
 			num++;
 			break;
+		case L_OPERAT_ASSIGNMENT:
+			if(prev == S_ID_VARIABLE &&
+					(str_get(num+1)->lext == L_CHAR ||
+					str_get(num+1)->lext == L_CONSTANT||
+					str_get(num+1)->lext == L_CONSTANT_BIN||
+					str_get(num+1)->lext == L_CONSTANT_FLOAT||
+					str_get(num+1)->lext == L_CONSTANT_HEX||
+					str_get(num+1)->lext == L_IDENTIFIER||
+					str_get(num+1)->lext == L_OPERAT_ARITHMETIC)
+					) {
+				str_get(num)->synt = S_OPERAT_ASSIGNMENT;
+				str_get(num)->level = arithlevel;
+				num++;
+				return process_expression(num, level+1, inside_expr);
+			} else {
+				err_amount++;
+				str_get(num)->synt = S_OPERAT_ASSIGNMENT_UNEXPECTED;
+				num++;
+				break;
+			}
 		case L_OPERAT_ARITHMETIC:
 		case L_OPERAT_BITWISE:
 		case L_OPERAT_RELATION:
@@ -432,7 +459,8 @@ int process_expression(int num, int level, bool inside_expr)
 						str_get(num-1)->lext == L_CONSTANT ||
 						str_get(num-1)->lext == L_CONSTANT_FLOAT ||
 						str_get(num-1)->lext == L_CONSTANT_BIN ||
-						str_get(num-1)->lext == L_CONSTANT_HEX
+						str_get(num-1)->lext == L_CONSTANT_HEX ||
+						prev == S_ID_VARIABLE
 						)) {
 					expect = S_ID_VARIABLE;
 					prev = S_OPERAT_BINARY;
@@ -441,15 +469,33 @@ int process_expression(int num, int level, bool inside_expr)
 					str_get(num)->level = arithlevel;
 					num++;
 					break;
+				} else {
+					err_amount++;
+					str_get(num)->synt = S_OPERAT_BINARY_UNEXPECTED;
+					str_get(num)->level = arithlevel;
+					num++;
+					break;
 				}
 			}
 
 			break;
 		}
+		case L_DELIMITER:
+			return num;
 		case L_IDENTIFIER:
+			if(prev == S_ID_VARIABLE) {
+				err_amount++;
+				str_get(num)->synt = S_ID_VARIABLE_UNEXPECTED;
+				num++;
+			}
 			num = process_ident(num, numlevel, true, true);
 			prev = S_ID_VARIABLE;
 			break;
+		default:
+			pr_err("Unexpected operator");
+			str_get(num)->level = 0;
+			str_get(num)->synt = S_OPERAT_UNKNOWN;
+			num++;
 		}
 	}
 	return num;
