@@ -46,7 +46,7 @@ int syn_analyze(void)
 			st.num = process_ident(st.num, st.nesting+1, false, false);
 			break;
 		case L_OPERAT_ARITHMETIC:
-			st.num = process_expression(st.num, st.nesting+1);
+			st.num = process_expression(st.num, st.nesting+1, false);
 		case L_BRACE_CLOSING:
 			//close_brace(st.num);
 		case L_BRACE_OPENING:
@@ -153,20 +153,27 @@ int process_ident(int num, int level, bool maybeparam, bool inside_expr)
 		}
 		if(
 				str_get(num+1)->lext == L_OPERAT_ARITHMETIC||
+				str_get(num+1)->lext == L_OPERAT_ASSIGNMENT||
 				str_get(num+1)->lext == L_OPERAT_BITWISE||
 				str_get(num+1)->lext == L_OPERAT_LOGIC||
-				str_get(num+1)->lext == L_OPERAT_RELATION) {
+				str_get(num+1)->lext == L_OPERAT_RELATION||
+				str_get(num-1)->lext == L_OPERAT_ARITHMETIC||
+				str_get(num-1)->lext == L_OPERAT_BITWISE||
+				str_get(num-1)->lext == L_OPERAT_LOGIC||
+				str_get(num-1)->lext == L_OPERAT_RELATION||
+				str_get(num+1)->lext == L_OPERAT_ASSIGNMENT
+				) {
 			if(inside_expr) {
 				str_get(num)->synt = S_ID_VARIABLE;
-				str_get(num)->level = level+1;
+				str_get(num)->level = level;
 				return ++num;
 			} else {
-				return process_expression(num, level);
+				return process_expression(num, level, maybeparam);
 			}
 		}
 		if(maybeparam && (str_get(num+1)->lext == L_BRACE_CLOSING ||
 				str_get(num+1)->lext == L_DELIMITER)) {
-			str_get(num)->synt = S_ID_PARAM;
+			str_get(num)->synt = S_ID_VARIABLE;
 			str_get(num)->level = level;
 			return ++num;
 		}
@@ -218,6 +225,8 @@ char* syn_to_str(syn_t t)
 		return "OPERAT_BITWISE";
 	case S_OPERAT_IF:
 		return "OPERAT_IF";
+	case S_OPERAT_BINARY:
+		return "OPERAT BINARY";
 	case S_OPERAT_LOGIC:
 		return "OPERAT_LOGIC";
 	case S_OPERAT_RELATION:
@@ -327,7 +336,7 @@ int process_function(int num, int level)
 	return str_array.amount;
 }
 
-int process_expression(int num, int level)
+int process_expression(int num, int level, bool inside_expr)
 {
 	syn_t prev = S_NOTDEFINED;
 	syn_t expect = S_NOTDEFINED;
@@ -339,6 +348,12 @@ int process_expression(int num, int level)
 		pr_warn("could not find delimiter when processing expression");
 		next_del = str_array.amount;
 	}
+	if(inside_expr) {
+		int brace = next_closing_brace(num, level);
+		if(brace>=0 && brace < next_del) {
+			next_del = brace;
+		}
+	}
 	for(; num<next_del;) {
 		switch(str_get(num)->lext) {
 		case L_CONSTANT:
@@ -346,25 +361,43 @@ int process_expression(int num, int level)
 		case L_CONSTANT_FLOAT:
 		case L_CONSTANT_HEX:
 		case L_CHAR:
+			if(prev == S_CONST_PARAM) {
+				err_amount++;
+				str_get(num)->synt = S_CONST_PARAM_UNEXPECTED;
+				num++;
+				break;
+			}
 			prev = S_CONST_PARAM;
 			str_get(num)->level = numlevel;
 			num++;
 			break;
 		case L_OPERAT_ARITHMETIC:
+		case L_OPERAT_BITWISE:
+		case L_OPERAT_RELATION:
+		case L_OPERAT_LOGIC:
 		{
 			const char* unary[] = { "++", "--"};
-			const char* sign[] = { "-", "+" };
+			const char* sign[] = { "-", "+", "!"};
+			const char* binary[] = {
+					"-", "+", "*", "/",
+					"==", ">","<", "!=", ">=", "<=",
+					"&&", "||",
+					"&", "|", "^", "~", "<<", ">>"
+			};
 			if(is_str_in(str_get(num)->inst, unary, sizeof unary)) {
 				pr_debug("unary op detected num=%d", num);
 				if(prev == S_ID_VARIABLE || str_get(num+1)->lext == L_IDENTIFIER) {
+					prev = S_OPERAT_UNARY;
 					expect = S_NOTDEFINED;
 					unary_been = true;
 					str_get(num)->synt = S_OPERAT_UNARY;
 					str_get(num)->level = numlevel + 1;
 					num++;
 				} else {
+					prev = S_OPERAT_UNARY_UNEXPECTED;
 					str_get(num)->synt = S_OPERAT_UNARY_UNEXPECTED;
 					str_get(num)->level = numlevel + 1;
+					err_amount++;
 					num++;
 				}
 				break;
@@ -378,18 +411,39 @@ int process_expression(int num, int level)
 						str_get(num+1)->lext == L_CONSTANT_HEX
 						)&&
 						str_get(num-1)->lext != L_IDENTIFIER) {
+					prev = S_OPERAT_UNARY;
 					expect = S_ID_VARIABLE;
 					unary_been = true;
 					str_get(num)->synt = S_OPERAT_UNARY;
 					str_get(num)->level = numlevel + 1;
 					num++;
-				} else {
-					str_get(num)->synt = S_OPERAT_UNARY_UNEXPECTED;
-					str_get(num)->level = numlevel + 1;
-					num++;
+					break;
 				}
-				break;
 			}
+			if(is_str_in(str_get(num)->inst, binary, sizeof binary)) {
+				pr_debug("binary op num=%d", num);
+				if((str_get(num+1)->lext == L_IDENTIFIER||
+						str_get(num+1)->lext == L_CONSTANT ||
+						str_get(num+1)->lext == L_CONSTANT_FLOAT ||
+						str_get(num+1)->lext == L_CONSTANT_BIN ||
+						str_get(num+1)->lext == L_CONSTANT_HEX
+						)&& (
+						str_get(num-1)->lext == L_IDENTIFIER||
+						str_get(num-1)->lext == L_CONSTANT ||
+						str_get(num-1)->lext == L_CONSTANT_FLOAT ||
+						str_get(num-1)->lext == L_CONSTANT_BIN ||
+						str_get(num-1)->lext == L_CONSTANT_HEX
+						)) {
+					expect = S_ID_VARIABLE;
+					prev = S_OPERAT_BINARY;
+					unary_been = true;
+					str_get(num)->synt = S_OPERAT_BINARY;
+					str_get(num)->level = arithlevel;
+					num++;
+					break;
+				}
+			}
+
 			break;
 		}
 		case L_IDENTIFIER:
@@ -411,6 +465,16 @@ int next_delimiter(int num, int level, bool param)
 			else if(!strcmp(str_get(i)->inst, ";")) {
 				return i;
 			}
+		}
+	}
+	return -1;
+}
+
+int next_closing_brace(int num, int level)
+{
+	for(int i=num; i<str_array.amount; i++) {
+		if(!strcmp(str_get(i)->inst, ")") ) {
+			return i;
 		}
 	}
 	return -1;
