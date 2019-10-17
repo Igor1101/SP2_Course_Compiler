@@ -487,6 +487,7 @@ int process_expression(int num, int level, bool inside_expr)
 				err_amount++;
 				str_get(num)->synt = S_ID_VARIABLE_UNEXPECTED;
 				num++;
+				break;
 			}
 			num = process_ident(num, numlevel, true, true);
 			prev = S_ID_VARIABLE;
