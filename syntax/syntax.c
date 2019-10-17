@@ -43,20 +43,36 @@ int syn_analyze(void)
 		}
 		switch(str_get(st.num)->lext) {
 		case L_IDENTIFIER:
-			st.num = get_identifier_type(st.num, st.nesting, false);
+			st.num = process_ident(st.num, st.nesting+1, false, false);
 			break;
+		case L_OPERAT_ARITHMETIC:
+			st.num = process_expression(st.num, st.nesting+1);
 		case L_BRACE_CLOSING:
 			//close_brace(st.num);
 		case L_BRACE_OPENING:
 			//open_brace(st.num);
-		default:
-			str_get(st.num)->synt = S_NOTDEFINED;
-			str_get(st.num)->level = st.nesting+1;
-			st.num++;
-
+			asm("");
 		}
+		st.num = is_delimiter_next_expected(st.num, st.nesting);
     }
 	return err_amount;
+}
+
+int is_delimiter_next_expected(int num, int level)
+{
+	if(num>=str_array.amount) {
+		err_amount++;
+		pr_err("DELIMITER EXPECTED AT THE END"
+	"EOF FOUND");
+	}
+	else if(str_get(num)->lext == L_DELIMITER) {
+		str_get(num)->level = level;
+		str_get(num)->synt = S_DEL;
+	} else {
+		str_get(num)->synt = S_DEL_EXPECTED;
+		err_amount++;
+	}
+	return num+1;
 }
 
 int close_brace(int num)
@@ -120,7 +136,7 @@ void reset(void)
 	st.__op_p = 0;
 }
 
-int get_identifier_type(int num, int level, bool maybeparam)
+int process_ident(int num, int level, bool maybeparam, bool inside_expr)
 {
 	if(num < (str_array.amount-1)) {
 		if(str_get(num+1)->lext == L_BRACE_OPENING &&
@@ -132,16 +148,19 @@ int get_identifier_type(int num, int level, bool maybeparam)
 		}
 		if(
 				str_get(num+1)->lext == L_OPERAT_ARITHMETIC||
-				str_get(num+1)->lext == L_OPERAT_ASSIGNMENT||
 				str_get(num+1)->lext == L_OPERAT_BITWISE||
 				str_get(num+1)->lext == L_OPERAT_LOGIC||
 				str_get(num+1)->lext == L_OPERAT_RELATION) {
-			str_get(num)->synt = S_ID_VARIABLE;
-			str_get(num)->level = level+1;
-			return ++num;
+			if(inside_expr) {
+				str_get(num)->synt = S_ID_VARIABLE;
+				str_get(num)->level = level+1;
+				return ++num;
+			} else {
+				return process_expression(num, level);
+			}
 		}
-		if(str_get(num+1)->lext == L_BRACE_CLOSING ||
-				str_get(num+1)->lext == L_DELIMITER) {
+		if(maybeparam && (str_get(num+1)->lext == L_BRACE_CLOSING ||
+				str_get(num+1)->lext == L_DELIMITER)) {
 			str_get(num)->synt = S_ID_PARAM;
 			str_get(num)->level = level;
 			return ++num;
@@ -168,12 +187,22 @@ int get_identifier_type(int num, int level, bool maybeparam)
 char* syn_to_str(syn_t t)
 {
 	switch(t) {
+	case S_OPERAT_UNARY_UNEXPECTED:
+		return "ERR UNARY OP UNEXPECTED";
+	case S_VARIABLE:
+		return "VARIABLE";
+	case S_CONST:
+		return "CONSTANT";
+	case S_DEL:
+		return "DELIMITER";
+	case S_DEL_EXPECTED:
+		return "ERR DELIMITER EXPECTED";
 	case S_NOTDEFINED:
-		return "UNDEFINED";
+		return "NOT PROCESSED";
 	case S_ID_FUNCTION:
 		return "ID_FUNCTION";
 	case S_ID_UNDEFINED:
-		return "ID_UNDEFINED";
+		return "ERR ID UNDEFINED";
 	case S_ID_VARIABLE:
 		return "ID_VARIABLE";
 	case S_OPERAT_ARITHMETIC:
@@ -208,9 +237,10 @@ char* syn_to_str(syn_t t)
 		return "PARAM IDENT";
 	case S_CONST_PARAM:
 		return "CONST PARAM";
-	default:
-		return "URECOGNIZED";
+	//default:
+	//	return "UNRECOGNIZED";
 	}
+	return "ERROR UNRECOGNIZED SYMBOL";
 }
 
 int process_function(int num, int level)
@@ -227,7 +257,12 @@ int process_function(int num, int level)
 		str_get(num+1)->level = level+2;
 		pr_debug("opening func brace");
 	}
-	for(int i=num+2; i<str_array.amount; ) {
+	int next_del = next_delimiter(num, level, false);
+	if(next_del<0) {
+		pr_warn("could not found next delimiter");
+		next_del = str_array.amount;
+	}
+	for(int i=num+2; i<next_del; ) {
 		switch(str_get(i)->lext) {
 		case L_BRACE_CLOSING:
 			if(!strcmp(str_get(i)->inst, ")") ) {
@@ -242,7 +277,7 @@ int process_function(int num, int level)
 			return i+1;
 		case L_IDENTIFIER:
 		{
-			int next = get_identifier_type(i, level_param, true);
+			int next = process_ident(i, level_param, true, false);
 			if(str_get(i)->synt == S_ID_PARAM) {
 				pr_debug("it was param");
 			}
@@ -285,4 +320,86 @@ int process_function(int num, int level)
 	pr_err("Expected ')' brace at end of input");
 	err_amount++;
 	return str_array.amount;
+}
+
+int process_expression(int num, int level)
+{
+	syn_t prev = S_NOTDEFINED;
+	syn_t expect = S_NOTDEFINED;
+	bool unary_been = false;
+	int numlevel = level + 2;
+	int arithlevel = level + 1;
+	int next_del = next_delimiter(num, level, true);
+	if(next_del<0) {
+		pr_warn("could not find delimiter when processing expression");
+		next_del = str_array.amount;
+	}
+	for(; num<next_del;) {
+		switch(str_get(num)->lext) {
+		case L_CONSTANT:
+		case L_CONSTANT_BIN:
+		case L_CONSTANT_FLOAT:
+		case L_CONSTANT_HEX:
+		case L_CHAR:
+			prev = S_CONST_PARAM;
+			str_get(num)->level = numlevel;
+			num++;
+			break;
+		case L_OPERAT_ARITHMETIC:
+		{
+			const char* unary[] = { "++", "--"};
+			const char* sign[] = { "-", "+" };
+			if(is_str_in(str_get(num)->inst, unary, sizeof unary)) {
+				pr_debug("unary op detected num=%d", num);
+				if(prev == S_ID_VARIABLE || str_get(num+1)->lext == L_IDENTIFIER) {
+					expect = S_NOTDEFINED;
+					unary_been = true;
+					str_get(num)->synt = S_OPERAT_UNARY;
+					str_get(num)->level = numlevel + 1;
+					num++;
+				} else {
+					str_get(num)->synt = S_OPERAT_UNARY_UNEXPECTED;
+					str_get(num)->level = numlevel + 1;
+					num++;
+				}
+			}
+			if(is_str_in(str_get(num)->inst, sign, sizeof sign)) {
+				pr_debug("sign op detected num=%d", num);
+				if(str_get(num+1)->lext == L_IDENTIFIER &&
+						str_get(num-1)->lext != L_IDENTIFIER) {
+					expect = S_ID_VARIABLE;
+					unary_been = true;
+					str_get(num)->synt = S_OPERAT_UNARY;
+					str_get(num)->level = numlevel + 1;
+					num++;
+				} else {
+					str_get(num)->synt = S_OPERAT_UNARY_UNEXPECTED;
+					str_get(num)->level = numlevel + 1;
+					num++;
+				}
+			}
+			break;
+		}
+		case L_IDENTIFIER:
+			num = process_ident(num, numlevel, true, true);
+			prev = S_ID_VARIABLE;
+			break;
+		}
+	}
+	return num;
+}
+
+int next_delimiter(int num, int level, bool param)
+{
+	for(int i=num; i<str_array.amount; i++) {
+		if(str_get(i)->lext == L_DELIMITER ) {
+			if(param && !strcmp(str_get(i)->inst, ",")) {
+				return i;
+			}
+			else if(!strcmp(str_get(i)->inst, ";")) {
+				return i;
+			}
+		}
+	}
+	return -1;
 }

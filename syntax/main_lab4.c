@@ -25,7 +25,7 @@ int main(void)
 	while(1) {
 		printf("code:\t");
 		memset(code, 0, sizeof code);
-		//memcpy(code, "f(sd,ds)", strlen("f(sd,ds)"));
+		//memcpy(code, "a++;b++;",strlen("f(sd,ds)"));
 		if(fgets(code, sizeof code, stdin) == NULL) {
 			prg_exit(0);
 		}

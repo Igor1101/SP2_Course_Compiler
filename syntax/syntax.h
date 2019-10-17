@@ -13,12 +13,13 @@ typedef enum {
 	S_NOTDEFINED,
 	S_OPERAT_RELATION,
 	S_OPERAT_ARITHMETIC,
+	S_OPERAT_UNARY,
+	S_OPERAT_UNARY_UNEXPECTED,
 	S_OPERAT_ASSIGNMENT,
 	S_OPERAT_LOGIC,
 	S_OPERAT_BITWISE,
 	S_OPERAT_IF,
 	S_OPERAT_SWITCH_CASE,
-	S_OPERAT_UNARY,
 	S_OPERAT_UNKNOWN,
 	S_ID_FUNCTION,
 	S_FUNC_BRACE_OPEN,
@@ -28,7 +29,10 @@ typedef enum {
 	S_VARIABLE,
 	S_ID_PARAM,
 	S_CONST_PARAM,
+	S_CONST,
 	S_DEL_PARAM,
+	S_DEL,
+	S_DEL_EXPECTED,
 	S_ID_VARIABLE,
 	S_ID_UNDEFINED
 }syn_t;
@@ -51,9 +55,11 @@ int open_brace(int num);
 int push(syn_t op);
 syn_t pop(void);
 void init_syn_analyzer(void);
-int get_identifier_type(int num, int level, bool maybeparam);
+int process_ident(int num, int level, bool maybeparam, bool inside_expr);
 char* syn_to_str(syn_t t);
 int process_function(int num, int level);
+int next_delimiter(int num, int level, bool param);
+int is_delimiter_next_expected(int num, int level);
 
 
 
