@@ -75,7 +75,13 @@ str_t* str_get(int index)
 {
 	if(str_array.amount <= index) {
 		pr_err("str_get: out of bounds");
-		return NULL;
+		static str_t str = {
+				.inst = NULL,
+				.level = 0,
+				.lext = L_NOTDEFINED,
+				.synt = 0
+		};
+		return &str;
 	}
 	return &str_array.instcs[index];
 }
