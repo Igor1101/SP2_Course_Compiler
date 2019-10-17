@@ -53,6 +53,11 @@ int syn_analyze(void)
 			//open_brace(st.num);
 			asm("");
 		}
+		if(st.num >= str_array.amount) {
+			err_amount++;
+			pr_err("DELIMITER EXPECTED AT THE END ");
+			return err_amount;
+		}
 		st.num = is_delimiter_next_expected(st.num, st.nesting);
     }
 	return err_amount;
@@ -362,10 +367,16 @@ int process_expression(int num, int level)
 					str_get(num)->level = numlevel + 1;
 					num++;
 				}
+				break;
 			}
 			if(is_str_in(str_get(num)->inst, sign, sizeof sign)) {
 				pr_debug("sign op detected num=%d", num);
-				if(str_get(num+1)->lext == L_IDENTIFIER &&
+				if((str_get(num+1)->lext == L_IDENTIFIER||
+						str_get(num+1)->lext == L_CONSTANT ||
+						str_get(num+1)->lext == L_CONSTANT_FLOAT ||
+						str_get(num+1)->lext == L_CONSTANT_BIN ||
+						str_get(num+1)->lext == L_CONSTANT_HEX
+						)&&
 						str_get(num-1)->lext != L_IDENTIFIER) {
 					expect = S_ID_VARIABLE;
 					unary_been = true;
@@ -377,6 +388,7 @@ int process_expression(int num, int level)
 					str_get(num)->level = numlevel + 1;
 					num++;
 				}
+				break;
 			}
 			break;
 		}
