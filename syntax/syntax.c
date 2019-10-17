@@ -200,6 +200,10 @@ int process_ident(int num, int level, bool maybeparam, bool inside_expr)
 char* syn_to_str(syn_t t)
 {
 	switch(t) {
+	case S_CONST_PARAM_UNEXPECTED:
+		return "ERR CONST PARAM UNEXPECTED";
+	case S_TOKEN_UNEXPECTED:
+		return "ERR TOKEN UNEXPECTED";
 	case S_OPERAT_UNARY_UNEXPECTED:
 		return "ERR UNARY OP UNEXPECTED";
 	case S_VARIABLE:
@@ -375,6 +379,7 @@ int process_expression(int num, int level, bool inside_expr)
 				break;
 			}
 			prev = S_CONST_PARAM;
+			str_get(num)->synt = S_CONST;
 			str_get(num)->level = numlevel;
 			num++;
 			break;
@@ -495,7 +500,7 @@ int process_expression(int num, int level, bool inside_expr)
 		default:
 			pr_err("Unexpected operator");
 			str_get(num)->level = 0;
-			str_get(num)->synt = S_OPERAT_UNKNOWN;
+			str_get(num)->synt = S_TOKEN_UNEXPECTED;
 			num++;
 		}
 	}
