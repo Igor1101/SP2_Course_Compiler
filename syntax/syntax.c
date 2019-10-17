@@ -46,7 +46,7 @@ int syn_analyze(void)
 			st.num = process_ident(st.num, st.nesting+1, false, false);
 			break;
 		case L_OPERAT_ARITHMETIC:
-			st.num = process_expression(st.num, st.nesting+1, false);
+			st.num = process_expression(st.num, st.nesting+1, false, false);
 		case L_BRACE_CLOSING:
 			//close_brace(st.num);
 		case L_BRACE_OPENING:
@@ -144,6 +144,12 @@ void reset(void)
 int process_ident(int num, int level, bool maybeparam, bool inside_expr)
 {
 	if(num < (str_array.amount-1)) {
+
+		if(str_get(num)->lext == L_IDENTIFIER &&
+			!strcmp(str_get(num + 1)->inst, "[")) {
+			int i = process_array(num, level);
+			return i;
+		}
 		if(str_get(num+1)->lext == L_BRACE_OPENING &&
 				!strcmp(str_get(num+1)->inst,"(")) {
 			/* this is a function */
@@ -169,7 +175,7 @@ int process_ident(int num, int level, bool maybeparam, bool inside_expr)
 				str_get(num)->level = level;
 				return ++num;
 			} else {
-				return process_expression(num, level, maybeparam);
+				return process_expression(num, level, maybeparam, false);
 			}
 		}
 		if(maybeparam && (str_get(num+1)->lext == L_BRACE_CLOSING ||
@@ -200,6 +206,12 @@ int process_ident(int num, int level, bool maybeparam, bool inside_expr)
 char* syn_to_str(syn_t t)
 {
 	switch(t) {
+	case S_BRACE_CLOSE:
+		return "BRACE CLOSE";
+	case S_BRACE_CLOSE_EXPECTED:
+		return "BRACE CLOSE EXPECTED";
+	case S_BRACE_OPEN:
+		return "BRACE OPEN";
 	case S_CONST_PARAM_UNEXPECTED:
 		return "ERR CONST PARAM UNEXPECTED";
 	case S_TOKEN_UNEXPECTED:
@@ -347,7 +359,7 @@ int process_function(int num, int level)
 	return str_array.amount;
 }
 
-int process_expression(int num, int level, bool inside_expr)
+int process_expression(int num, int level, bool inside_expr, bool inside_array)
 {
 	syn_t prev = S_NOTDEFINED;
 	syn_t expect = S_NOTDEFINED;
@@ -396,7 +408,7 @@ int process_expression(int num, int level, bool inside_expr)
 				str_get(num)->synt = S_OPERAT_ASSIGNMENT;
 				str_get(num)->level = arithlevel;
 				num++;
-				return process_expression(num, level+1, inside_expr);
+				return process_expression(num, level+1, inside_expr, inside_array);
 			} else {
 				err_amount++;
 				str_get(num)->synt = S_OPERAT_ASSIGNMENT_UNEXPECTED;
@@ -497,7 +509,12 @@ int process_expression(int num, int level, bool inside_expr)
 			num = process_ident(num, numlevel, true, true);
 			prev = S_ID_VARIABLE;
 			break;
+		case L_BRACE_CLOSING:
+			if(!strcmp(str_get(num)->inst, "]")&& inside_array) {
+				return num;
+			}
 		default:
+			err_amount++;
 			pr_err("Unexpected operator");
 			str_get(num)->level = 0;
 			str_get(num)->synt = S_TOKEN_UNEXPECTED;
@@ -530,4 +547,32 @@ int next_closing_brace(int num, int level)
 		}
 	}
 	return -1;
+}
+
+int process_array(int num, int level)
+{
+	if(
+			str_get(num)->lext == L_IDENTIFIER &&
+			!strcmp(str_get(num + 1)->inst, "[")
+			) {
+		str_get(num)->synt = S_ID_VARIABLE;
+		str_get(num)->level = level;
+		str_get(num+1)->synt = S_BRACE_OPEN;
+		str_get(num+1)->level = level+1;
+		num = process_expression(num+2, level+2, true, true);
+		if(num>=str_array.amount)
+			return num++;
+		if( !strcmp(str_get(num)->inst, "]")) {
+			str_get(num)->synt = S_BRACE_CLOSE;
+			str_get(num)->level = level+1;
+			return num+1;
+		} else {
+			str_get(num)->synt = S_BRACE_CLOSE_EXPECTED;
+			str_get(num)->level = level+1;
+			return num+1;
+		}
+	} else {
+		return ++num;
+	}
+	return num++;
 }

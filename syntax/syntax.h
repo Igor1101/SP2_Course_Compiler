@@ -27,6 +27,9 @@ typedef enum {
 	S_OPERAT_UNKNOWN,
 	S_ID_FUNCTION,
 	S_FUNC_BRACE_OPEN,
+	S_BRACE_OPEN,
+	S_BRACE_CLOSE,
+	S_BRACE_CLOSE_EXPECTED,
 	S_FUNC_BRACE_CLOSE,
 	S_EXPECTED_FUNC_BRACE_CLOSE,
 	S_EXPECTED_PARAM_DELIMITER,
@@ -62,12 +65,13 @@ int push(syn_t op);
 syn_t pop(void);
 void init_syn_analyzer(void);
 int process_ident(int num, int level, bool maybeparam, bool inside_expr);
-int process_expression(int num, int level, bool inside_expr);
+int process_expression(int num, int level, bool inside_expr, bool inside_array);
 char* syn_to_str(syn_t t);
 int process_function(int num, int level);
 int next_delimiter(int num, int level, bool param);
 int next_closing_brace(int num, int level);
 int is_delimiter_next_expected(int num, int level);
+int process_array(int num, int level);
 
 
 
