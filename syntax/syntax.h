@@ -43,7 +43,9 @@ typedef enum {
 	S_DEL_EXPECTED,
 	S_ID_VARIABLE,
 	S_ID_VARIABLE_UNEXPECTED,
-	S_ID_UNDEFINED
+	S_ID_UNDEFINED,
+	S_TYPE,
+	S_TYPE_UNEXPECTED
 }syn_t;
 typedef struct {
 	int num;
