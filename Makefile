@@ -6,7 +6,7 @@ APP_PATH = $(abspath ./)
 LAB1_PATH = $(APP_PATH)/lexems
 SYN_PATH = $(APP_PATH)/syntax
 # main src file
-APP_SRC += main_lab4.c
+APP_SRC += main_lab3.c
 # app sources
 APP_SRC += ch_utf8.c
 APP_SRC += utf8.c

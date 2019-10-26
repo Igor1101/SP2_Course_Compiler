@@ -29,6 +29,19 @@ static const char * c_reservedwords[] = {
 		"volatile"
 };
 
+static const char* pas_reservedwords[] = {
+		"and", "array", "asm", "begin", "break",
+		"case", "const", "constructor", "continue",
+		"destructor", "div", "do", "downto",
+		"else", "end", "false", "file",
+		"for", "function", "goto", "if", "in", "label",
+		"mod", "nil", "not", "object", "of", "on", "operator",
+		"or", "packed", "procedure", "program", "record", "repeat",
+		"set", "shl", "shr", "string", "then", "to",
+		"true", "type", "unit", "until", "uses", "var", "while",
+		"with", "xor"
+};
+
 static const char* c_operators[] = {
 		"+", "-", "*", "/", "%",
 		"++", "--",
@@ -37,22 +50,44 @@ static const char* c_operators[] = {
 		"&&", "||", "!",
 		"&", "|", "^", "~", "<<", ">>", "->", "."
 };
+static const char* pas_operators[] = {
+		"+", "-", "*", "/", "%",
+		":=",
+		"=", ">","<", "<>", ">=", "<=",
+		"not", "or", "and", "xor"
+		"&", "|", "^", "~", "<<", ">>"
+};
 static const char* c_op_arithmetic[] = {
 		"+", "-", "*", "/", "%", "++", "--"
+};
+static const char* pas_op_arithmetic[] = {
+		"+", "-", "*", "/", "%", "div", "mod"
 };
 static const char* c_op_assign[] = {
 		"=", "+=", "-=", "*=", "/=", "%="
 };
+static const char* pas_op_assign[] = {
+		":="
+};
 static const char* c_op_bitwise[] = {
 		"&", "|", "^", "~", "<<", ">>"
 };
+static const char* pas_op_bitwise[] = {
+		"&", "|", "^", "~", "<<", ">>", "shl", "shr",
+};
 static const char* c_op_logic[] = {
 		"&&", "||", "!",
+};
+static const char* pas_op_logic[] = {
+		"and", "or", "xor", "not"
 };
 static const char* c_op_relation[] = {
 		"==", ">","<", "!=", ">=", "<=",
 };
 
+static const char* pas_op_relation[] = {
+		"=", ">","<", "<>", ">=", "<=",
+};
 bool is_char_in(unsigned ch, const char*str)
 {
 	if(str == NULL) {
@@ -87,12 +122,12 @@ bool is_name(char* str)
 char* get_next_lexem_alloc(char*str, int* i, lexem_t* lexerror)
 {
 	char*lex;
-	const char* op_ch = "?!~|%^&*-+=/<>";
+	const char* op_ch = "?!~|%^&*-+=/<>:";
 	if(str == NULL)
 		return NULL;
 	unsigned ch = u8_nextchar(str, i);
 	pr_debug("char %c indentifying", ch);
-	if(is_char_in(ch, ";,:. ")) {
+	if(is_char_in(ch, ";,. ")) {
 		pr_debug("lex is delimiter");
 		lex = calloc(1, 2);
 		lex[0] = (char)ch;
@@ -184,7 +219,7 @@ int lex_parse(char*str)
 			ret_status++;
 			continue;
 		}
-		if(is_char_in(ch, ";,:")) {
+		if(is_char_in(ch, ";,")) {
 			pr_debug("found delimiter");
 			char _del[2];
 			_del[0] = ch;
@@ -271,7 +306,7 @@ int lex_parse(char*str)
 			ret_status++;
 			continue;
 		}
-		if(is_str_in(lex, c_reservedwords, sizeof c_reservedwords)) {
+		if(is_str_in(lex, pas_reservedwords, sizeof pas_reservedwords)) {
 			pr_debug("found keyword");
 			str_add(lex, L_KEYWORD);
 			lastlexem = L_KEYWORD;
@@ -291,8 +326,8 @@ int lex_parse(char*str)
 			pr_debug("may be operator");
 			while(strlen(lex) > 0) {
 				pr_debug("lex=%s", lex);
-				if(is_str_in(lex, c_operators, sizeof c_operators)) {
-					if(is_str_in(lex, c_op_arithmetic, sizeof c_op_arithmetic)) {
+				if(is_str_in(lex, pas_operators, sizeof pas_operators)) {
+					if(is_str_in(lex, pas_op_arithmetic, sizeof pas_op_arithmetic)) {
 						/* verify if it is arithmetic or
 						 * pointer
 						 */
@@ -318,12 +353,12 @@ int lex_parse(char*str)
 						lastlexem = L_OPERAT_ARITHMETIC;
 						break;
 					}
-					if(is_str_in(lex, c_op_assign, sizeof c_op_assign)) {
+					if(is_str_in(lex, pas_op_assign, sizeof pas_op_assign)) {
 						str_add(lex, L_OPERAT_ASSIGNMENT);
 						lastlexem = L_OPERAT_ASSIGNMENT;
 						break;
 					}
-					if(is_str_in(lex, c_op_bitwise, sizeof c_op_bitwise)) {
+					if(is_str_in(lex, pas_op_bitwise, sizeof pas_op_bitwise)) {
 					/* verify if it is arithmetic or
 					* pointer
 					*/
@@ -348,12 +383,12 @@ int lex_parse(char*str)
 						lastlexem = L_OPERAT_BITWISE;
 						break;
 					}
-					if(is_str_in(lex, c_op_logic, sizeof c_op_logic)) {
+					if(is_str_in(lex, pas_op_logic, sizeof pas_op_logic)) {
 						str_add(lex, L_OPERAT_LOGIC);
 						lastlexem = L_OPERAT_LOGIC;
 						break;
 					}
-					if(is_str_in(lex, c_op_relation, sizeof c_op_relation)) {
+					if(is_str_in(lex, pas_op_relation, sizeof pas_op_relation)) {
 						str_add(lex, L_OPERAT_RELATION);
 						lastlexem = L_OPERAT_RELATION;
 						break;
@@ -485,7 +520,7 @@ bool is_sacc_char(char c)
 bool is_op_chars(char*str)
 {
 	for(int i=0; i<strlen(str); i++) {
-		if(!is_char_in(str[i], ".~|&!-+/<>=^%*")) {
+		if(!is_char_in(str[i], ".~|&!-+/<>=^%*:")) {
 			return false;
 		}
 	}
@@ -564,7 +599,7 @@ char* lex_to_str(lexem_t lt)
 	case L_IDENTIFIER:
 		return "identifier";
 	case L_KEYWORD:
-		return "Ckeyword";
+		return "PASkeyword";
 	case L_OPERAT_ARITHMETIC:
 		return "arithmetic op";
 	case L_OPERAT_ASSIGNMENT:
