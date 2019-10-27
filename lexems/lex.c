@@ -264,20 +264,20 @@ int lex_parse(char*str)
 			} else {
 				u8_dec(str, &i);
 				u8_dec(str, &i);
+				goto str_process;
 			}
 		}
-		if(is_char_in(ch, "\"")) {
+		str_process:
+		if(is_char_in(ch, "\'")) {
 			/* looks like string */
 			pr_debug("string process");
 			/* save str pointer */
-			int iold = i;
-			char* strend = strchr(&str[i+1], '"');
+			char* strend = strchr(&str[i+1], '\'');
 			if(strend == NULL) {
-				pr_err("string without end \" ");
+				pr_err("string without end \' ");
 			} else {
-				int iend = (int)(strend - &str[i]+2);
 				char*newstr = str_alloc(&str[i - 1]);
-				char*newstrend = strchr(newstr+1, '"');
+				char*newstrend = strchr(newstr+1, '\'');
 				if(newstrend == NULL) {
 					free(newstr);
 				} else {
