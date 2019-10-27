@@ -51,7 +51,11 @@ int syn_analyze(void)
 			//close_brace(st.num);
 		case L_BRACE_OPENING:
 			//open_brace(st.num);
-			asm("");
+		default:
+			pr_err("UNEXPECTED SYMBOL");
+			str_get(st.num)->synt = S_TOKEN_UNEXPECTED;
+			err_amount++;
+			st.num++;
 		}
 		if(st.num >= str_array.amount) {
 			err_amount++;
