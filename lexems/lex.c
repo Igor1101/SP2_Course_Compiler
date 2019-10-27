@@ -406,9 +406,15 @@ int lex_parse(char*str)
 						 * */
 						str_add(lex, L_UNKNOWN_WORD);
 						lastlexem = L_UNKNOWN_WORD;
-						break;
 						ret_status++;
+						break;
 					}
+				}
+				if(strlen(lex) == 1) {
+					str_add(lex, L_UNKNOWN_WORD);
+					lastlexem = L_UNKNOWN_WORD;
+					ret_status++;
+					break;
 				}
 				lex[strlen(lex)-1] = '\0';
 				i--;
