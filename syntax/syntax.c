@@ -51,6 +51,9 @@ int syn_analyze(void)
 			//close_brace(st.num);
 		case L_BRACE_OPENING:
 			//open_brace(st.num);
+		case L_DELIMITER:
+			st.num = is_delimiter_next_expected(st.num, st.nesting);
+			break;
 		default:
 			pr_err("UNEXPECTED SYMBOL");
 			str_get(st.num)->synt = S_TOKEN_UNEXPECTED;
