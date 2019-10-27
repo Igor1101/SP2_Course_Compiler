@@ -423,9 +423,9 @@ int process_expression(int num, int level, bool inside_expr, bool inside_array)
 			const char* unary[] = { "++", "--"};
 			const char* sign[] = { "-", "+", "!"};
 			const char* binary[] = {
-					"-", "+", "*", "/",
-					"==", ">","<", "!=", ">=", "<=",
-					"&&", "||",
+					"-", "+", "*", "/", "%",
+					"=", ">","<", "<>", ">=", "<=",
+					"not", "or", "xor", "mod", "div",
 					"&", "|", "^", "~", "<<", ">>"
 			};
 			if(is_str_in(str_get(num)->inst, unary, sizeof unary)) {
