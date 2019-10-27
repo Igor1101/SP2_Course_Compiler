@@ -47,6 +47,7 @@ int syn_analyze(void)
 			break;
 		case L_OPERAT_ARITHMETIC:
 			st.num = process_expression(st.num, st.nesting+1, false, false);
+			break;
 		case L_BRACE_CLOSING:
 			//close_brace(st.num);
 		case L_BRACE_OPENING:
@@ -61,12 +62,18 @@ int syn_analyze(void)
 			st.num++;
 		}
 		if(st.num >= str_array.amount) {
-			err_amount++;
-			pr_err("DELIMITER EXPECTED AT THE END ");
+			if(str_array.amount>0 && (str_get(str_array.amount - 1)->lext != L_DELIMITER)) {
+				str_get(str_array.amount - 1)->synt = S_DEL_EXPECTED;
+				err_amount++;
+			}
 			return err_amount;
 		}
 		st.num = is_delimiter_next_expected(st.num, st.nesting);
     }
+	if(str_array.amount>0 && (str_get(str_array.amount - 1)->lext != L_DELIMITER)) {
+		str_get(str_array.amount - 1)->synt = S_DEL_EXPECTED;
+		err_amount++;
+	}
 	return err_amount;
 }
 
