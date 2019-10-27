@@ -539,7 +539,7 @@ bool is_str_in(char*str, const char*arr[], size_t arr_size)
 		return false;
 	}
 	for(int i=0; i<arr_size / sizeof arr[0]; i++) {
-		if(!strcmp(str, arr[i]))
+		if(!strcasecmp(str, arr[i]))
 			return true;
 	}
 	return false;
