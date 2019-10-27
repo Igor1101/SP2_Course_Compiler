@@ -37,7 +37,8 @@ static const char* pas_reservedwords[] = {
 		"for", "function", "goto", "if", "in", "label",
 		"mod", "nil", "not", "object", "of", "on", "operator",
 		"or", "packed", "procedure", "program", "record", "repeat",
-		"set", "shl", "shr", "string", "then", "to",
+		"set", "shl", "shr", "string", "var", "real", "boolean", "char",
+		"then", "to",
 		"true", "type", "unit", "until", "uses", "var", "while",
 		"with", "xor"
 };
