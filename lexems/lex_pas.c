@@ -14,21 +14,6 @@
 #include <ctype.h>
 #include "lex.h"
 
-static const char * c_reservedwords[] = {
-		"auto", "signed", "const", "extern", "register", "unsigned", "static",
-		"int", "float", "char", "double", "long",
-		"void",
-		"if", "else", "switch", "case", "default",
-		"break", "continue",
-		"for", "while", "do",
-		"goto",
-		"return",
-		"enum",
-		"sizeof",
-		"struct", "typedef", "union",
-		"volatile"
-};
-
 static const char* pas_reservedwords[] = {
 		"and", "array", "asm", "begin", "break",
 		"case", "const", "constructor", "continue",
@@ -43,14 +28,6 @@ static const char* pas_reservedwords[] = {
 		"with", "xor"
 };
 
-static const char* c_operators[] = {
-		"+", "-", "*", "/", "%",
-		"++", "--",
-		"=", "+=", "-=", "*=", "/=", "%=",
-		"==", ">","<", "!=", ">=", "<=",
-		"&&", "||", "!",
-		"&", "|", "^", "~", "<<", ">>", "->", "."
-};
 static const char* pas_operators[] = {
 		"+", "-", "*", "/", "%",
 		":=",
@@ -58,37 +35,27 @@ static const char* pas_operators[] = {
 		"not", "or", "and", "xor"
 		"&", "|", "^", "~", "<<", ">>"
 };
-static const char* c_op_arithmetic[] = {
-		"+", "-", "*", "/", "%", "++", "--"
-};
+
 static const char* pas_op_arithmetic[] = {
 		"+", "-", "*", "/", "%", "div", "mod"
 };
-static const char* c_op_assign[] = {
-		"=", "+=", "-=", "*=", "/=", "%="
-};
+
 static const char* pas_op_assign[] = {
 		":="
 };
-static const char* c_op_bitwise[] = {
-		"&", "|", "^", "~", "<<", ">>"
-};
+
 static const char* pas_op_bitwise[] = {
 		"&", "|", "^", "~", "<<", ">>", "shl", "shr",
 };
-static const char* c_op_logic[] = {
-		"&&", "||", "!",
-};
+
 static const char* pas_op_logic[] = {
 		"and", "or", "xor", "not"
-};
-static const char* c_op_relation[] = {
-		"==", ">","<", "!=", ">=", "<=",
 };
 
 static const char* pas_op_relation[] = {
 		"=", ">","<", "<>", ">=", "<=",
 };
+
 bool is_char_in(unsigned ch, const char*str)
 {
 	if(str == NULL) {
