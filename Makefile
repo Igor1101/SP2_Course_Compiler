@@ -15,6 +15,7 @@ APP_SRC += tables.c
 APP_SRC += MooreMachine.c
 APP_SRC += lex.c
 APP_SRC += syntax.c
+APP_SRC += syn_utils.c
 # app includes
 INCFLAGS +=-I$(APP_PATH)
 # rtos includes
