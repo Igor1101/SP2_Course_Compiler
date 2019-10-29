@@ -7,6 +7,7 @@
 
 #ifndef LAB1_TABLES_H_
 #define LAB1_TABLES_H_
+#include <stdbool.h>
 #include <lexems/lex.h>
 #include <syntax/syntax.h>
 
@@ -20,6 +21,10 @@ typedef struct {
 	int level;
 	lexem_t lext;
 	syn_t synt;
+	syn_t synexp;
+	syn_t synunexp;
+	bool syn_err;
+	bool lex_err;
 }str_t;
 
 typedef struct {
