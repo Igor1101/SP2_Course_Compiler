@@ -10,6 +10,8 @@
 #include "syntax.h"
 #include <stdbool.h>
 #include <string.h>
+#include <stdlib.h>
+#include <stddef.h>
 
 syn_state_t st;
 int err_amount = 0;
@@ -57,13 +59,13 @@ int syn_analyze(void)
 			break;
 		default:
 			pr_err("UNEXPECTED SYMBOL");
-			str_get(st.num)->synt = S_TOKEN_UNEXPECTED;
+
 			err_amount++;
 			st.num++;
 		}
 		if(st.num >= str_array.amount) {
 			if(str_array.amount>0 && (str_get(str_array.amount - 1)->lext != L_DELIMITER)) {
-				str_get(str_array.amount - 1)->synt = S_DEL_EXPECTED;
+				set_synt_err(str_array.amount - 1, S_DEL);
 				err_amount++;
 			}
 			return err_amount;
@@ -71,7 +73,7 @@ int syn_analyze(void)
 		st.num = is_delimiter_next_expected(st.num, st.nesting);
     }
 	if(str_array.amount>0 && (str_get(str_array.amount - 1)->lext != L_DELIMITER)) {
-		str_get(str_array.amount - 1)->synt = S_DEL_EXPECTED;
+		set_synt_err(str_array.amount - 1, S_DEL);
 		err_amount++;
 	}
 	return err_amount;
@@ -88,7 +90,7 @@ int is_delimiter_next_expected(int num, int level)
 		str_get(num)->level = level;
 		str_get(num)->synt = S_DEL;
 	} else {
-		str_get(num)->synt = S_DEL_EXPECTED;
+		set_synt_err(num, S_DEL);
 		err_amount++;
 	}
 	return num+1;
@@ -242,12 +244,13 @@ int process_function(int num, int level)
 		case L_BRACE_CLOSING:
 			if(!strcmp(str_get(i)->inst, ")") ) {
 				pr_debug("closing func brace");
-				str_get(i)->synt = S_FUNC_BRACE_CLOSE;
+				set_synt(i, S_FUNC_BRACE_CLOSE);
 				str_get(i)->level = level+2;
 				return i+1;
 			}
 			/* unexpected brace */
-			str_get(i)->synt = S_EXPECTED_FUNC_BRACE_CLOSE;
+			set_synt_err(num, S_FUNC_BRACE_CLOSE);
+
 			err_amount++;
 			return i+1;
 		case L_IDENTIFIER:
@@ -283,7 +286,7 @@ int process_function(int num, int level)
 				i++;
 				break;
 			}
-			str_get(i)->synt = S_EXPECTED_PARAM_DELIMITER;
+			set_synt(i, S_DEL_PARAM);
 			i++;
 			break;
 		default:
@@ -324,7 +327,7 @@ int process_expression(int num, int level, bool inside_expr, bool inside_array)
 		case L_CHAR:
 			if(prev == S_CONST_PARAM) {
 				err_amount++;
-				str_get(num)->synt = S_CONST_PARAM_UNEXPECTED;
+				set_synt_err_unexp(num, S_OPERAT_BINARY, S_CONST_PARAM);
 				num++;
 				break;
 			}
@@ -349,7 +352,7 @@ int process_expression(int num, int level, bool inside_expr, bool inside_array)
 				return process_expression(num, level+1, inside_expr, inside_array);
 			} else {
 				err_amount++;
-				str_get(num)->synt = S_OPERAT_ASSIGNMENT_UNEXPECTED;
+				set_synt_err_unexp(num, S_OPERAT_BINARY, S_OPERAT_ASSIGNMENT);
 				num++;
 				break;
 			}
@@ -376,8 +379,8 @@ int process_expression(int num, int level, bool inside_expr, bool inside_array)
 					str_get(num)->level = numlevel + 1;
 					num++;
 				} else {
-					prev = S_OPERAT_UNARY_UNEXPECTED;
-					str_get(num)->synt = S_OPERAT_UNARY_UNEXPECTED;
+					prev = S_OPERAT_UNARY;
+					set_synt_err_unexp(num, S_ID_UNDEFINED, S_OPERAT_UNARY);
 					str_get(num)->level = numlevel + 1;
 					err_amount++;
 					num++;
@@ -426,7 +429,7 @@ int process_expression(int num, int level, bool inside_expr, bool inside_array)
 					break;
 				} else {
 					err_amount++;
-					str_get(num)->synt = S_OPERAT_BINARY_UNEXPECTED;
+					set_synt_err_unexp(num, S_CONST, S_OPERAT_BINARY);
 					str_get(num)->level = arithlevel;
 					num++;
 					break;
@@ -440,7 +443,7 @@ int process_expression(int num, int level, bool inside_expr, bool inside_array)
 		case L_IDENTIFIER:
 			if(prev == S_ID_VARIABLE) {
 				err_amount++;
-				str_get(num)->synt = S_ID_VARIABLE_UNEXPECTED;
+				set_synt_err_unexp(num, S_OPERAT_BINARY, S_ID_VARIABLE);
 				num++;
 				break;
 			}
@@ -455,7 +458,7 @@ int process_expression(int num, int level, bool inside_expr, bool inside_array)
 			err_amount++;
 			pr_err("Unexpected operator");
 			str_get(num)->level = 0;
-			str_get(num)->synt = S_TOKEN_UNEXPECTED;
+			set_synt_err_unexp(num, S_NOTDEFINED, lex_to_syn(str_get(num)->lext));
 			num++;
 		}
 	}
@@ -505,7 +508,7 @@ int process_array(int num, int level)
 			str_get(num)->level = level+1;
 			return num+1;
 		} else {
-			str_get(num)->synt = S_BRACE_CLOSE_EXPECTED;
+			set_synt_err(num, S_BRACE_CLOSE);
 			str_get(num)->level = level+1;
 			return num+1;
 		}
@@ -523,21 +526,21 @@ int process_for_loop(int num, int level)
 {
 	if(strcasecmp(str_get(num)->inst, "for")) {
 		pr_err("no 'for' inside 'for' loop");
-		str_get(num)->synt = S_KEYWORD_EXPECTED;
+		set_synt_err(num, S_KEYWORD);
 		err_amount++;
 		return num++;
 	}
-	str_get(num)->synt = S_KEYWORD_EXPECTED;
+	set_synt_err(num, S_KEYWORD);
 	str_get(num)->level = level;
 	num++;
 	if((str_get(num)->lext != L_IDENTIFIER)) {
-		str_get(num)->synt = S_ID_VARIABLE_EXPECTED;
+		set_synt_err(num, S_ID_VARIABLE);
 		err_amount++;
 		return num++;
 	}
 	num = process_ident(num, level+2, true, true);
 	if(str_get(num)->lext != L_OPERAT_ASSIGNMENT) {
-		str_get(num)->synt = S_OPERAT_ASSIGNMENT_EXPECTED;
+		set_synt_err(num, S_OPERAT_ASSIGNMENT);
 		err_amount++;
 		return num++;
 	}
