@@ -1,6 +1,7 @@
 TARGET := app
 PLATFORM ?= posix 
 CC ?= gcc
+LANGUAGE_ ?= pas
 # path
 APP_PATH = $(abspath ./)
 LAB1_PATH = $(APP_PATH)/lexems
@@ -13,8 +14,8 @@ APP_SRC += utf8.c
 APP_SRC += cli.c
 APP_SRC += tables.c
 APP_SRC += MooreMachine.c
-APP_SRC += lex.c
-APP_SRC += syntax.c
+APP_SRC += lex_$(LANGUAGE_).c
+APP_SRC += syntax_$(LANGUAGE_).c
 APP_SRC += syn_utils.c
 # app includes
 INCFLAGS +=-I$(APP_PATH)
