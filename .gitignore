@@ -8,3 +8,4 @@
 .antiplug/
 *.sig
 *.pdf
+.settings/org.eclipse.cdt.codan.core.prefs
