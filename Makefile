@@ -15,6 +15,7 @@ APP_SRC += cli.c
 APP_SRC += tables.c
 APP_SRC += MooreMachine.c
 APP_SRC += lex_$(LANGUAGE_).c
+APP_SRC += lex_utils.c
 APP_SRC += syntax_$(LANGUAGE_).c
 APP_SRC += syn_utils.c
 # app includes
