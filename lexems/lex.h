@@ -37,6 +37,8 @@ typedef enum {
 	L_UNACCEPTABLE_WORD
 }lexem_t;
 
+void lex_printf(void);
+void lex_add(char* str, lexem_t l);
 bool is_name(char* str);
 bool is_char_in(unsigned ch, const char*str);
 bool is_acc_char(char c);

@@ -5,6 +5,10 @@
  *      Author: igor
  */
 #include "lex.h"
+#include <lexems/tables.h>
+#include <defs.h>
+#include <stdlib.h>
+#include <string.h>
 
 char* lex_to_str(lexem_t lt)
 {
@@ -55,5 +59,57 @@ char* lex_to_str(lexem_t lt)
 		return "ERR UNKNOWN WORD";
 	default:
 		return "UNKNOWN LEXEM";
+	}
+}
+
+void lex_add(char* str, lexem_t l)
+{
+	int ind = str_add(str, l);
+	switch (l) {
+		case L_UNACCEPTABLE_CHAR:
+		case L_UNACCEPTABLE_WORD:
+		case L_UNKNOWN_WORD:
+			str_get(ind)->lex_err=true;
+			break;
+		default:
+			str_get(ind)->lex_err=false;
+			break;
+	}
+}
+
+int lex_err_amount(void)
+{
+	int err=0;
+	for(int i=0; i<str_array.amount; i++) {
+		if(str_get(i)->lex_err)
+			err++;
+	}
+	return err;
+}
+
+void lex_printf(void)
+{
+	pr_info("lex output:");
+	char *arr = malloc(1000);
+	size_t *sz = malloc(str_array.amount*sizeof(size_t));
+	size_t sz_cur = 0;
+
+	for(int i=0; i<str_array.amount; i++) {
+		if(str_get(i)->lex_err) {
+			printf(COLOR_RED " %s" COLOR_DEF, str_get_inst(i));
+		} else {
+			printf(COLOR_GREEN " %s" COLOR_DEF, str_get_inst(i));
+		}
+		sprintf(arr, " %s" , str_get_inst(i));
+		sz[i] = strlen(arr) + sz_cur;
+		sz_cur = sz[i];
+	}
+	puts("");
+	for(int i=0; i<str_array.amount;i++) {
+		if(str_get(i)->lex_err) {
+			for(int j=0; j<sz[i]; j++)
+				putchar(' ');
+			pr_info("^ lexical error <%s> ", lex_to_str(str_get(i)->lext));
+		}
 	}
 }
