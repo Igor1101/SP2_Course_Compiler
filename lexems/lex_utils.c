@@ -112,4 +112,5 @@ void lex_printf(void)
 			pr_info("^ lexical error <%s> ", lex_to_str(str_get(i)->lext));
 		}
 	}
+	free(arr);
 }
