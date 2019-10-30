@@ -79,6 +79,16 @@ syn_t lex_to_syn(lexem_t l)
 char* syn_to_str(syn_t t)
 {
 	switch(t) {
+	case S_KEYWORD_TYPE:
+		return "KEYWORD TYPE";
+	case S_FUNC_BRACE_CLOSE:
+		return "FUNC BRACE CLOSE";
+	case S_CHAR:
+		return "CHAR";
+	case S_STRING:
+		return "STRING";
+	case S_POINTER:
+		return "POINTER";
 	case S_BRACE_CLOSE:
 		return "BRACE CLOSE";
 	case S_BRACE_OPEN:
@@ -123,10 +133,8 @@ char* syn_to_str(syn_t t)
 		return "PARAM IDENT";
 	case S_CONST_PARAM:
 		return "CONST PARAM";
-	//default:
-	//	return "UNRECOGNIZED";
 	}
-	return "ERROR UNRECOGNIZED SYMBOL";
+	//return "ERROR UNRECOGNIZED SYMBOL";
 }
 
 void syn_printf(void)

@@ -225,7 +225,7 @@ int process_function(int num, int level)
 		set_synt(num, S_ID_FUNCTION, level);
 	}
 	if(str_get(num+1)->lext == L_BRACE_OPENING) {
-		set_synt(num, S_FUNC_BRACE_OPEN, level+1);
+		set_synt(num+1, S_FUNC_BRACE_OPEN, level+1);
 		pr_debug("opening func brace");
 	}
 	int next_del = next_delimiter(num, level, false);
@@ -273,7 +273,7 @@ int process_function(int num, int level)
 					i = num+2;
 					continue;
 				}
-				set_synt(i, S_DEL_PARAM, level_del);
+				set_synt_err_unexp(i, S_FUNC_BRACE_CLOSE, S_DEL_PARAM);
 				i++;
 				break;
 			}
@@ -285,6 +285,7 @@ int process_function(int num, int level)
 			i++;
 		}
 	}
+	set_synt_err(next_del, S_BRACE_CLOSE);
 	pr_err("Expected ')' brace at end of input");
 	err_amount++;
 	return str_array.amount;
