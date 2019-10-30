@@ -57,7 +57,7 @@ typedef struct {
 extern syn_state_t st;
 /* syn utils */
 char* syn_to_str(syn_t t);
-void set_synt(int num, syn_t s);
+void set_synt(int num, syn_t s, int level);
 void set_synt_err_unexp(int num, syn_t expected, syn_t unexpected);
 void set_synt_err(int num, syn_t exp);
 syn_t lex_to_syn(lexem_t l);

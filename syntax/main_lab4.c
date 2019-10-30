@@ -30,11 +30,12 @@ int main(void)
 			prg_exit(0);
 		}
         int lerr_amount = lex_parse(code);
-		pr_info("lexical error amount: %d", lerr_amount);
+		pr_debug("lexical error amount: %d", lerr_amount);
 		/* print result */
 		for(int i=0; i<str_array.amount;i++) {
-			pr_info("lexem:\t%s\t\t:\t<%s> ", str_get_inst(i), lex_to_str(str_get(i)->lext));
+			pr_debug("lexem:\t%s\t\t:\t<%s> ", str_get_inst(i), lex_to_str(str_get(i)->lext));
 		}
+        lex_printf();
         if(lerr_amount > 0) {
             pr_err("lerrors detected, wont start syntax analyzer");
             return lerr_amount;

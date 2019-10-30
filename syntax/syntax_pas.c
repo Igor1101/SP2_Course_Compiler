@@ -60,6 +60,7 @@ int syn_analyze(void)
 		default:
 			pr_err("UNEXPECTED SYMBOL");
 
+			set_synt_err_unexp(st.num, S_NOTDEFINED, lex_to_syn(str_get(st.num)->lext));
 			err_amount++;
 			st.num++;
 		}
@@ -244,8 +245,7 @@ int process_function(int num, int level)
 		case L_BRACE_CLOSING:
 			if(!strcmp(str_get(i)->inst, ")") ) {
 				pr_debug("closing func brace");
-				set_synt(i, S_FUNC_BRACE_CLOSE);
-				str_get(i)->level = level+2;
+				set_synt(i, S_FUNC_BRACE_CLOSE, level + 2);
 				return i+1;
 			}
 			/* unexpected brace */
@@ -286,7 +286,7 @@ int process_function(int num, int level)
 				i++;
 				break;
 			}
-			set_synt(i, S_DEL_PARAM);
+			set_synt(i, S_DEL_PARAM, level_del);
 			i++;
 			break;
 		default:

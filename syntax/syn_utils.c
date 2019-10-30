@@ -9,12 +9,13 @@
 #include <stdbool.h>
 #include <lexems/tables.h>
 
-void set_synt(int num, syn_t s)
+void set_synt(int num, syn_t s, int level)
 {
 	str_get(num)->synt = s;
 	str_get(num)->syn_err = false;
 	str_get(num)->synexp = s;
 	str_get(num)->synunexp = S_NOTDEFINED;
+	str_get(num)->level = level;
 }
 void set_synt_err_unexp(int num, syn_t expected, syn_t unexpected)
 {
