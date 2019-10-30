@@ -113,4 +113,5 @@ void lex_printf(void)
 		}
 	}
 	free(arr);
+	free(sz);
 }
