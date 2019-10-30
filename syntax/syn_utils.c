@@ -79,6 +79,8 @@ syn_t lex_to_syn(lexem_t l)
 char* syn_to_str(syn_t t)
 {
 	switch(t) {
+	case S_KEYWORD:
+		return "KEYWORD";
 	case S_KEYWORD_TYPE:
 		return "KEYWORD TYPE";
 	case S_FUNC_BRACE_CLOSE:

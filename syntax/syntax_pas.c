@@ -44,6 +44,11 @@ int syn_analyze(void)
 			continue;
 		}
 		switch(str_get(st.num)->lext) {
+		case L_KEYWORD:
+			if(!strcasecmp(str_get_inst(st.num), "for")) {
+				st.num = process_for_loop(st.num, st.nesting+1);
+			}
+			break;
 		case L_IDENTIFIER:
 			st.num = process_ident(st.num, st.nesting+1, false, false);
 			break;
@@ -426,6 +431,8 @@ int process_expression(int num, int level, bool inside_expr, bool inside_array)
 		}
 		case L_DELIMITER:
 			return num;
+		case L_KEYWORD:
+			return num;
 		case L_IDENTIFIER:
 			if(prev == S_ID_VARIABLE) {
 				err_amount++;
@@ -507,26 +514,50 @@ int process_array(int num, int level)
  */
 int process_for_loop(int num, int level)
 {
+	/* for */
 	if(strcasecmp(str_get(num)->inst, "for")) {
 		pr_err("no 'for' inside 'for' loop");
 		set_synt_err(num, S_KEYWORD);
 		err_amount++;
-		return num++;
+		return ++num;
 	}
-	set_synt_err(num, S_KEYWORD);
-	str_get(num)->level = level;
+	set_synt(num, S_KEYWORD, level);
 	num++;
+	/* <variable name> */
 	if((str_get(num)->lext != L_IDENTIFIER)) {
 		set_synt_err(num, S_ID_VARIABLE);
 		err_amount++;
-		return num++;
+		return ++num;
 	}
 	num = process_ident(num, level+2, true, true);
+	/* := */
 	if(str_get(num)->lext != L_OPERAT_ASSIGNMENT) {
 		set_synt_err(num, S_OPERAT_ASSIGNMENT);
 		err_amount++;
-		return num++;
+		return ++num;
 	}
-	str_get(num)->synt = S_OPERAT_ASSIGNMENT;
-	str_get(num)->level = level + 1;
+	set_synt(num, S_OPERAT_ASSIGNMENT, level+1);
+	num++;
+	/* <initial value> */
+	num = process_expression(num, level+2, false, false);
+	/* to [down to] */
+	const char * arr[] = { "to", "downto" };
+	if(str_get(num)->lext != L_KEYWORD ||
+			(!is_str_in(str_get_inst(num), arr, sizeof arr))) {
+		set_synt_err(num, S_KEYWORD);
+		err_amount++;
+		return ++num;
+	}
+	set_synt(num++, S_KEYWORD, level+1);
+	/* <final value> */
+	num = process_expression(num, level+2, false, false);
+	/* do */
+	if(strcasecmp(str_get_inst(num), "do")) {
+		set_synt_err(num, S_KEYWORD);
+		err_amount++;
+		return ++num;
+	}
+	set_synt(num++, S_KEYWORD, level+1);
+	/* S */
+	return process_ident(num, level + 3, false, false);
 }

@@ -73,6 +73,7 @@ void init_syn_analyzer(void);
 int process_ident(int num, int level, bool maybeparam, bool inside_expr);
 int process_expression(int num, int level, bool inside_expr, bool inside_array);
 int process_function(int num, int level);
+int process_for_loop(int num, int level);
 int next_delimiter(int num, int level, bool param);
 int next_closing_brace(int num, int level);
 int is_delimiter_next_expected(int num, int level);
