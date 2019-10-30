@@ -61,6 +61,7 @@ void set_synt(int num, syn_t s, int level);
 void set_synt_err_unexp(int num, syn_t expected, syn_t unexpected);
 void set_synt_err(int num, syn_t exp);
 syn_t lex_to_syn(lexem_t l);
+void syn_printf(void);
 
 /* syntax analyzer */
 int syn_analyze(void);

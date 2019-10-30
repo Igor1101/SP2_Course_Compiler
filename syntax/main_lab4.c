@@ -49,6 +49,7 @@ int main(void)
 			pr_info("%s\t:\t<%s>\t<%s> ", str_get_inst(i),
 					lex_to_str(str_get(i)->lext), syn_to_str(str_get(i)->synt));
 		}
+		syn_printf();
 	}
 	return 0;
 };

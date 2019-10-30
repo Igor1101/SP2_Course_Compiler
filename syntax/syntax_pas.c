@@ -88,8 +88,7 @@ int is_delimiter_next_expected(int num, int level)
 	"EOF FOUND");
 	}
 	else if(str_get(num)->lext == L_DELIMITER) {
-		str_get(num)->level = level;
-		str_get(num)->synt = S_DEL;
+		set_synt(num, S_DEL, level);
 	} else {
 		set_synt_err(num, S_DEL);
 		err_amount++;
@@ -188,8 +187,7 @@ int process_ident(int num, int level, bool maybeparam, bool inside_expr)
 				str_get(num+1)->lext == L_OPERAT_ASSIGNMENT
 				) {
 			if(inside_expr) {
-				str_get(num)->synt = S_ID_VARIABLE;
-				str_get(num)->level = level;
+				set_synt(num, S_ID_VARIABLE, level);
 				return ++num;
 			} else {
 				return process_expression(num, level, maybeparam, false);
@@ -197,8 +195,7 @@ int process_ident(int num, int level, bool maybeparam, bool inside_expr)
 		}
 		if(maybeparam && (str_get(num+1)->lext == L_BRACE_CLOSING ||
 				str_get(num+1)->lext == L_DELIMITER)) {
-			str_get(num)->synt = S_ID_VARIABLE;
-			str_get(num)->level = level;
+			set_synt(num, S_ID_VARIABLE, level);
 			return ++num;
 		}
 	}
@@ -209,14 +206,12 @@ int process_ident(int num, int level, bool maybeparam, bool inside_expr)
 				str_get(num-1)->lext == L_OPERAT_BITWISE||
 				str_get(num-1)->lext == L_OPERAT_LOGIC||
 				str_get(num-1)->lext == L_OPERAT_RELATION) {
-			str_get(num)->synt = S_ID_VARIABLE;
-			str_get(num)->level = level;
+			set_synt(num, S_ID_VARIABLE, level);
 			return ++num;
 		}
 	}
 	err_amount++;
-	str_get(num)->synt = S_ID_UNDEFINED;
-	str_get(num)->level = level;
+	set_synt_err_unexp(num, S_ID_VARIABLE, S_ID_UNDEFINED);
 	return ++num;
 }
 
@@ -224,20 +219,18 @@ int process_ident(int num, int level, bool maybeparam, bool inside_expr)
 int process_function(int num, int level)
 {
 	bool has_del = false;
-	int level_del = level+3;
+	int level_del = level+2;
 	int level_param = level+3;
 	if(str_get(num)->lext == L_IDENTIFIER) {
-		str_get(num)->synt = S_ID_FUNCTION;
-		str_get(num)->level = level+1;
+		set_synt(num, S_ID_FUNCTION, level);
 	}
 	if(str_get(num+1)->lext == L_BRACE_OPENING) {
-		str_get(num+1)->synt = S_FUNC_BRACE_OPEN;
-		str_get(num+1)->level = level+2;
+		set_synt(num, S_FUNC_BRACE_OPEN, level+1);
 		pr_debug("opening func brace");
 	}
 	int next_del = next_delimiter(num, level, false);
 	if(next_del<0) {
-		pr_warn("could not found next delimiter");
+		pr_warn("could not find next delimiter");
 		next_del = str_array.amount;
 	}
 	for(int i=num+2; i<next_del; ) {
@@ -245,7 +238,7 @@ int process_function(int num, int level)
 		case L_BRACE_CLOSING:
 			if(!strcmp(str_get(i)->inst, ")") ) {
 				pr_debug("closing func brace");
-				set_synt(i, S_FUNC_BRACE_CLOSE, level + 2);
+				set_synt(i, S_FUNC_BRACE_CLOSE, level + 1);
 				return i+1;
 			}
 			/* unexpected brace */
@@ -268,8 +261,7 @@ int process_function(int num, int level)
 		case L_CONSTANT_FLOAT:
 		case L_CONSTANT_HEX:
 		case L_STRING:
-			str_get(i)->synt = S_CONST_PARAM;
-			str_get(i)->level = level_param;
+			set_synt(i, S_CONST_PARAM, level_param);
 			i++;
 			break;
 		case L_DELIMITER:
@@ -281,8 +273,7 @@ int process_function(int num, int level)
 					i = num+2;
 					continue;
 				}
-				str_get(i)->synt = S_DEL_PARAM;
-				str_get(i)->level = level_del;
+				set_synt(i, S_DEL_PARAM, level_del);
 				i++;
 				break;
 			}
@@ -290,8 +281,7 @@ int process_function(int num, int level)
 			i++;
 			break;
 		default:
-			str_get(i)->synt = S_ID_UNDEFINED;
-			str_get(i)->level = level_param;
+			set_synt_err_unexp(i, S_ID_UNDEFINED, lex_to_syn(str_get(i)->lext));
 			i++;
 		}
 	}
@@ -332,8 +322,7 @@ int process_expression(int num, int level, bool inside_expr, bool inside_array)
 				break;
 			}
 			prev = S_CONST_PARAM;
-			str_get(num)->synt = S_CONST;
-			str_get(num)->level = numlevel;
+			set_synt(num, S_CONST, numlevel);
 			num++;
 			break;
 		case L_OPERAT_ASSIGNMENT:
@@ -346,8 +335,7 @@ int process_expression(int num, int level, bool inside_expr, bool inside_array)
 					str_get(num+1)->lext == L_IDENTIFIER||
 					str_get(num+1)->lext == L_OPERAT_ARITHMETIC)
 					) {
-				str_get(num)->synt = S_OPERAT_ASSIGNMENT;
-				str_get(num)->level = arithlevel;
+				set_synt(num, S_OPERAT_ASSIGNMENT, arithlevel);
 				num++;
 				return process_expression(num, level+1, inside_expr, inside_array);
 			} else {
@@ -375,8 +363,7 @@ int process_expression(int num, int level, bool inside_expr, bool inside_array)
 					prev = S_OPERAT_UNARY;
 					expect = S_NOTDEFINED;
 					unary_been = true;
-					str_get(num)->synt = S_OPERAT_UNARY;
-					str_get(num)->level = numlevel + 1;
+					set_synt(num, S_OPERAT_UNARY, numlevel+1);
 					num++;
 				} else {
 					prev = S_OPERAT_UNARY;
@@ -399,8 +386,7 @@ int process_expression(int num, int level, bool inside_expr, bool inside_array)
 					prev = S_OPERAT_UNARY;
 					expect = S_ID_VARIABLE;
 					unary_been = true;
-					str_get(num)->synt = S_OPERAT_UNARY;
-					str_get(num)->level = numlevel + 1;
+					set_synt(num, S_OPERAT_UNARY, numlevel+1);
 					num++;
 					break;
 				}
@@ -423,8 +409,7 @@ int process_expression(int num, int level, bool inside_expr, bool inside_array)
 					expect = S_ID_VARIABLE;
 					prev = S_OPERAT_BINARY;
 					unary_been = true;
-					str_get(num)->synt = S_OPERAT_BINARY;
-					str_get(num)->level = arithlevel;
+					set_synt(num, S_OPERAT_BINARY, arithlevel);
 					num++;
 					break;
 				} else {
@@ -496,16 +481,13 @@ int process_array(int num, int level)
 			str_get(num)->lext == L_IDENTIFIER &&
 			!strcmp(str_get(num + 1)->inst, "[")
 			) {
-		str_get(num)->synt = S_ID_VARIABLE;
-		str_get(num)->level = level;
-		str_get(num+1)->synt = S_BRACE_OPEN;
-		str_get(num+1)->level = level+1;
+		set_synt(num, S_ID_VARIABLE, level);
+		set_synt(num+1, S_BRACE_OPEN, level+1);
 		num = process_expression(num+2, level+2, true, true);
 		if(num>=str_array.amount)
 			return num++;
 		if( !strcmp(str_get(num)->inst, "]")) {
-			str_get(num)->synt = S_BRACE_CLOSE;
-			str_get(num)->level = level+1;
+			set_synt(num, S_BRACE_CLOSE, level+1);
 			return num+1;
 		} else {
 			set_synt_err(num, S_BRACE_CLOSE);

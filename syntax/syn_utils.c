@@ -7,7 +7,9 @@
 #include "syntax.h"
 #include <lexems/lex.h>
 #include <stdbool.h>
+#include <string.h>
 #include <lexems/tables.h>
+#include <defs.h>
 
 void set_synt(int num, syn_t s, int level)
 {
@@ -127,3 +129,33 @@ char* syn_to_str(syn_t t)
 	return "ERROR UNRECOGNIZED SYMBOL";
 }
 
+void syn_printf(void)
+{
+	pr_info("syn output:");
+	char *arr = malloc(1000);
+	size_t *sz = malloc(str_array.amount*sizeof(size_t));
+	size_t sz_cur = 0;
+
+	for(int i=0; i<str_array.amount; i++) {
+		if(str_get(i)->syn_err) {
+			printf(COLOR_RED " %s" COLOR_DEF, str_get_inst(i));
+		} else {
+			printf(COLOR_GREEN " %s" COLOR_DEF, str_get_inst(i));
+		}
+		sprintf(arr, " %s" , str_get_inst(i));
+		sz[i] = strlen(arr) + sz_cur;
+		sz_cur = sz[i];
+	}
+	puts("");
+	for(int i=0; i<str_array.amount;i++) {
+		if(str_get(i)->syn_err) {
+			for(int j=0; j<sz[i]; j++)
+				putchar(' ');
+			pr_info("^ syn unexpected <%s>, expected <%s> ",
+					syn_to_str(str_get(i)->synunexp),
+					syn_to_str(str_get(i)->synexp));
+		}
+	}
+	free(arr);
+	free(sz);
+}
