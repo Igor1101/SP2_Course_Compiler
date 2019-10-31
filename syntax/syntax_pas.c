@@ -567,6 +567,10 @@ int process_for_loop(int num, int level)
 	}
 	set_synt(num++, S_KEYWORD, level+1);
 	/* S */
+	/* may be block */
+	if(!strcasecmp(str_get_inst(num), "begin")) {
+		return process_block(num, level+3);
+	}
 	return process_ident(num, level + 3, false, false);
 }
 
