@@ -11,6 +11,11 @@
 #include <lexems/tables.h>
 #include <defs.h>
 
+static str_t end_err = {
+		.lex_err=false,
+		.syn_err=false
+};
+
 void set_synt(int num, syn_t s, int level)
 {
 	str_get(num)->synt = s;
@@ -29,6 +34,17 @@ void set_synt_err_unexp(int num, syn_t expected, syn_t unexpected)
 void set_synt_err(int num, syn_t exp)
 {
 	set_synt_err_unexp(num, exp, lex_to_syn(str_get(num)->lext));
+}
+
+void end_set_synt_err(syn_t exp)
+{
+	end_err.synexp = exp;
+	end_err.syn_err = true;
+}
+
+str_t* end_get_synt_err(syn_t exp)
+{
+	return &end_err;
 }
 
 syn_t lex_to_syn(lexem_t l)
@@ -161,7 +177,7 @@ void syn_printf(void)
 		if(str_get(i)->syn_err) {
 			for(int j=0; j<sz[i]; j++)
 				putchar(' ');
-			pr_info("^ syn unexpected <%s>, expected <%s> ",
+			pr_info("^ unexpected <%s>, expected <%s> ",
 					syn_to_str(str_get(i)->synunexp),
 					syn_to_str(str_get(i)->synexp));
 		}
@@ -169,3 +185,20 @@ void syn_printf(void)
 	free(arr);
 	free(sz);
 }
+
+int is_delimiter_next_expected(int num, int level, bool forcenext)
+{
+	if(num>=str_array.amount) {
+		pr_err("DELIMITER EXPECTED AT THE END"
+	"EOF FOUND");
+	}
+	else if(str_get(num)->lext == L_DELIMITER) {
+		set_synt(num, S_DEL, level);
+	} else {
+		set_synt_err(num, S_DEL);
+		if(!forcenext)
+			return num;
+	}
+	return num+1;
+}
+
