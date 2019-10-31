@@ -270,11 +270,11 @@ int process_function(int num, int level)
 					i = num+2;
 					continue;
 				}
-				set_synt_err_unexp(i, S_FUNC_BRACE_CLOSE, S_DEL_PARAM);
+				set_synt(i, S_DEL_PARAM, level_del);
 				i++;
 				break;
 			}
-			set_synt(i, S_DEL_PARAM, level_del);
+			set_synt_err_unexp(i, S_FUNC_BRACE_CLOSE, S_DEL_PARAM);
 			i++;
 			break;
 		default:
