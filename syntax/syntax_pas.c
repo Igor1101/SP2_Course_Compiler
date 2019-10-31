@@ -30,7 +30,6 @@ void init_syn_analyzer(void)
 int syn_analyze(void)
 {
 	init_syn_analyzer();
-	int num;
 	process_main(0, 0, false);
 	return err_amount;
 
@@ -56,9 +55,15 @@ int process_main(int num, int level, bool inside_block)
 		case L_KEYWORD:
 			if(!strcasecmp(str_get_inst(num), "for")) {
 				num = process_for_loop(num, level+1);
+				break;
 			}
 			if(!strcasecmp(str_get_inst(num), "begin")) {
 				num = process_block(num, level+1);
+				break;
+			}
+			if(!strcasecmp(str_get_inst(num), "end") && inside_block) {
+				set_synt(num, S_KEYWORD, level-1);
+				return num+1;
 			}
 			break;
 		case L_IDENTIFIER:
