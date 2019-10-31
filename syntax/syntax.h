@@ -76,7 +76,7 @@ int process_function(int num, int level);
 int process_for_loop(int num, int level);
 int next_delimiter(int num, int level, bool param);
 int next_closing_brace(int num, int level);
-int is_delimiter_next_expected(int num, int level);
+int is_delimiter_next_expected(int num, int level, bool forcenext);
 int process_array(int num, int level);
 
 

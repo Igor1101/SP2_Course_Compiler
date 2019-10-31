@@ -43,6 +43,7 @@ int syn_analyze(void)
 			st.num++;
 			continue;
 		}
+		int prev = st.num;
 		switch(str_get(st.num)->lext) {
 		case L_KEYWORD:
 			if(!strcasecmp(str_get_inst(st.num), "for")) {
@@ -60,7 +61,7 @@ int syn_analyze(void)
 		case L_BRACE_OPENING:
 			//open_brace(st.num);
 		case L_DELIMITER:
-			st.num = is_delimiter_next_expected(st.num, st.nesting);
+			st.num = is_delimiter_next_expected(st.num, st.nesting, true);
 			break;
 		default:
 			pr_err("UNEXPECTED SYMBOL");
@@ -76,16 +77,19 @@ int syn_analyze(void)
 			}
 			return err_amount;
 		}
-		st.num = is_delimiter_next_expected(st.num, st.nesting);
+		int next = st.num;
+		st.num = is_delimiter_next_expected(st.num, st.nesting, next == prev);
     }
 	if(str_array.amount>0 && (str_get(str_array.amount - 1)->lext != L_DELIMITER)) {
-		set_synt_err(str_array.amount - 1, S_DEL);
-		err_amount++;
+		if(!str_get(str_array.amount - 1)->syn_err) {
+			set_synt_err(str_array.amount - 1, S_DEL);
+			err_amount++;
+		}
 	}
 	return err_amount;
 }
 
-int is_delimiter_next_expected(int num, int level)
+int is_delimiter_next_expected(int num, int level, bool forcenext)
 {
 	if(num>=str_array.amount) {
 		err_amount++;
@@ -97,6 +101,8 @@ int is_delimiter_next_expected(int num, int level)
 	} else {
 		set_synt_err(num, S_DEL);
 		err_amount++;
+		if(!forcenext)
+			return num;
 	}
 	return num+1;
 }
@@ -197,6 +203,10 @@ int process_ident(int num, int level, bool maybeparam, bool inside_expr)
 			} else {
 				return process_expression(num, level, maybeparam, false);
 			}
+		}
+		if(str_get(num+1)->lext == L_KEYWORD) {
+			set_synt(num, S_ID_VARIABLE, level);
+			return ++num;
 		}
 		if(maybeparam && (str_get(num+1)->lext == L_BRACE_CLOSING ||
 				str_get(num+1)->lext == L_DELIMITER)) {
@@ -550,7 +560,7 @@ int process_for_loop(int num, int level)
 	}
 	set_synt(num++, S_KEYWORD, level+1);
 	/* <final value> */
-	num = process_expression(num, level+2, false, false);
+	num = process_ident(num, level+2, false, false);
 	/* do */
 	if(strcasecmp(str_get_inst(num), "do")) {
 		set_synt_err(num, S_KEYWORD);
