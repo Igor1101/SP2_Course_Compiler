@@ -229,3 +229,16 @@ int is_delimiter_next_expected(int num, int level, bool forcenext)
 	return num+1;
 }
 
+void init_syn_analyzer(void)
+{
+	end_err.syn_err = false;
+	end_err.lex_err = false;
+	st.num = 0;
+	st.arithmetic = false;
+	st.assignment = false;
+	st.curlybrace_nest = 0;
+	st.nesting = 0;
+	st.parensis_nest = 0;
+	st.square_braces_nest = 0;
+	st.symbols_after_del = 0;
+}

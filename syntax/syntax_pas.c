@@ -15,18 +15,7 @@
 
 syn_state_t st;
 int err_amount = 0;
-void init_syn_analyzer(void)
-{
-	st.num = 0;
-	st.arithmetic = false;
-	st.assignment = false;
-	st.curlybrace_nest = 0;
-	st.nesting = 0;
-	st.parensis_nest = 0;
-	st.square_braces_nest = 0;
-	st.symbols_after_del = 0;
-	err_amount = 0;
-}
+
 
 int syn_analyze(void)
 {
