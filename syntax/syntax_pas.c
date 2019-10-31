@@ -103,6 +103,8 @@ int process_main(int num, int level, bool inside_block)
 			err_amount++;
 		}
 	}
+	if(inside_block)
+		end_set_synt_err_inst(S_KEYWORD, "end");
 	return num;
 }
 

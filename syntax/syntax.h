@@ -83,6 +83,8 @@ int next_delimiter(int num, int level, bool param);
 int next_closing_brace(int num, int level);
 int is_delimiter_next_expected(int num, int level, bool forcenext);
 int process_array(int num, int level);
+void end_set_synt_err(syn_t exp);
+void end_set_synt_err_inst(syn_t exp, char* inst);
 
 
 

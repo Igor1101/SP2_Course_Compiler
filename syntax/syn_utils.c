@@ -13,7 +13,8 @@
 
 static str_t end_err = {
 		.lex_err=false,
-		.syn_err=false
+		.syn_err=false,
+		.syn_inst_exp = ""
 };
 
 void set_synt(int num, syn_t s, int level)
@@ -52,13 +53,14 @@ void set_synt_err_inst(int num, syn_t exp, char* inst)
 	set_synt_err_unexp_inst(num, exp, lex_to_syn(str_get(num)->lext), inst);
 }
 
-void end_set_synt_err(syn_t exp)
+void end_set_synt_err_inst(syn_t exp, char* inst)
 {
 	end_err.synexp = exp;
 	end_err.syn_err = true;
+	end_err.syn_inst_exp = inst;
 }
 
-str_t* end_get_synt_err(syn_t exp)
+str_t* end_get_synt_err(void)
 {
 	return &end_err;
 }
@@ -199,6 +201,13 @@ void syn_printf(void)
 					str_get(i)->syn_inst_exp,
 					syn_to_str(str_get(i)->synexp));
 		}
+	}
+	if(end_get_synt_err()->syn_err) {
+		for(int j=0; j<sz[str_array.amount-1] + 1; j++)
+			putchar(' ');
+		pr_info("in the end expected \"%s\" <%s> ",
+					end_get_synt_err()->syn_inst_exp,
+					syn_to_str(end_get_synt_err()->synexp));
 	}
 	free(arr);
 	free(sz);
