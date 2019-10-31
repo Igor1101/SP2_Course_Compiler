@@ -27,6 +27,7 @@ void init_syn_analyzer(void)
 	st.symbols_after_del = 0;
 	err_amount = 0;
 }
+
 int syn_analyze(void)
 {
 	init_syn_analyzer();
@@ -525,7 +526,7 @@ int process_for_loop(int num, int level)
 	/* for */
 	if(strcasecmp(str_get(num)->inst, "for")) {
 		pr_err("no 'for' inside 'for' loop");
-		set_synt_err(num, S_KEYWORD);
+		set_synt_err_inst(num, S_KEYWORD, "for");
 		err_amount++;
 		return ++num;
 	}
@@ -540,7 +541,7 @@ int process_for_loop(int num, int level)
 	num = process_ident(num, level+2, true, true);
 	/* := */
 	if(str_get(num)->lext != L_OPERAT_ASSIGNMENT) {
-		set_synt_err(num, S_OPERAT_ASSIGNMENT);
+		set_synt_err_inst(num, S_OPERAT_ASSIGNMENT, ":=");
 		err_amount++;
 		return ++num;
 	}
@@ -552,7 +553,7 @@ int process_for_loop(int num, int level)
 	const char * arr[] = { "to", "downto" };
 	if(str_get(num)->lext != L_KEYWORD ||
 			(!is_str_in(str_get_inst(num), arr, sizeof arr))) {
-		set_synt_err(num, S_KEYWORD);
+		set_synt_err_inst(num, S_KEYWORD, "to,downto");
 		err_amount++;
 		return ++num;
 	}
@@ -561,7 +562,7 @@ int process_for_loop(int num, int level)
 	num = process_ident(num, level+2, false, false);
 	/* do */
 	if(strcasecmp(str_get_inst(num), "do")) {
-		set_synt_err(num, S_KEYWORD);
+		set_synt_err_inst(num, S_KEYWORD, "do");
 		err_amount++;
 		return ++num;
 	}
@@ -579,7 +580,7 @@ int process_block(int num, int level)
 {
 	if(strcasecmp(str_get_inst(num), "begin")) {
 		/* not block */
-		set_synt_err(num, S_KEYWORD);
+		set_synt_err_inst(num, S_KEYWORD, "begin");
 		return num+1;
 	}
 	set_synt(num++, S_KEYWORD, level);
