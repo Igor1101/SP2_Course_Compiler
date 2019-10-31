@@ -30,55 +30,66 @@ void init_syn_analyzer(void)
 int syn_analyze(void)
 {
 	init_syn_analyzer();
-	for(st.num=0; st.num<str_array.amount; ) {
-		if(str_get(st.num) == NULL) {
+	int num;
+	process_main(0, 0, false);
+	return err_amount;
+
+}
+
+int process_main(int num, int level, bool inside_block)
+{
+	for(; num<str_array.amount; ) {
+		if(str_get(num) == NULL) {
 			pr_err("SYNTAX: NULL str_t detected");
 			err_amount++;
-			st.num++;
+			num++;
 			continue;
 		}
-		if(str_get(st.num)->inst == NULL) {
+		if(str_get(num)->inst == NULL) {
 			pr_err("SYNTAX: NULL string detected");
 			err_amount++;
-			st.num++;
+			num++;
 			continue;
 		}
-		int prev = st.num;
-		switch(str_get(st.num)->lext) {
+		int prev = num;
+		switch(str_get(num)->lext) {
 		case L_KEYWORD:
-			if(!strcasecmp(str_get_inst(st.num), "for")) {
-				st.num = process_for_loop(st.num, st.nesting+1);
+			if(!strcasecmp(str_get_inst(num), "for")) {
+				num = process_for_loop(num, level+1);
+			}
+			if(!strcasecmp(str_get_inst(num), "begin")) {
+				num = process_block(num, level+1);
 			}
 			break;
 		case L_IDENTIFIER:
-			st.num = process_ident(st.num, st.nesting+1, false, false);
+			num = process_ident(num, level+1, false, false);
 			break;
 		case L_OPERAT_ARITHMETIC:
-			st.num = process_expression(st.num, st.nesting+1, false, false);
+			num = process_expression(num, level+1, false, false);
 			break;
 		case L_BRACE_CLOSING:
-			//close_brace(st.num);
+			//close_brace(num);
 		case L_BRACE_OPENING:
-			//open_brace(st.num);
+			//open_brace(num);
 		case L_DELIMITER:
-			st.num = is_delimiter_next_expected(st.num, st.nesting, true);
+			num = is_delimiter_next_expected(num, level, true);
 			break;
 		default:
 			pr_err("UNEXPECTED SYMBOL");
 
-			set_synt_err_unexp(st.num, S_NOTDEFINED, lex_to_syn(str_get(st.num)->lext));
+			set_synt_err_unexp(num, S_NOTDEFINED, lex_to_syn(str_get(num)->lext));
 			err_amount++;
-			st.num++;
+			num++;
 		}
-		if(st.num >= str_array.amount) {
+		if(num >= str_array.amount) {
 			if(str_array.amount>0 && (str_get(str_array.amount - 1)->lext != L_DELIMITER)) {
 				set_synt_err(str_array.amount - 1, S_DEL);
 				err_amount++;
 			}
 			return err_amount;
 		}
-		int next = st.num;
-		st.num = is_delimiter_next_expected(st.num, st.nesting, next == prev);
+		int next = num;
+		num = is_delimiter_next_expected(num, level, next == prev);
     }
 	if(str_array.amount>0 && (str_get(str_array.amount - 1)->lext != L_DELIMITER)) {
 		if(!str_get(str_array.amount - 1)->syn_err) {
@@ -86,7 +97,7 @@ int syn_analyze(void)
 			err_amount++;
 		}
 	}
-	return err_amount;
+	return num;
 }
 
 int close_brace(int num)
@@ -552,4 +563,16 @@ int process_for_loop(int num, int level)
 	set_synt(num++, S_KEYWORD, level+1);
 	/* S */
 	return process_ident(num, level + 3, false, false);
+}
+
+ /* begin <code...;.;.;> end; */
+int process_block(int num, int level)
+{
+	if(strcasecmp(str_get_inst(num), "begin")) {
+		/* not block */
+		set_synt_err(num, S_KEYWORD);
+		return num+1;
+	}
+	set_synt(num++, S_KEYWORD, level);
+	return process_main(num, level+1, true);
 }
