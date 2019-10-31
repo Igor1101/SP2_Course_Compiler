@@ -18,6 +18,7 @@ typedef struct {
 
 typedef struct {
 	char* inst;
+	char* syn_inst_exp;
 	int level;
 	lexem_t lext;
 	syn_t synt;

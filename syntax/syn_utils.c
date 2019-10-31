@@ -23,17 +23,33 @@ void set_synt(int num, syn_t s, int level)
 	str_get(num)->synexp = s;
 	str_get(num)->synunexp = S_NOTDEFINED;
 	str_get(num)->level = level;
+	str_get(num)->syn_inst_exp = "";
 }
 void set_synt_err_unexp(int num, syn_t expected, syn_t unexpected)
 {
 	str_get(num)->syn_err = true;
 	str_get(num)->synexp = expected;
 	str_get(num)->synunexp = unexpected;
+	str_get(num)->syn_inst_exp = "";
+}
+
+void set_synt_err_unexp_inst(int num, syn_t expected, syn_t unexpected,
+		char* inst)
+{
+	str_get(num)->syn_err = true;
+	str_get(num)->synexp = expected;
+	str_get(num)->synunexp = unexpected;
+	str_get(num)->syn_inst_exp = inst;
 }
 
 void set_synt_err(int num, syn_t exp)
 {
 	set_synt_err_unexp(num, exp, lex_to_syn(str_get(num)->lext));
+}
+
+void set_synt_err_inst(int num, syn_t exp, char* inst)
+{
+	set_synt_err_unexp_inst(num, exp, lex_to_syn(str_get(num)->lext), inst);
 }
 
 void end_set_synt_err(syn_t exp)
@@ -177,8 +193,10 @@ void syn_printf(void)
 		if(str_get(i)->syn_err) {
 			for(int j=0; j<sz[i]; j++)
 				putchar(' ');
-			pr_info("^ unexpected <%s>, expected <%s> ",
+			pr_info("^\"%s\"<%s>, but expected \"%s\" <%s> ",
+					str_get(i)->inst,
 					syn_to_str(str_get(i)->synunexp),
+					str_get(i)->syn_inst_exp,
 					syn_to_str(str_get(i)->synexp));
 		}
 	}
