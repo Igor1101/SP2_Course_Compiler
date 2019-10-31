@@ -89,24 +89,6 @@ int syn_analyze(void)
 	return err_amount;
 }
 
-int is_delimiter_next_expected(int num, int level, bool forcenext)
-{
-	if(num>=str_array.amount) {
-		err_amount++;
-		pr_err("DELIMITER EXPECTED AT THE END"
-	"EOF FOUND");
-	}
-	else if(str_get(num)->lext == L_DELIMITER) {
-		set_synt(num, S_DEL, level);
-	} else {
-		set_synt_err(num, S_DEL);
-		err_amount++;
-		if(!forcenext)
-			return num;
-	}
-	return num+1;
-}
-
 int close_brace(int num)
 {
 	int ret;
