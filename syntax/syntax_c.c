@@ -55,7 +55,7 @@ int syn_analyze(void)
 		case L_BRACE_OPENING:
 			//open_brace(st.num);
 		case L_DELIMITER:
-			st.num = is_delimiter_next_expected(st.num, st.nesting);
+			st.num = is_delimiter_next_expected(st.num, st.nesting, true);
 			break;
 		default:
 			pr_err("UNEXPECTED SYMBOL");
@@ -70,7 +70,7 @@ int syn_analyze(void)
 			}
 			return err_amount;
 		}
-		st.num = is_delimiter_next_expected(st.num, st.nesting);
+		st.num = is_delimiter_next_expected(st.num, st.nesting, true);
     }
 	if(str_array.amount>0 && (str_get(str_array.amount - 1)->lext != L_DELIMITER)) {
 		set_synt_err(str_array.amount - 1, S_DEL);
@@ -79,22 +79,6 @@ int syn_analyze(void)
 	return err_amount;
 }
 
-int is_delimiter_next_expected(int num, int level)
-{
-	if(num>=str_array.amount) {
-		err_amount++;
-		pr_err("DELIMITER EXPECTED AT THE END"
-	"EOF FOUND");
-	}
-	else if(str_get(num)->lext == L_DELIMITER) {
-		str_get(num)->level = level;
-		str_get(num)->synt = S_DEL;
-	} else {
-		set_synt_err(num, S_DEL);
-		err_amount++;
-	}
-	return num+1;
-}
 
 int close_brace(int num)
 {
@@ -243,8 +227,7 @@ int process_function(int num, int level)
 		case L_BRACE_CLOSING:
 			if(!strcmp(str_get(i)->inst, ")") ) {
 				pr_debug("closing func brace");
-				set_synt(i, S_FUNC_BRACE_CLOSE);
-				str_get(i)->level = level+2;
+				set_synt(i, S_FUNC_BRACE_CLOSE, level+2);
 				return i+1;
 			}
 			/* unexpected brace */
@@ -285,7 +268,7 @@ int process_function(int num, int level)
 				i++;
 				break;
 			}
-			set_synt(i, S_DEL_PARAM);
+			set_synt(i, S_DEL_PARAM, level_del);
 			i++;
 			break;
 		default:
