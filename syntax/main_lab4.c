@@ -41,14 +41,15 @@ int main(void)
             return lerr_amount;
         }
         int serr_amount = syn_analyze();
-		pr_info("syntax error amount: %d", serr_amount);
+		//pr_info("syntax error amount: %d", serr_amount);
+        /*
 		for(int i=0; i<str_array.amount;i++) {
 			for(int j=0; j<str_get(i)->level; j++) {
 				printf(" ");// print level
 			}
 			pr_info("%s\t:\t<%s>\t<%s> ", str_get_inst(i),
 					lex_to_str(str_get(i)->lext), syn_to_str(str_get(i)->synt));
-		}
+		}*/
 		syn_printf();
 	}
 	return 0;
