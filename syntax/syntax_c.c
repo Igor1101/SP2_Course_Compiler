@@ -210,6 +210,7 @@ int process_function(int num, int level)
 		pr_warn("could not found next delimiter");
 		next_del = str_array.amount;
 	}
+	syn_t prev = S_FUNC_BRACE_OPEN;
 	for(int i=num+2; i<next_del; ) {
 		switch(str_get(i)->lext) {
 		case L_BRACE_CLOSING:
@@ -229,6 +230,7 @@ int process_function(int num, int level)
 				pr_debug("it was param");
 			}
 			i = next;
+			prev = S_ID_VARIABLE;
 			break;
 		}
 		case L_CHAR:
@@ -238,6 +240,7 @@ int process_function(int num, int level)
 		case L_CONSTANT_HEX:
 		case L_STRING:
 			i = process_expression(i, level_param, true, true);
+			prev = S_CONST_PARAM;
 			break;
 		case L_DELIMITER:
 			if(!strcmp(str_get(i)->inst, ",")) {
@@ -248,7 +251,12 @@ int process_function(int num, int level)
 					i = num+2;
 					continue;
 				}
-				set_synt(i, S_DEL_PARAM, level_del);
+				if(prev == S_DEL_PARAM || prev == S_FUNC_BRACE_OPEN) {
+					set_synt_err_unexp(i, S_ID_PARAM, S_DEL_PARAM);
+				} else {
+					set_synt(i, S_DEL_PARAM, level_del);
+				}
+				prev = S_DEL_PARAM;
 				i++;
 				break;
 			}
