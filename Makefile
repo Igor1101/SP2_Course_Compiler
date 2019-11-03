@@ -1,9 +1,9 @@
 TARGET := app
 PLATFORM ?= posix 
 CC ?= gcc
-LANGUAGE_ ?= pas
+LANGUAGE_ ?=c
 # path
-APP_PATH = $(abspath ./)
+APP_PATH = $(realpath ./)
 LAB1_PATH = $(APP_PATH)/lexems
 SYN_PATH = $(APP_PATH)/syntax
 # main src file
@@ -19,10 +19,10 @@ APP_SRC += lex_utils.c
 APP_SRC += syntax_$(LANGUAGE_).c
 APP_SRC += syn_utils.c
 # app includes
-INCFLAGS +=-I$(APP_PATH)
+INCFLAGS +=-I$(realpath $(APP_PATH))
 # rtos includes
-INCFLAGS += -I$(RTOS_PATH)
-INCFLAGS += -I$(RTOS_INCLUDES_PATH)
+INCFLAGS += -I$(realpath $(RTOS_PATH))
+INCFLAGS += -I$(realpath $(RTOS_INCLUDES_PATH))
 CFLAGS = -c -g -Wall -DDEBUG_APP
 
 # build

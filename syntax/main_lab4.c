@@ -35,22 +35,26 @@ int main(void)
 		for(int i=0; i<str_array.amount;i++) {
 			pr_debug("lexem:\t%s\t\t:\t<%s> ", str_get_inst(i), lex_to_str(str_get(i)->lext));
 		}
-        lex_printf();
         if(lerr_amount > 0) {
+        	lex_printf();
             pr_err("lerrors detected, wont start syntax analyzer");
             return lerr_amount;
         }
         int serr_amount = syn_analyze();
-		//pr_info("syntax error amount: %d", serr_amount);
-        /*
+		pr_info("syntax error amount: %d", serr_amount);
 		for(int i=0; i<str_array.amount;i++) {
+#if (defined DEBUG_APP)
 			for(int j=0; j<str_get(i)->level; j++) {
 				printf(" ");// print level
 			}
 			pr_info("%s\t:\t<%s>\t<%s> ", str_get_inst(i),
 					lex_to_str(str_get(i)->lext), syn_to_str(str_get(i)->synt));
-		}*/
-		syn_printf();
+#endif
+		}
+		if(serr_amount>0) {
+			syn_printf();
+			pr_err("Syntax errors detected, wont start semantic analyzer");
+		}
 	}
 	return 0;
 };

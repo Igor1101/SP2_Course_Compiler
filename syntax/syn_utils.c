@@ -242,3 +242,15 @@ void init_syn_analyzer(void)
 	st.square_braces_nest = 0;
 	st.symbols_after_del = 0;
 }
+
+int syn_err_amount(void)
+{
+	int err_amount=0;
+	for(int i=0; i<str_array.amount; i++) {
+		if(str_get(i)->syn_err)
+			err_amount++;
+	}
+	if(end_get_synt_err()->syn_err)
+		err_amount++;
+	return err_amount;
+}
