@@ -80,6 +80,7 @@ int process_function(int num, int level);
 int process_for_loop(int num, int level);
 int process_main(int num, int level, bool inside_block);
 int process_block(int num, int level);
+int process_declaration(int num, int level, bool param);
 int next_delimiter(int num, int level, bool param);
 int next_closing_brace(int num, int level);
 int is_delimiter_next_expected(int num, int level, bool forcenext);

@@ -52,6 +52,15 @@ int process_main(int num, int level, bool inside_block)
 		case L_DELIMITER:
 			num = is_delimiter_next_expected(num, level, true);
 			break;
+		case L_KEYWORD:
+		{
+			const static char* types[] = { "int", "float",
+			"char", "double", "long"};
+			if(is_str_in(str_get(num)->inst, types, sizeof types)) {
+				num = process_declaration(num, level, false);
+				break;
+			}
+		}
 		default:
 			pr_err("UNEXPECTED SYMBOL");
 			set_synt_err_unexp(num, S_NOTDEFINED, lex_to_syn(str_get(num)->lext));
@@ -479,3 +488,50 @@ int process_array(int num, int level)
 	return num++;
 }
 
+int process_declaration(int num, int level, bool param)
+{
+	const static char* types[] = { "int", "float",
+			"char", "double", "long"};
+	if(!is_str_in(str_get_inst(num), types, sizeof types)) {
+		set_synt_err(num, S_KEYWORD_TYPE);
+		return num+1;
+	}
+	set_synt(num, S_KEYWORD_TYPE, level);
+	num++;
+	if(str_get(num)->lext != L_IDENTIFIER) {
+		set_synt_err(num, S_ID_VARIABLE);
+		return num+1;
+	}
+	int nxt_del;
+	nxt_del = next_delimiter(num, level, param);
+	if(nxt_del < 0) {
+		pr_warn("could not find delimiter");
+		nxt_del = str_array.amount;
+	}
+	syn_t prev = S_NOTDEFINED;
+	for(; num<nxt_del; ) {
+		switch(str_get(num)->lext) {
+		case L_IDENTIFIER:
+			num = process_ident(num, level+2, true, true);
+			prev = S_ID_VARIABLE;
+			break;
+		case L_BRACE_CLOSING:
+			return num;
+		case L_DELIMITER:
+			if(prev == S_DEL) {
+				set_synt_err_unexp(num, S_ID_VARIABLE, S_DEL);
+				num++;
+				break;
+			} else {
+				set_synt(num, S_DEL, level+1);
+				prev = S_DEL;
+				num++;
+				break;
+			}
+		default:
+			set_synt_err(num, S_DEL);
+			return ++num;
+		}
+	}
+	return num;
+}
