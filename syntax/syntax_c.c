@@ -287,7 +287,10 @@ int process_expression(int num, int level, bool inside_expr, bool inside_array)
 	syn_t prev = S_NOTDEFINED;
 	syn_t expect = S_NOTDEFINED;
 	bool unary_been = false;
-	int numlevel = level + 2;
+	int numlevel = level + 4;
+	int arithlevel1 = level + 3;
+	int arithlevel2 = level + 2;
+	int arithlevel0 = level + 1;
 	int arithlevel = level + 1;
 	int next_del = next_delimiter(num, level, true);
 	if(next_del<0) {
@@ -344,10 +347,19 @@ int process_expression(int num, int level, bool inside_expr, bool inside_array)
 			const char* unary[] = { "++", "--"};
 			const char* sign[] = { "-", "+", "!"};
 			const char* binary[] = {
-					"-", "+", "*", "/",
+					"-", "+", "*", "/", "%",
 					"==", ">","<", "!=", ">=", "<=",
 					"&&", "||",
 					"&", "|", "^", "~", "<<", ">>"
+			};
+			const char* bin_prio0[] = {
+					 "*", "/", "%"
+			};
+			const char* bin_prio1[] = {
+					 "+", "-"
+			};
+			const char* bin_prio2[] = {
+					 "<<", ">>"
 			};
 			if(is_str_in(str_get(num)->inst, unary, sizeof unary)) {
 				pr_debug("unary op detected num=%d", num);
@@ -400,7 +412,14 @@ int process_expression(int num, int level, bool inside_expr, bool inside_array)
 					expect = S_ID_VARIABLE;
 					prev = S_OPERAT_BINARY;
 					unary_been = true;
-					set_synt(num, S_OPERAT_BINARY, arithlevel);
+					if(is_str_in(str_get(num)->inst, bin_prio0, sizeof bin_prio0))
+						set_synt(num, S_OPERAT_BINARY, arithlevel0);
+					else if(is_str_in(str_get(num)->inst, bin_prio1, sizeof bin_prio1))
+						set_synt(num, S_OPERAT_BINARY, arithlevel1);
+					else if(is_str_in(str_get(num)->inst, bin_prio2, sizeof bin_prio2))
+						set_synt(num, S_OPERAT_BINARY, arithlevel2);
+					else
+						set_synt(num, S_OPERAT_BINARY, arithlevel);
 					num++;
 					break;
 				} else {
