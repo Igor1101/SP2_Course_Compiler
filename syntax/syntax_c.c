@@ -372,7 +372,8 @@ int process_expression(int num, int level, bool inside_expr, bool inside_array)
 						str_get(num+1)->lext == L_CONSTANT_BIN ||
 						str_get(num+1)->lext == L_CONSTANT_HEX
 						)&&
-						str_get(num-1)->lext != L_IDENTIFIER) {
+						str_get(num-1)->lext != L_IDENTIFIER  &&
+						str_get(num-1)->lext != L_CONSTANT) {
 					prev = S_OPERAT_UNARY;
 					expect = S_ID_VARIABLE;
 					unary_been = true;
