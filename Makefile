@@ -6,8 +6,9 @@ LANGUAGE_ ?=c
 APP_PATH = $(realpath ./)
 LAB1_PATH = $(APP_PATH)/lexems
 SYN_PATH = $(APP_PATH)/syntax
+SEM_PATH = $(APP_PATH)/semantic
 # main src file
-APP_SRC += main_lab4.c
+APP_SRC += main_lab6.c
 # app sources
 APP_SRC += ch_utf8.c
 APP_SRC += utf8.c
@@ -18,6 +19,8 @@ APP_SRC += lex_$(LANGUAGE_).c
 APP_SRC += lex_utils.c
 APP_SRC += syntax_$(LANGUAGE_).c
 APP_SRC += syn_utils.c
+APP_SRC += sem_$(LANGUAGE_).c
+APP_SRC += tables_sem.c
 # app includes
 INCFLAGS +=-I$(realpath $(APP_PATH))
 # rtos includes
@@ -30,7 +33,7 @@ COBJS = $(patsubst %.c,%.o,$(APP_SRC))
 # deps rules
 .PHONY: all clean
 # Path to directories containing application source 
-vpath %.c $(APP_PATH):$(LAB1_PATH):$(SYN_PATH):trees
+vpath %.c $(APP_PATH):$(LAB1_PATH):$(SYN_PATH):$(SEM_PATH):trees
 
 
 all: $(APP_SRC) $(COBJS) $(TARGET).elf 
