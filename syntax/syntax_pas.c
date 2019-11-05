@@ -512,7 +512,7 @@ int process_array(int num, int level)
  * to [down to] < final_value > do
    S;
  */
-int process_for_loop(int num, int level)
+static int process_for_loop(int num, int level)
 {
 	/* for */
 	if(strcasecmp(str_get(num)->inst, "for")) {
@@ -567,7 +567,7 @@ int process_for_loop(int num, int level)
 }
 
  /* begin <code...;.;.;> end; */
-int process_block(int num, int level)
+static int process_block(int num, int level)
 {
 	if(strcasecmp(str_get_inst(num), "begin")) {
 		/* not block */

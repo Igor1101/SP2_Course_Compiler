@@ -15,6 +15,15 @@
 
 syn_state_t st;
 int err_amount = 0;
+
+static int process_ident(int num, int level, bool maybeparam, bool inside_expr);
+static int process_expression(int num, int level, bool inside_expr, bool inside_array);
+static int process_function(int num, int level);
+static int process_for_loop(int num, int level);
+static int process_main(int num, int level, bool inside_block);
+static int process_block(int num, int level);
+static int process_declaration(int num, int level, bool param);
+static int process_array(int num, int level);
 int syn_analyze(void)
 {
 	init_syn_analyzer();
@@ -22,7 +31,7 @@ int syn_analyze(void)
 	return syn_err_amount();
 }
 
-int process_main(int num, int level, bool inside_block)
+static int process_main(int num, int level, bool inside_block)
 {
 	for(num=0; num<str_array.amount; ) {
 		if(str_get(num) == NULL) {
@@ -145,7 +154,7 @@ void reset(void)
 	st.__op_p = 0;
 }
 
-int process_ident(int num, int level, bool maybeparam, bool inside_expr)
+static int process_ident(int num, int level, bool maybeparam, bool inside_expr)
 {
 	if(num < (str_array.amount-1)) {
 
@@ -202,7 +211,7 @@ int process_ident(int num, int level, bool maybeparam, bool inside_expr)
 	return ++num;
 }
 
-int process_function(int num, int level)
+static int process_function(int num, int level)
 {
 	bool has_del = false;
 	int level_del = level+3;
@@ -282,7 +291,7 @@ int process_function(int num, int level)
 	return str_array.amount;
 }
 
-int process_expression(int num, int level, bool inside_expr, bool inside_array)
+static int process_expression(int num, int level, bool inside_expr, bool inside_array)
 {
 	syn_t prev = S_NOTDEFINED;
 	syn_t expect = S_NOTDEFINED;
@@ -484,7 +493,7 @@ int next_closing_brace(int num, int level)
 	return -1;
 }
 
-int process_array(int num, int level)
+static int process_array(int num, int level)
 {
 	if(
 			str_get(num)->lext == L_IDENTIFIER &&
@@ -508,7 +517,7 @@ int process_array(int num, int level)
 	return num++;
 }
 
-int process_declaration(int num, int level, bool param)
+static int process_declaration(int num, int level, bool param)
 {
 	const static char* types[] = { "int", "float",
 			"char", "double", "long"};
