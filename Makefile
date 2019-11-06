@@ -21,6 +21,7 @@ APP_SRC += syntax_$(LANGUAGE_).c
 APP_SRC += syn_utils.c
 APP_SRC += sem_$(LANGUAGE_).c
 APP_SRC += tables_sem.c
+APP_SRC += sem_utils.c
 # app includes
 INCFLAGS +=-I$(realpath $(APP_PATH))
 # rtos includes

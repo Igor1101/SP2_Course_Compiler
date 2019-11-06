@@ -12,6 +12,7 @@
 #include <lexems/lex.h>
 #include <lexems/tables.h>
 #include <syntax/syntax.h>
+#include <semantic/sem.h>
 #include <string.h>
 
 void prg_exit(int r)
@@ -56,6 +57,7 @@ int main(void)
 			pr_err("Syntax errors detected, wont start semantic analyzer");
 			prg_exit(serr_amount);
 		}
+		int sem_err_amount = sem_analyze();
 	}
 	return 0;
 };
