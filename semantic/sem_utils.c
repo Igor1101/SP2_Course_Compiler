@@ -5,11 +5,33 @@
  *      Author: igor
  */
 
+#include <defs.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <lexems/tables.h>
 #include "tables_sem.h"
 #include "sem.h"
 
+void set_err(int num, char* format, ...)
+{
+	va_list argp;
+	va_start(argp, format);
+#define MAX_SERRSZ 1000
+	char* output = malloc(MAX_SERRSZ);
+	if(output == NULL) {
+		pr_err("malloc err");
+		return ;
+	}
+	vsnprintf(output, MAX_SERRSZ, format, argp);
+	str_get(num)->sem_err=true;
+	str_get(num)->sem_inst_err = str_alloc(output);
+	free(output);
+#undef MAX_SERRSZ
+	va_end(argp);
+}
 ctypes_t str_to_type(char*str)
 {
 	if(!strcmp(str, "char")) return C_CHAR_T;

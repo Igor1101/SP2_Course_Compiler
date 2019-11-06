@@ -32,12 +32,11 @@ static int process_declaration(int num)
 	/* getting type of variables */
 	ctypes_t t = str_to_type(str_get(num)->inst);
 	/* getting declared vars */
-	for(; num<next_delimiter(num, 0, false); num++) {
+	for(; num<next_delimiter(num, 0, false); ) {
 		switch(str_get(num)->synt) {
 		case S_ID_VARIABLE:
 			if(str_get(num+1)->synt == S_OPERAT_ASSIGNMENT) {
 				if(ident_add(str_get_inst(num), t, true)<0) {
-					pr_err("variable already initialized");
 				}
 				num = process_expression(num);
 			} else {
