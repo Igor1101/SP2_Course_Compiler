@@ -207,3 +207,15 @@ void sem_printf(void)
 	free(arr);
 	free(sz);
 }
+
+void sem_database_print(void)
+{
+	pr_info("database:");
+	for(int i=0; i<ident_array.amount; i++) {
+		pr_info("\t%s:\t%s,\t<%s>,\t%s", ident_get(i)->inst,
+				(ident_get(i)->init)?"initialized":"uninitialized",
+				type_to_str(ident_get(i)->type),
+				(ident_get(i)->used)?"used":"unused"
+						);
+	}
+}

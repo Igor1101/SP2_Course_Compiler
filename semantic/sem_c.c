@@ -25,6 +25,7 @@ int sem_analyze(void)
 			num++;
 		}
 	}
+	sem_database_print();
 	return sem_err_amount();
 }
 
@@ -36,7 +37,7 @@ static int process_declaration(int num)
 	for(; num<next_delimiter(num, 0, false); ) {
 		switch(str_get(num)->synt) {
 		case S_ID_VARIABLE:
-			if(ident_add(str_get_inst(num), t, true)<0) {
+			if(ident_add(str_get_inst(num), t, false)<0) {
 				set_err(num, "var %s already declared", str_get_inst(num));
 			}
 			if(str_get(num+1)->synt == S_OPERAT_ASSIGNMENT) {
