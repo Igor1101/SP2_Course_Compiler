@@ -58,6 +58,7 @@ int main(void)
 			prg_exit(serr_amount);
 		}
 		int sem_err_amount = sem_analyze();
+		sem_printf();
 	}
 	return 0;
 };

@@ -168,3 +168,42 @@ ctype_conv_t type0_to_type1_acc(ctypes_t t0, ctypes_t t1)
 	}
 	return NOTACCEPT;
 }
+
+int sem_err_amount(void)
+{
+	int err_amount=0;
+	for(int i=0; i<str_array.amount; i++) {
+		if(str_get(i)->sem_err)
+			err_amount++;
+	}
+	return err_amount;
+}
+
+void sem_printf(void)
+{
+	pr_info("sem output:");
+	char *arr = malloc(1000);
+	size_t *sz = malloc(str_array.amount*sizeof(size_t));
+	size_t sz_cur = 0;
+
+	for(int i=0; i<str_array.amount; i++) {
+		if(str_get(i)->sem_err) {
+			printf(COLOR_RED " %s" COLOR_DEF, str_get_inst(i));
+		} else {
+			printf(COLOR_GREEN " %s" COLOR_DEF, str_get_inst(i));
+		}
+		sprintf(arr, " %s" , str_get_inst(i));
+		sz[i] = strlen(arr) + sz_cur;
+		sz_cur = sz[i];
+	}
+	puts("");
+	for(int i=0; i<str_array.amount;i++) {
+		if(str_get(i)->sem_err) {
+			for(int j=0; j<sz[i]; j++)
+				putchar(' ');
+			pr_info("^ %s", str_get(i)->sem_inst_err);
+		}
+	}
+	free(arr);
+	free(sz);
+}

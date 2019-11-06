@@ -12,6 +12,7 @@
 ctypes_t str_to_type(char*str);
 /* analyzer */
 int sem_analyze(void);
+int sem_err_amount(void);
 
 
 
