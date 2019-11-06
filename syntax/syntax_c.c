@@ -541,7 +541,7 @@ static int process_declaration(int num, int level, bool param)
 	for(; num<nxt_del; ) {
 		switch(str_get(num)->lext) {
 		case L_IDENTIFIER:
-			num = process_ident(num, level+2, true, true);
+			num = process_ident(num, level+2, true, false);
 			prev = S_ID_VARIABLE;
 			break;
 		case L_BRACE_CLOSING:
