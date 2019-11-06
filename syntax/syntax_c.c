@@ -297,9 +297,9 @@ static int process_expression(int num, int level, bool inside_expr, bool inside_
 	syn_t expect = S_NOTDEFINED;
 	bool unary_been = false;
 	int numlevel = level + 4;
-	int arithlevel1 = level + 3;
-	int arithlevel2 = level + 2;
-	int arithlevel0 = level + 1;
+	int arithlevel0 = level + 3;
+	int arithlevel1 = level + 2;
+	int arithlevel2 = level + 1;
 	int arithlevel = level + 1;
 	int next_del = next_delimiter(num, level, true);
 	if(next_del<0) {
