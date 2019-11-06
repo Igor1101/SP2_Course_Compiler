@@ -499,7 +499,7 @@ static int process_array(int num, int level)
 			str_get(num)->lext == L_IDENTIFIER &&
 			!strcmp(str_get(num + 1)->inst, "[")
 			) {
-		set_synt(num, S_ID_VARIABLE, level);
+		set_synt(num, S_ID_ARRAY, level);
 		set_synt(num+1, S_BRACE_OPEN, level+1);
 		num = process_expression(num+2, level+2, true, true);
 		if(num>=str_array.amount)

@@ -36,6 +36,7 @@ typedef enum {
 	S_DEL_PARAM,
 	S_DEL,
 	S_ID_VARIABLE,
+	S_ID_ARRAY,
 	S_ID_UNDEFINED,
 	S_CHAR,
 	S_STRING,
