@@ -520,7 +520,7 @@ static int process_array(int num, int level)
 static int process_declaration(int num, int level, bool param)
 {
 	const static char* types[] = { "int", "float",
-			"char", "double", "long"};
+			"char", "double", "long", "unsigned"};
 	if(!is_str_in(str_get_inst(num), types, sizeof types)) {
 		set_synt_err(num, S_KEYWORD_TYPE);
 		return num+1;
@@ -541,6 +541,15 @@ static int process_declaration(int num, int level, bool param)
 	for(; num<nxt_del; ) {
 		switch(str_get(num)->lext) {
 		case L_IDENTIFIER:
+			if(str_get(num+1)->lext == L_OPERAT_ASSIGNMENT) {
+				if(strcmp(str_get(num+1)->inst, "=")) {
+					int nnext = num+1;
+					num = process_ident(num, level+2, false, false);
+					set_synt_err_inst(nnext, S_OPERAT_ASSIGNMENT, "=");
+					num = nnext+1;
+					break;
+				}
+			}
 			num = process_ident(num, level+2, true, false);
 			prev = S_ID_VARIABLE;
 			break;
