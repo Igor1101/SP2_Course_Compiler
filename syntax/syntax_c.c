@@ -23,7 +23,7 @@ static int process_for_loop(int num, int level);
 static int process_main(int num, int level, bool inside_block);
 static int process_block(int num, int level);
 static int process_declaration(int num, int level, bool param);
-static int process_array(int num, int level);
+static int process_array(int num, int level, bool maybeparam, bool inside_expr);
 int syn_analyze(void)
 {
 	init_syn_analyzer();
@@ -160,7 +160,7 @@ static int process_ident(int num, int level, bool maybeparam, bool inside_expr)
 
 		if(str_get(num)->lext == L_IDENTIFIER &&
 			!strcmp(str_get(num + 1)->inst, "[")) {
-			int i = process_array(num, level);
+			int i = process_array(num, level, maybeparam, inside_expr);
 			return i;
 		}
 		if(str_get(num+1)->lext == L_BRACE_OPENING &&
@@ -493,7 +493,7 @@ int next_closing_brace(int num, int level)
 	return -1;
 }
 
-static int process_array(int num, int level)
+static int process_array(int num, int level, bool maybeparam, bool inside_expr)
 {
 	if(
 			str_get(num)->lext == L_IDENTIFIER &&
@@ -506,6 +506,10 @@ static int process_array(int num, int level)
 			return num++;
 		if( !strcmp(str_get(num)->inst, "]")) {
 			set_synt(num, S_BRACE_CLOSE, level+1);
+			if(str_get(num+1)->lext == L_OPERAT_ASSIGNMENT && !inside_expr) {
+				set_synt(num+1, S_OPERAT_ASSIGNMENT, level);
+				return process_expression(num+2, level, inside_expr, false);
+			}
 			return num+1;
 		} else {
 			set_synt_err(num, S_BRACE_CLOSE);
