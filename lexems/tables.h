@@ -19,6 +19,7 @@ typedef struct {
 typedef struct {
 	char* inst;
 	char* syn_inst_exp;
+	char* sem_inst_err;
 	int level;
 	lexem_t lext;
 	syn_t synt;
@@ -26,6 +27,7 @@ typedef struct {
 	syn_t synunexp;
 	bool syn_err;
 	bool lex_err;
+	bool sem_err;
 }str_t;
 
 typedef struct {

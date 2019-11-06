@@ -92,6 +92,7 @@ void str_array_remove(void)
 		return;
 	for(int i=0; i<str_array.amount; i++) {
 		str_free(str_array.instcs[i].inst);
+		str_free(str_array.instcs[i].sem_inst_err);
 	}
 	free(str_array.instcs);
 	str_array.instcs = NULL;
