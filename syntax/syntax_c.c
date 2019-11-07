@@ -337,7 +337,8 @@ static int process_expression(int num, int level, bool inside_expr, bool inside_
 					str_get(num+1)->lext == L_CONSTANT_FLOAT||
 					str_get(num+1)->lext == L_CONSTANT_HEX||
 					str_get(num+1)->lext == L_IDENTIFIER||
-					str_get(num+1)->lext == L_OPERAT_ARITHMETIC)
+					str_get(num+1)->lext == L_OPERAT_ARITHMETIC) &&
+					(str_get(num-2)->synt != S_OPERAT_BINARY)
 					) {
 				set_synt(num, S_OPERAT_ASSIGNMENT, arithlevel);
 				num++;
