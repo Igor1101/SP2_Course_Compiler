@@ -75,6 +75,25 @@ static int process_expression(int num, bool param, bool inside_array)
 	ctypes_t main_type = C_UKNOWN;
 	for(; num<next_delimiter(num, 0, param);) {
 		switch(str_get(num)->synt) {
+		case S_CONST:
+			if(str_get(num)->lext == L_CONSTANT) {
+				if(main_type == C_UKNOWN)
+					main_type = C_INT_T;
+				num++;
+				break;
+			}
+			if(str_get(num)->lext == L_CONSTANT_FLOAT) {
+				if(main_type != C_UKNOWN) {
+					if(main_type != C_FLOAT_T && main_type != C_DOUBLE_T)
+						set_err_type(num, C_FLOAT_T, main_type);
+				} else {
+					main_type = C_DOUBLE_T;
+				}
+				num++;
+				break;
+			}
+			num++;
+			break;
 		case S_BRACE_CLOSE:
 			if(inside_array)
 				return num;
