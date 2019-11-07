@@ -10,6 +10,7 @@
 #include "tables_sem.h"
 /* sem utils */
 ctypes_t str_to_type(char*str);
+char* type_to_str(ctypes_t t);
 void sem_printf(void);
 int sem_err_amount(void);
 void sem_database_print(void);

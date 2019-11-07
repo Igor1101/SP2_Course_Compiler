@@ -94,6 +94,24 @@ ident_t* ident_get_str(char*str)
 	return NULL;
 }
 
+bool ident_set_init(char*str)
+{
+	ident_t* id = ident_get_str(str);
+	if(id == NULL)
+		return false;
+	id->init = true;
+	return true;
+}
+
+bool ident_set_used(char*str)
+{
+	ident_t* id = ident_get_str(str);
+	if(id == NULL)
+		return false;
+	id->used = true;
+	return true;
+}
+
 bool ident_present(char*str)
 {
 	if(ident_get_str(str)!=NULL) {

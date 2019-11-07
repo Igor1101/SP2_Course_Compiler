@@ -6,6 +6,7 @@
  */
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 #include <defs.h>
 #include <lexems/tables.h>
 #include "sem.h"
@@ -56,17 +57,42 @@ static int process_declaration(int num)
 
 static int process_expression(int num, bool param, bool inside_array)
 {
+	bool assign_used = false;
+	int assigned_var;
+	ctypes_t main_type = C_UKNOWN;
 	for(; num<next_delimiter(num, 0, param);) {
 		switch(str_get(num)->synt) {
 		case S_ID_VARIABLE:
 		{
-			if(!ident_present(str_get(num)->inst))
+			if(!ident_present(str_get(num)->inst)) {
 				set_err_undeclared_used(num);
-			num++;
+				num++;
+				break;
+			}
+			if(!strcmp(str_get(num+1)->inst, "=")) {
+				ident_set_init(str_get_inst(num));
+				assign_used = true;
+				assigned_var = num;
+				main_type = ident_get_str(str_get_inst(num))->type;
+				num++;
+				break;
+			}
+			if(str_get(num+1)->synt == S_OPERAT_BINARY) {
+				ident_set_used(str_get_inst(num));
+				num++;
+				break;
+			}
+			if(str_get(num+1)->synt == S_OPERAT_UNARY) {
+				ctypes_t t = ident_get_str(str_get_inst(index))->type;
+				if( t == C_FLOAT_T || t == C_DOUBLE_T) {
+					set_err(num, "for type <%s> op not acceptable", type_to_str(t));
+				}
+			}
 		}
 		break;
 		default:
 			num++;
 		}
 	}
+	return num;
 }

@@ -55,5 +55,7 @@ void ident_sort(void);
 void ident_insert(int index, char* str);
 void ident_del_max(void);
 bool ident_present(char*str);
+bool ident_set_used(char*str);
+bool ident_set_init(char*str);
 
 #endif /* LAB1_TABLESSEM_H_ */

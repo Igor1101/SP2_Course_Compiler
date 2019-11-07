@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <lexems/lex.h>
 #include <syntax/syntax.h>
+#include <semantic/tables_sem.h>
 
 typedef struct {
 	char* inst;
@@ -25,6 +26,7 @@ typedef struct {
 	syn_t synt;
 	syn_t synexp;
 	syn_t synunexp;
+	ctypes_t conv_to;
 	bool syn_err;
 	bool lex_err;
 	bool sem_err;
