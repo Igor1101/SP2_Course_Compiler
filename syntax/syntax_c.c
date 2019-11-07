@@ -554,7 +554,8 @@ static int process_declaration(int num, int level, bool param)
 					num = nnext+1;
 					break;
 				}
-			} else if(str_get(num+1)->lext != L_DELIMITER) {
+			} else if(str_get(num+1)->lext != L_DELIMITER &&
+				str_get(num+1)->lext != L_BRACE_OPENING) {
 				int nnext = num+1;
 				num = process_ident(num, level+2, false, false);
 				set_synt_err_inst(nnext, S_OPERAT_ASSIGNMENT, "=");

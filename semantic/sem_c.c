@@ -25,6 +25,7 @@ int sem_analyze(void)
 			break;
 		case S_ID_VARIABLE:
 		case S_OPERAT_UNARY:
+		case S_ID_ARRAY:
 			num = process_expression(num, false, false);
 			break;
 		default:
@@ -66,6 +67,11 @@ static int process_expression(int num, bool param, bool inside_array)
 	ctypes_t main_type = C_UKNOWN;
 	for(; num<next_delimiter(num, 0, param);) {
 		switch(str_get(num)->synt) {
+		case S_BRACE_CLOSE:
+			if(inside_array)
+				return num;
+			num++;
+			break;
 		case S_ID_VARIABLE:
 		{
 			if(!ident_present(str_get(num)->inst)) {
@@ -74,6 +80,13 @@ static int process_expression(int num, bool param, bool inside_array)
 				break;
 			}
 			ctypes_t t = ident_get_str(str_get_inst(num))->type;
+			if(inside_array) {
+				if(t == C_DOUBLE_T || t == C_FLOAT_T) {
+					set_err(num, "type <%s> inside array elem", t);
+					num++;
+					break;
+				}
+			}
 			if(main_type != C_UKNOWN) {
 				switch(type0_to_type1_acc(t, main_type)) {
 				case ACCEPT:
@@ -123,4 +136,14 @@ static int process_expression(int num, bool param, bool inside_array)
 		}
 	}
 	return num;
+}
+
+int process_array(int num, bool param)
+{
+	/* we are at the beginning */
+	num += 2;
+	/* at the expr */
+	num = process_expression(num, param, true);
+	/* at ] */
+	return num+1;
 }
