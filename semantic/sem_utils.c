@@ -39,6 +39,16 @@ void set_noerr(int num)
 	str_free(str_get(num)->sem_inst_err);
 }
 
+void set_err_already_decl(int num)
+{
+	set_err(num, "var <%s> already declared", str_get_inst(num));
+}
+
+void set_err_undeclared_used(int num)
+{
+	set_err(num, "var <%s> undeclared", str_get_inst(num));
+}
+
 ctypes_t str_to_type(char*str)
 {
 	if(!strcmp(str, "char")) return C_CHAR_T;

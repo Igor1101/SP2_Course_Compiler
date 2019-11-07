@@ -12,7 +12,7 @@
 #include "tables_sem.h"
 
 static int process_declaration(int num);
-static int process_expression(int num);
+static int process_expression(int num, bool param, bool inside_array);
 
 int sem_analyze(void)
 {
@@ -21,6 +21,7 @@ int sem_analyze(void)
 		switch(str_get(num)->synt) {
 		case S_KEYWORD_TYPE:
 			num = process_declaration(num);
+			break;
 		default:
 			num++;
 		}
@@ -38,10 +39,10 @@ static int process_declaration(int num)
 		switch(str_get(num)->synt) {
 		case S_ID_VARIABLE:
 			if(ident_add(str_get_inst(num), t, false)<0) {
-				set_err(num, "var %s already declared", str_get_inst(num));
+				set_err_already_decl(num);
 			}
 			if(str_get(num+1)->synt == S_OPERAT_ASSIGNMENT) {
-				num = process_expression(num);
+				num = process_expression(num, true, false);
 			} else {
 			}
 			num++;
@@ -50,10 +51,22 @@ static int process_declaration(int num)
 			num++;
 		}
 	}
+	return num;
 }
 
-static int process_expression(int num)
+static int process_expression(int num, bool param, bool inside_array)
 {
-	num++;
-	//switch(str_get(num)->)
+	for(; num<next_delimiter(num, 0, param);) {
+		switch(str_get(num)->synt) {
+		case S_ID_VARIABLE:
+		{
+			if(!ident_present(str_get(num)->inst))
+				set_err_undeclared_used(num);
+			num++;
+		}
+		break;
+		default:
+			num++;
+		}
+	}
 }
