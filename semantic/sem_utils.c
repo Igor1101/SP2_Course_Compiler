@@ -49,6 +49,11 @@ void set_err_undeclared_used(int num)
 	set_err(num, "var <%s> undeclared", str_get_inst(num));
 }
 
+void set_err_type(int num, ctypes_t from, ctypes_t to)
+{
+	set_err(num, "wont convert from <%s> to <%s>", type_to_str(from), type_to_str(to));
+}
+
 ctypes_t str_to_type(char*str)
 {
 	if(!strcmp(str, "char")) return C_CHAR_T;
