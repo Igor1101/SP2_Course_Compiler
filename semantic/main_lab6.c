@@ -18,6 +18,7 @@
 void prg_exit(int r)
 {
 	str_array_remove();
+	ident_array_remove();
 	exit(r);
 }
 int main(void)
