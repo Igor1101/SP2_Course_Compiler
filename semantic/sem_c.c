@@ -14,6 +14,7 @@
 
 static int process_declaration(int num);
 static int process_expression(int num, bool param, bool inside_array);
+static int process_array(int num, bool param);
 
 int sem_analyze(void)
 {
@@ -47,7 +48,7 @@ static int process_declaration(int num)
 			if(ident_add(str_get_inst(num), t, false)<0) {
 				set_err_already_decl(num);
 			}
-			if(str_get(num+1)->synt == S_OPERAT_ASSIGNMENT) {
+			if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
 				num = process_expression(num, true, false);
 			} else {
 			}
@@ -57,11 +58,7 @@ static int process_declaration(int num)
 			if(ident_add(str_get_inst(num), t, true)<0) {
 				set_err_already_decl(num);
 			}
-			if(str_get(num+1)->synt == S_OPERAT_ASSIGNMENT) {
-				num = process_expression(num, true, false);
-			} else {
-			}
-			num++;
+			num = process_array(num, false);
 			break;
 
 		default:
@@ -82,6 +79,36 @@ static int process_expression(int num, bool param, bool inside_array)
 			if(inside_array)
 				return num;
 			num++;
+			break;
+		case S_ID_ARRAY:
+			if(!ident_present(str_get(num)->inst)) {
+				set_err_undeclared_used(num);
+				num++;
+				break;
+			}
+			ctypes_t t = ident_get_str(str_get_inst(num))->type;
+			if(inside_array) {
+				if(t == C_DOUBLE_T || t == C_FLOAT_T) {
+					set_err(num, "type <%s> inside array elem", t);
+					num++;
+					break;
+				}
+			}
+			if(main_type != C_UKNOWN) {
+				switch(type0_to_type1_acc(t, main_type)) {
+				case ACCEPT:
+					break;
+				case NOTACCEPT:
+					set_err_type(num, t, main_type);
+					break;
+				case CONVERT:
+					str_get(num)->conv_to = main_type;
+					break;
+				}
+			} else {
+				main_type = t;
+			}
+			num = process_array(num, param);
 			break;
 		case S_ID_VARIABLE:
 		{
@@ -149,7 +176,7 @@ static int process_expression(int num, bool param, bool inside_array)
 	return num;
 }
 
-int process_array(int num, bool param)
+static int process_array(int num, bool param)
 {
 	/* we are at the beginning */
 	num += 2;
