@@ -53,6 +53,17 @@ static int process_declaration(int num)
 			}
 			num++;
 			break;
+		case S_ID_ARRAY:
+			if(ident_add(str_get_inst(num), t, true)<0) {
+				set_err_already_decl(num);
+			}
+			if(str_get(num+1)->synt == S_OPERAT_ASSIGNMENT) {
+				num = process_expression(num, true, false);
+			} else {
+			}
+			num++;
+			break;
+
 		default:
 			num++;
 		}

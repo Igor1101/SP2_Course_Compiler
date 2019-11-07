@@ -17,7 +17,7 @@ ident_array_t ident_array = {
 		.amount = 0
 };
 
-int ident_add(char*str, ctypes_t t, bool init)
+int ident_add(char*str, ctypes_t t, bool array)
 {
 	/* check if it is already declared */
 	if(ident_present(str))
@@ -37,7 +37,7 @@ int ident_add(char*str, ctypes_t t, bool init)
 	}
 	ident_array.instcs[strindex].inst = ident_alloc(str);
 	ident_array.instcs[strindex].type = t;
-	ident_array.instcs[strindex].init = init;
+	ident_array.instcs[strindex].array = array;
 	/* return index */
 	return strindex;
 }

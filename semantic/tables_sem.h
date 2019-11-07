@@ -31,6 +31,7 @@ typedef struct {
 	ctypes_t type;
 	bool init;
 	bool used;
+	bool array;
 }ident_t;
 
 typedef struct {
