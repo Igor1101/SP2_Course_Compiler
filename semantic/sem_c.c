@@ -77,6 +77,19 @@ static int process_expression(int num, bool param, bool inside_array)
 	ctypes_t main_type = C_UKNOWN;
 	for(; num<next_delimiter(num, 0, param);) {
 		switch(str_get(num)->synt) {
+		case S_OPERAT_BINARY:
+			if(str_get(num)->lext== L_OPERAT_RELATION) {
+				if(ident_present(str_get(num-1)->inst) &&
+						ident_present(str_get(num+1)->inst)) {
+				if(ident_get_str(str_get(num-1)->inst)->type !=
+						ident_get_str(str_get(num+1)->inst)->type
+						) {
+					set_err(num, "relation with different types");
+				}
+				}
+			}
+			num++;
+			break;
 		case S_CONST:
 			if(str_get(num)->lext == L_CONSTANT) {
 				if(main_type == C_UKNOWN)
