@@ -101,6 +101,8 @@ ctype_conv_t type0_to_type1_acc(ctypes_t t0, ctypes_t t1)
 		case C_SIGNED_T:
 		case C_INT_T:
 		case C_LONG_T:
+		case C_FLOAT_T:
+		case C_DOUBLE_T:
 			return CONVERT;
 		default:
 			return NOTACCEPT;
@@ -113,6 +115,8 @@ ctype_conv_t type0_to_type1_acc(ctypes_t t0, ctypes_t t1)
 		case C_INT_T:
 		case C_LONG_T:
 		case C_SIGNED_T:
+		case C_FLOAT_T:
+		case C_DOUBLE_T:
 			return CONVERT;
 		default:
 			return NOTACCEPT;
@@ -125,6 +129,8 @@ ctype_conv_t type0_to_type1_acc(ctypes_t t0, ctypes_t t1)
 			return ACCEPT;
 		case C_UNSIGNED_T:
 		case C_LONG_T:
+		case C_FLOAT_T:
+		case C_DOUBLE_T:
 			return CONVERT;
 		default:
 			return NOTACCEPT;
@@ -136,6 +142,8 @@ ctype_conv_t type0_to_type1_acc(ctypes_t t0, ctypes_t t1)
 		case C_INT_T:
 			return ACCEPT;
 		case C_LONG_T:
+		case C_FLOAT_T:
+		case C_DOUBLE_T:
 			return CONVERT;
 		default:
 			return NOTACCEPT;
@@ -144,6 +152,7 @@ ctype_conv_t type0_to_type1_acc(ctypes_t t0, ctypes_t t1)
 	case C_LONG_T:
 		switch(t1) {
 		case C_LONG_T:
+		case C_DOUBLE_T:
 			return ACCEPT;
 		default:
 			return NOTACCEPT;
@@ -154,6 +163,8 @@ ctype_conv_t type0_to_type1_acc(ctypes_t t0, ctypes_t t1)
 		case C_UNSIGNED_T:
 			return ACCEPT;
 		case C_INT_T:
+		case C_FLOAT_T:
+		case C_DOUBLE_T:
 		case C_LONG_T:
 			return CONVERT;
 		default:
