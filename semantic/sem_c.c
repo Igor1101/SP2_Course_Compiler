@@ -54,7 +54,6 @@ static int process_declaration(int num)
 				num = process_expression(num, true, false);
 			} else {
 			}
-			num++;
 			break;
 		case S_ID_ARRAY:
 			if(ident_add(str_get_inst(num), t, true)<0) {
