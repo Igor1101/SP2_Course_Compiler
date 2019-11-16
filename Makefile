@@ -7,8 +7,9 @@ APP_PATH = $(realpath ./)
 LAB1_PATH = $(APP_PATH)/lexems
 SYN_PATH = $(APP_PATH)/syntax
 SEM_PATH = $(APP_PATH)/semantic
+GEN_PATH = $(APP_PATH)/gen
 # main src file
-APP_SRC += main_lab6.c
+APP_SRC += main.c
 # app sources
 APP_SRC += ch_utf8.c
 APP_SRC += utf8.c
@@ -34,7 +35,7 @@ COBJS = $(patsubst %.c,%.o,$(APP_SRC))
 # deps rules
 .PHONY: all clean
 # Path to directories containing application source 
-vpath %.c $(APP_PATH):$(LAB1_PATH):$(SYN_PATH):$(SEM_PATH):trees
+vpath %.c $(APP_PATH):$(LAB1_PATH):$(SYN_PATH):$(SEM_PATH):$(GEN_PATH):trees
 
 
 all: $(APP_SRC) $(COBJS) $(TARGET).elf 
