@@ -50,6 +50,8 @@ static int process_declaration(int num)
 				num++;
 				break;
 			}
+			num++;
+			break;
 			if(str_get(num+1)->synt == S_OPERAT_ASSIGNMENT) {
 				num = process_expression(num, true, false);
 			} else {
