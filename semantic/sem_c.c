@@ -45,22 +45,23 @@ static int process_declaration(int num)
 	for(; num<next_delimiter(num, 0, false); ) {
 		switch(str_get(num)->synt) {
 		case S_ID_VARIABLE:
-			if(ident_add(str_get_inst(num), t, false)<0) {
+		{
+			int idnum = ident_add(str_get_inst(num), t, false);
+			if(idnum<0) {
 				set_err_already_decl(num);
-				num++;
-				break;
 			}
+			str_get(num)->ctype = ident_get(idnum)->type;
 			num++;
-			break;
-			if(str_get(num+1)->synt == S_OPERAT_ASSIGNMENT) {
-				num = process_expression(num, true, false);
-			} else {
+			if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
+				num = process_expression(num-1, true, false);
 			}
 			break;
+		}
 		case S_ID_ARRAY:
 			if(ident_add(str_get_inst(num), t, true)<0) {
 				set_err_already_decl(num);
 			}
+			str_get(num)->ctype = t;
 			num = process_array(num, false);
 			break;
 
@@ -93,12 +94,15 @@ static int process_expression(int num, bool param, bool inside_array)
 			break;
 		case S_CONST:
 			if(str_get(num)->lext == L_CONSTANT) {
+
+				str_get(num)->ctype = C_INT_T;
 				if(main_type == C_UKNOWN)
 					main_type = C_INT_T;
 				num++;
 				break;
 			}
 			if(str_get(num)->lext == L_CONSTANT_FLOAT) {
+				str_get(num)->ctype = C_FLOAT_T;
 				if(main_type != C_UKNOWN) {
 					if(main_type != C_FLOAT_T && main_type != C_DOUBLE_T)
 						set_err_type(num, C_FLOAT_T, main_type);
@@ -121,6 +125,7 @@ static int process_expression(int num, bool param, bool inside_array)
 				num++;
 				break;
 			}
+			str_get(num)->ctype = ident_get_str(str_get_inst(num))->type;
 			ctypes_t t = ident_get_str(str_get_inst(num))->type;
 			if(inside_array) {
 				if(t == C_DOUBLE_T || t == C_FLOAT_T) {
@@ -152,6 +157,7 @@ static int process_expression(int num, bool param, bool inside_array)
 				num++;
 				break;
 			}
+			str_get(num)->ctype = ident_get_str(str_get_inst(num))->type;
 			ctypes_t t = ident_get_str(str_get_inst(num))->type;
 			if(inside_array) {
 				if(t == C_DOUBLE_T || t == C_FLOAT_T) {

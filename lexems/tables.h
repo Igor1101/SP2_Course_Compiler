@@ -27,6 +27,7 @@ typedef struct {
 	syn_t synexp;
 	syn_t synunexp;
 	ctypes_t conv_to;
+	ctypes_t ctype;
 	bool syn_err;
 	bool lex_err;
 	bool sem_err;
