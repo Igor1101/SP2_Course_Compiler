@@ -13,6 +13,8 @@
 
 typedef enum {
 	NOP,
+	INC,
+	DEC,
 	CONV,
 	MOV,
 	PUSH,
@@ -31,6 +33,7 @@ typedef enum {
 	SIGN,
 	JMP,
 	CALL,
+	RET,
 	JZ
 }op_t;
 typedef enum {
@@ -52,10 +55,18 @@ typedef struct {
 }inst_t;
 
 typedef struct {
-	inst_t inst[];
+	inst_t* inst;
 	int amount;
 }code_t;
 extern code_t pre_code;
 
+/* utils */
+int add_bin(op_t op, int num0, char *num0_reg, int num1, char* num1_reg);
+int add_un(op_t op, int num0, char *num0_reg);
+int add_noarg(op_t op);
+char* op_to_str(op_t op);
+void prelim_print_debug(void);
+/* lan specific */
+int preliminary_gen(void);
 
 #endif /* GEN_PRELIM_H_ */

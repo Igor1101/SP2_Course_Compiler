@@ -14,6 +14,7 @@
 #include <syntax/syntax.h>
 #include <semantic/sem.h>
 #include <string.h>
+#include <gen/prelim.h>
 
 void prg_exit(int r)
 {
@@ -67,6 +68,8 @@ int main(void)
 					type_to_str(str_get(i)->ctype));
 #endif
 		}
+		preliminary_gen();
+		prelim_print_debug();
 	}
 	return 0;
 };
