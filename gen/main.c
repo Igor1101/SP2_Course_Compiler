@@ -61,9 +61,10 @@ int main(void)
 			for(int j=0; j<str_get(i)->level; j++) {
 				printf(" ");// print level
 			}
-			pr_info("%s\t:\t<%s>\t<%s> \t conv <%s>", str_get_inst(i),
+			pr_info("%s\t:\t<%s>\t<%s> \t conv <%s>\t type <%s>", str_get_inst(i),
 					lex_to_str(str_get(i)->lext), syn_to_str(str_get(i)->synt),
-					type_to_str(str_get(i)->conv_to));
+					type_to_str(str_get(i)->conv_to),
+					type_to_str(str_get(i)->ctype));
 #endif
 		}
 	}
