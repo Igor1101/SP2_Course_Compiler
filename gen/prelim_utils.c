@@ -186,3 +186,76 @@ void prelim_print_debug(void)
 	}
 }
 
+struct regs_vm_t {
+	bool reg_res[REGS_AMOUNT];
+}regs_vm;
+
+int reserve_reg(void)
+{
+	for(int i=0; i<REGS_AMOUNT; i++) {
+		if(!regs_vm.reg_res[i]) {
+			regs_vm.reg_res[i] = true;
+			return i;
+		}
+	}
+	return -1;
+}
+
+void free_reg(int r)
+{
+	 if(r>=REGS_AMOUNT) {
+		 pr_err("free reg out of region");
+		 return;
+	 }
+	 regs_vm.reg_res[r] = false;
+}
+
+char* reg_to_str(int r)
+{
+	switch(r) {
+	case 0:
+		return "r8";
+	case 1:
+		return "r9";
+	case 2:
+		return "r10";
+	case 3:
+		return "r11";
+	case 4:
+		return "r12";
+	case 5:
+		return "r13";
+	case 6:
+		return "r14";
+	case 7:
+		return "r15";
+	case 8:
+		return "rax";
+	case 9:
+		return "rbx";
+	case 10:
+		return "rcx";
+	case 11:
+		return "rdx";
+	case 12:
+		return "rbp";
+	case 13:
+		return "rdx";
+	}
+}
+
+void free_ops(void)
+{
+	for(int i=0; i<pre_code.amount; i++) {
+		if(pre_code.inst[i].argc>=1)
+			free(pre_code.inst[i].arg0.inst);
+		if(pre_code.inst[i].argc>=2)
+			free(pre_code.inst[i].arg1.inst);
+	}
+	free(pre_code.inst);
+}
+
+void init_prelim(void)
+{
+	free_ops();
+}

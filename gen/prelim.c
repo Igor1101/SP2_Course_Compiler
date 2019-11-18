@@ -13,7 +13,7 @@
 code_t pre_code = {
 		.amount = 0
 };
-static int process_expression(int num);
+static int process_expression(int num, bool param);
 
 int preliminary_gen(void)
 {
@@ -22,7 +22,7 @@ int preliminary_gen(void)
 		case S_OPERAT_ASSIGNMENT:
 		{
 			pr_debug("assignment detected");
-			num = process_expression(num-1);
+			num = process_expression(num-1, false);
 			break;
 		}
 		case S_ID_ARRAY:
@@ -33,7 +33,7 @@ int preliminary_gen(void)
 		case S_OPERAT_UNARY:
 		{
 			pr_debug("expr detected");
-			num = process_expression(num);
+			num = process_expression(num, false);
 			break;
 		}
 		default:
@@ -43,10 +43,40 @@ int preliminary_gen(void)
 	return 0;
 }
 
-static int process_expression(int num)
+struct var_node{
+	int varnum;
+	bool in_reg;
+	int reg;
+	struct var_node* next;
+};
+static int process_expression(int num, bool param)
 {
+	struct var_node* var0 = calloc(1, sizeof(struct var_node));
+	struct var_node* prev = var0;
+	void free_vars(void)
+	{
+		struct var_node*i = var0;
+		while(i->next != NULL) {
+			struct var_node*pr = i;
+			i = i->next;
+			free(pr);
+		}
+		free(i);
+	}
+	int savenum = num;
+	/* get all vars */
+	for(; num<next_delimiter(num, 0, param);num++) {
+		if(str_get(num)->synt == S_ID_VARIABLE) {
+			prev->varnum = num;
+			prev->next = calloc(1, sizeof (struct var_node));
+			prev = prev->next;
+			prev->next = NULL;
+			prev->varnum = -1;
+		}
+	}
+	num = savenum;
 	/* unary op first ++<var> (changeable) */
-	for(;num<next_delimiter(num, 0, false);) {
+	for(;num<next_delimiter(num, 0, param);) {
 		switch(str_get(num)->synt) {
 		case S_OPERAT_UNARY:
 		{
@@ -64,6 +94,28 @@ static int process_expression(int num)
 			num++;
 		}
 	}
+	num = savenum;
+	/* unary op  (unchangeable) */
+	for(;num<next_delimiter(num, 0, false);) {
+		switch(str_get(num)->synt) {
+		case S_OPERAT_UNARY:
+		{
+			int var = num+1;
+			if(str_get(var)->lext == L_IDENTIFIER) {
+					/*ignore + */
+				if(!strcmp(str_get(num)->inst, "-")) {
+					int reg = reserve_reg();
+					add_bin(SIGN, reg, reg_to_str(reg), num, NULL);
+				}
+			}
+			num++;
+			break;
+		}
+		default:
+			num++;
+		}
+	}
+	free_vars();
 	return num;
 }
 

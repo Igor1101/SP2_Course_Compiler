@@ -20,6 +20,7 @@ void prg_exit(int r)
 {
 	str_array_remove();
 	ident_array_remove();
+	free_ops();
 	exit(r);
 }
 int main(void)
@@ -68,6 +69,7 @@ int main(void)
 					type_to_str(str_get(i)->ctype));
 #endif
 		}
+		init_prelim();
 		preliminary_gen();
 		prelim_print_debug();
 	}

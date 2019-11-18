@@ -11,6 +11,7 @@
 #include <defs.h>
 #include <semantic/tables_sem.h>
 
+#define REGS_AMOUNT 8
 typedef enum {
 	NOP,
 	INC,
@@ -66,6 +67,11 @@ int add_un(op_t op, int num0, char *num0_reg);
 int add_noarg(op_t op);
 char* op_to_str(op_t op);
 void prelim_print_debug(void);
+int reserve_reg(void);
+void free_reg(int r);
+char* reg_to_str(int r);
+void free_ops(void);
+void init_prelim(void);
 /* lan specific */
 int preliminary_gen(void);
 
