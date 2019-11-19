@@ -248,11 +248,12 @@ void free_ops(void)
 {
 	for(int i=0; i<pre_code.amount; i++) {
 		if(pre_code.inst[i].argc>=1)
-			free(pre_code.inst[i].arg0.inst);
+			str_free((void**)&pre_code.inst[i].arg0.inst);
 		if(pre_code.inst[i].argc>=2)
-			free(pre_code.inst[i].arg1.inst);
+			str_free((void**)&pre_code.inst[i].arg1.inst);
 	}
-	free(pre_code.inst);
+	str_free((void**)&pre_code.inst);
+	pre_code.amount = 0;
 }
 
 void init_prelim(void)

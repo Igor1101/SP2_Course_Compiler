@@ -36,7 +36,7 @@ void set_err(int num, char* format, ...)
 void set_noerr(int num)
 {
 	str_get(num)->sem_err=false;
-	str_free(str_get(num)->sem_inst_err);
+	str_free((void**)&str_get(num)->sem_inst_err);
 }
 
 void set_err_already_decl(int num)

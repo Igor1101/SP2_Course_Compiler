@@ -54,12 +54,12 @@ char* str_alloc(char* str)
 	return alloc;
 }
 
-void str_free(char*str)
+void str_free(void**str)
 {
-	if(str == NULL)
+	if(*str == NULL)
 		return;
-	free(str);
-	str = NULL;
+	free(*str);
+	*str = NULL;
 }
 
 char* str_get_inst(int index)
@@ -91,12 +91,11 @@ void str_array_remove(void)
 	if(str_array.instcs == NULL)
 		return;
 	for(int i=0; i<str_array.amount; i++) {
-		str_free(str_array.instcs[i].inst);
+		str_free((void**)&str_array.instcs[i].inst);
 		if(str_array.instcs[i].sem_err)
-			str_free(str_array.instcs[i].sem_inst_err);
+			str_free((void**)&str_array.instcs[i].sem_inst_err);
 	}
-	free(str_array.instcs);
-	str_array.instcs = NULL;
+	str_free((void**)&str_array.instcs);
 	str_array.amount = 0;
 }
 
@@ -210,7 +209,7 @@ void str_modify(int index, char* new)
 		return;
 	if(str_array.amount <= index)
 		return;
-	str_free(str_get_inst(index));
+	str_free((void**)&str_get(index)->inst);
 	str_get(index)->inst = str_alloc(new);
 }
 
