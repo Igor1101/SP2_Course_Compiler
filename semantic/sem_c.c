@@ -196,8 +196,14 @@ static int process_expression(int num, bool param, bool inside_array)
 				num++;
 				break;
 			}
-			if(str_get(num+1)->synt == S_OPERAT_UNARY ||
-					str_get(num-1)->synt == S_OPERAT_UNARY) {
+			if((str_get(num+1)->synt == S_OPERAT_UNARY &&
+					(!strcmp(str_get(num+1)->inst, "--")||
+					!strcmp(str_get(num+1)->inst, "++"))
+					)||
+					(str_get(num-1)->synt == S_OPERAT_UNARY &&
+					(!strcmp(str_get(num-1)->inst, "--")||
+					!strcmp(str_get(num-1)->inst, "++")))
+							) {
 				ctypes_t t = ident_get_str(str_get_inst(num))->type;
 				if( t == C_FLOAT_T || t == C_DOUBLE_T) {
 					set_err(num, "for type <%s> op not acceptable", type_to_str(t));
