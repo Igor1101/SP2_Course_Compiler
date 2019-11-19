@@ -11,7 +11,8 @@
 #include "prelim.h"
 
 code_t pre_code = {
-		.amount = 0
+		.amount = 0,
+		.inst = NULL
 };
 static int process_expression(int num, bool param);
 
@@ -63,17 +64,34 @@ static int process_expression(int num, bool param)
 		}
 		free(i);
 	}
-	int savenum = num;
-	/* get all vars */
-	for(; num<next_delimiter(num, 0, param);num++) {
-		if(str_get(num)->synt == S_ID_VARIABLE) {
-			prev->varnum = num;
-			prev->next = calloc(1, sizeof (struct var_node));
-			prev = prev->next;
-			prev->next = NULL;
-			prev->varnum = -1;
+	int set_var_reg(int reg, int varnum)
+	{
+		struct var_node*i = var0;
+		do {
+			if(i->varnum == varnum && i->reg == -1) {
+				i->reg = reg;
+				return 0;
+			}
+			i = i->next;
+		} while(i != NULL);
+		return -1;
+	}
+	void get_vars(void)
+	{
+		for(; num<next_delimiter(num, 0, param);num++) {
+			if(str_get(num)->synt == S_ID_VARIABLE) {
+				prev->varnum = num;
+				prev->next = calloc(1, sizeof (struct var_node));
+				prev = prev->next;
+				prev->next = NULL;
+				prev->varnum = -1;
+				prev->reg = -1;
+			}
 		}
 	}
+	int savenum = num;
+	/* get all vars */
+	get_vars();
 	num = savenum;
 	/* unary op first ++<var> (changeable) */
 	for(;num<next_delimiter(num, 0, param);) {
@@ -105,7 +123,8 @@ static int process_expression(int num, bool param)
 					/*ignore + */
 				if(!strcmp(str_get(num)->inst, "-")) {
 					int reg = reserve_reg();
-					add_bin(SIGN, reg, reg_to_str(reg), num, NULL);
+					add_bin(SIGN, reg, reg_to_str(reg), var, NULL);
+					set_var_reg(reg, var);
 				}
 			}
 			num++;
