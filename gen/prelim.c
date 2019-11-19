@@ -52,6 +52,7 @@ struct var_node{
 };
 static int process_expression(int num, bool param)
 {
+	int savenum = num;
 	struct var_node* var0 = calloc(1, sizeof(struct var_node));
 	struct var_node* prev = var0;
 	void free_vars(void)
@@ -78,7 +79,7 @@ static int process_expression(int num, bool param)
 	}
 	void get_vars(void)
 	{
-		for(; num<next_delimiter(num, 0, param);num++) {
+		for(num=savenum; num<next_delimiter(num, 0, param);num++) {
 			if(str_get(num)->synt == S_ID_VARIABLE) {
 				prev->varnum = num;
 				prev->next = calloc(1, sizeof (struct var_node));
@@ -89,12 +90,10 @@ static int process_expression(int num, bool param)
 			}
 		}
 	}
-	int savenum = num;
 	/* get all vars */
 	get_vars();
-	num = savenum;
 	/* unary op first ++<var> (changeable) */
-	for(;num<next_delimiter(num, 0, param);) {
+	for(num=savenum;num<next_delimiter(num, 0, param);) {
 		switch(str_get(num)->synt) {
 		case S_OPERAT_UNARY:
 		{
@@ -112,9 +111,8 @@ static int process_expression(int num, bool param)
 			num++;
 		}
 	}
-	num = savenum;
 	/* unary op  (unchangeable) */
-	for(;num<next_delimiter(num, 0, false);) {
+	for(num=savenum;num<next_delimiter(num, 0, false);) {
 		switch(str_get(num)->synt) {
 		case S_OPERAT_UNARY:
 		{
