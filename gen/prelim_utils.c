@@ -242,6 +242,7 @@ char* reg_to_str(int r)
 	case 13:
 		return "rdx";
 	}
+	return "invalid reg";
 }
 
 void free_ops(void)

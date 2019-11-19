@@ -53,6 +53,7 @@ struct var_node{
 static int process_expression(int num, bool param)
 {
 	int savenum = num;
+	int rvalue_reg = -1;
 	struct var_node* var0 = calloc(1, sizeof(struct var_node));
 	struct var_node* prev = var0;
 	void free_vars(void)
@@ -121,6 +122,7 @@ static int process_expression(int num, bool param)
 					/*ignore + */
 				if(!strcmp(str_get(num)->inst, "-")) {
 					int reg = reserve_reg();
+					rvalue_reg = reg;
 					add_bin(SIGN, reg, reg_to_str(reg), var, NULL);
 					set_var_reg(reg, var);
 				}
@@ -130,6 +132,13 @@ static int process_expression(int num, bool param)
 		}
 		default:
 			num++;
+		}
+	}
+	/* assignment op */
+	for(num=savenum;num<next_delimiter(num, 0, false);num++) {
+		if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
+			int result = num - 1;
+			add_bin(MOV, result, NULL, rvalue_reg, reg_to_str(rvalue_reg));
 		}
 	}
 	free_vars();
