@@ -8,6 +8,7 @@
 #include <defs.h>
 #include <lexems/tables.h>
 #include <semantic/tables_sem.h>
+#include <string.h>
 #include "prelim.h"
 
 code_t pre_code = {

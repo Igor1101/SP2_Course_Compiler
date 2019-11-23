@@ -185,13 +185,13 @@ void str_sort(void)
 
 void key_set(char* str)
 {
-	str_free(key.inst);
+	str_free((void**)&key.inst);
 	key.inst = str_alloc(str);
 }
 
 void str_del(int index)
 {
-	str_free(str_get_inst(index));
+	str_free((void**)&str_get(index)->inst);
 	if(str_array.amount == 0)
 		return;
 	if(str_array.amount <= index)
