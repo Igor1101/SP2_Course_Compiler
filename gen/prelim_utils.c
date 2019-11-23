@@ -10,9 +10,9 @@
 #include <lexems/tables.h>
 #include "prelim.h"
 
-static int _add(op_t op, int argc, arg_t* a0, arg_t* a1);
+static int _add(op_t op, int argc, var_t* a0, var_t* a1);
 
-static int _add(op_t op, int argc, arg_t* a0, arg_t* a1)
+static int _add(op_t op, int argc, var_t* a0, var_t* a1)
 {
 	int strindex = pre_code.amount;
 	if(pre_code.inst == NULL) {
@@ -39,8 +39,8 @@ static int _add(op_t op, int argc, arg_t* a0, arg_t* a1)
 
 int add_bin(op_t op, int num0, char *num0_reg, int num1, char* num1_reg)
 {
-	arg_t a0 , a1;
-	_argt_t t0, t1;
+	var_t a0 , a1;
+	mem_t t0, t1;
 	if(num0_reg == NULL) {
 		switch(str_get(num0)->synt) {
 		case S_CONST:
@@ -83,15 +83,15 @@ int add_bin(op_t op, int num0, char *num0_reg, int num1, char* num1_reg)
 		t1 = REGISTER;
 	a0.type = t0;
 	a1.type = t1;
-	a0.inst = (t0 == REGISTER)?str_alloc(num0_reg):str_alloc(str_get_inst(num0));
-	a1.inst = (t1 == REGISTER)?str_alloc(num1_reg):str_alloc(str_get_inst(num1));
+	//a0.inst = (t0 == REGISTER)?str_alloc(num0_reg):str_alloc(str_get_inst(num0));
+	//a1.inst = (t1 == REGISTER)?str_alloc(num1_reg):str_alloc(str_get_inst(num1));
 	return _add(op, 2, &a0, &a1);
 }
 
 int add_un(op_t op, int num0, char *num0_reg)
 {
-	arg_t a0;
-	_argt_t t0;
+	var_t a0;
+	mem_t t0;
 	if(num0_reg == NULL) {
 		switch(str_get(num0)->synt) {
 		case S_CONST:
@@ -113,7 +113,7 @@ int add_un(op_t op, int num0, char *num0_reg)
 	} else
 		t0 = REGISTER;
 	a0.type = t0;
-	a0.inst = (t0 == REGISTER)?str_alloc(num0_reg):str_alloc(str_get_inst(num0));
+	//a0.inst = (t0 == REGISTER)?str_alloc(num0_reg):str_alloc(str_get_inst(num0));
 	return _add(op, 1, &a0, NULL);
 }
 
@@ -179,10 +179,10 @@ void prelim_print_debug(void)
 	pr_info("Prelim output:");
 	for(int i=0; i<pre_code.amount; i++) {
 		inst_t* inst = &pre_code.inst[i];
-		pr_info("<%s\t%s, %s>", op_to_str(inst->opcode),
-				(inst->argc>0)?inst->arg0.inst:"",
-						(inst->argc>1)?inst->arg1.inst:""
-		);
+		//pr_info("<%s\t%s, %s>", op_to_str(inst->opcode),
+		//		(inst->argc>0)?inst->arg0.inst:"",
+		//				(inst->argc>1)?inst->arg1.inst:""
+		//);
 	}
 }
 
@@ -248,10 +248,10 @@ char* reg_to_str(int r)
 void free_ops(void)
 {
 	for(int i=0; i<pre_code.amount; i++) {
-		if(pre_code.inst[i].argc>=1)
-			str_free((void**)&pre_code.inst[i].arg0.inst);
-		if(pre_code.inst[i].argc>=2)
-			str_free((void**)&pre_code.inst[i].arg1.inst);
+		//if(pre_code.inst[i].argc>=1)
+		//	str_free((void**)&pre_code.inst[i].arg0.inst);
+		//if(pre_code.inst[i].argc>=2)
+		//	str_free((void**)&pre_code.inst[i].arg1.inst);
 	}
 	str_free((void**)&pre_code.inst);
 	pre_code.amount = 0;
@@ -260,4 +260,24 @@ void free_ops(void)
 void init_prelim(void)
 {
 	free_ops();
+}
+
+int var_get(int num, mem_t mem, var_t* var)
+{
+	if(var == NULL) {
+		pr_err("str_get_var NULL pointer");
+		return -1;
+	}
+	var->memtype = mem;
+	var->num = num;
+	switch(mem) {
+	case MEMORY_LOC:
+	{
+		var->conv = str_get(num)->conv_to;
+		var->type = str_get(num)->ctype;
+		var->arrayel = str_get(num)->array;
+	}
+	break;
+	}
+	return 0;
 }

@@ -54,6 +54,7 @@ static int process_expression(int num, bool param)
 {
 	int savenum = num;
 	int rvalue_reg = -1;
+	int rvalue_num = -1;
 	struct var_node* var0 = calloc(1, sizeof(struct var_node));
 	struct var_node* prev = var0;
 	void free_vars(void)

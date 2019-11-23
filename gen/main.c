@@ -58,17 +58,20 @@ int main(void)
 			pr_err("Semantic errors detected, wont start code gen");
 			prg_exit(sem_err_amount);
 		}
-		for(int i=0; i<str_array.amount;i++) {
 #if (defined DEBUG_APP)
+		pr_debug("Code analyzed result:");
+		for(int i=0; i<str_array.amount;i++) {
 			for(int j=0; j<str_get(i)->level; j++) {
 				printf(" ");// print level
 			}
-			pr_info("%s\t:\t<%s>\t<%s> \t conv <%s>\t type <%s>", str_get_inst(i),
+			pr_info("%s\t:\t<%s>\t<%s> \t conv <%s>\t type <%s> %s", str_get_inst(i),
 					lex_to_str(str_get(i)->lext), syn_to_str(str_get(i)->synt),
 					type_to_str(str_get(i)->conv_to),
-					type_to_str(str_get(i)->ctype));
-#endif
+					type_to_str(str_get(i)->ctype),
+					(str_get(i)->array)?" is array":""
+					);
 		}
+#endif
 		init_prelim();
 		preliminary_gen();
 		prelim_print_debug();

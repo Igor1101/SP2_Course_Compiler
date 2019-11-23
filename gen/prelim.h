@@ -40,18 +40,23 @@ typedef enum {
 typedef enum {
 	REGISTER,
 	MEMORY_LOC,
+	STACK_INST,
 	CONSTANT
-}_argt_t;
+}mem_t;
 
 typedef struct {
-	_argt_t type;
-	ctypes_t ctype;
-	char*inst;
-}arg_t;
+	int num;
+	ctypes_t type;
+	ctypes_t conv;
+	mem_t memtype;
+	bool pointer;
+	bool arrayel;
+} var_t;
+
 typedef struct {
 	op_t opcode;
-	arg_t arg0;
-	arg_t arg1;
+	var_t arg0;
+	var_t arg1;
 	int argc;
 }inst_t;
 
@@ -59,9 +64,12 @@ typedef struct {
 	inst_t* inst;
 	int amount;
 }code_t;
+
+
 extern code_t pre_code;
 
 /* utils */
+int var_get(int num, mem_t mem, var_t* var);
 int add_bin(op_t op, int num0, char *num0_reg, int num1, char* num1_reg);
 int add_un(op_t op, int num0, char *num0_reg);
 int add_noarg(op_t op);
