@@ -101,10 +101,16 @@ static int process_expression(int num, bool param)
 		{
 			int var = num+1;
 			if(str_get(var)->lext == L_IDENTIFIER) {
-				if(!strcmp(str_get(num)->inst, "++"))
-					add_un(INC, var, NULL);
-				if(!strcmp(str_get(num)->inst, "--"))
-					add_un(DEC, var, NULL);
+				if(!strcmp(str_get(num)->inst, "++")) {
+					var_t v;
+					var_get(var, MEMORY_LOC, &v);
+					add_un(INC, &v);
+				}
+				if(!strcmp(str_get(num)->inst, "--")) {
+					var_t v;
+					var_get(var, MEMORY_LOC, &v);
+					add_un(DEC, &v);
+				}
 			}
 			num++;
 			break;
@@ -122,9 +128,12 @@ static int process_expression(int num, bool param)
 			if(str_get(var)->lext == L_IDENTIFIER) {
 					/*ignore + */
 				if(!strcmp(str_get(num)->inst, "-")) {
-					int reg = reserve_reg();
+					int reg = reserve_reg(str_get(var)->ctype);
 					rvalue_reg = reg;
-					add_bin(SIGN, reg, reg_to_str(reg), var, NULL);
+					var_t from, to;
+					var_get(var, MEMORY_LOC, &from);
+					var_get(reg, REGISTER, &to);
+					add_bin(SIGN, &to, &from);
 					set_var_reg(reg, var);
 				}
 			}
@@ -139,7 +148,10 @@ static int process_expression(int num, bool param)
 	for(num=savenum;num<next_delimiter(num, 0, false);num++) {
 		if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
 			int result = num - 1;
-			add_bin(MOV, result, NULL, rvalue_reg, reg_to_str(rvalue_reg));
+			var_t from, to;
+			var_get(result, MEMORY_LOC, &to);
+			var_get(rvalue_reg, REGISTER, &from);
+			add_bin(MOV, &to, &from);
 		}
 	}
 	free_vars();

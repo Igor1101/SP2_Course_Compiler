@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <syntax/syntax.h>
 #include <lexems/tables.h>
+#include <semantic/sem.h>
 #include "prelim.h"
 
 static int _add(op_t op, int argc, var_t* a0, var_t* a1);
@@ -37,84 +38,35 @@ static int _add(op_t op, int argc, var_t* a0, var_t* a1)
 	return strindex;
 }
 
-int add_bin(op_t op, int num0, char *num0_reg, int num1, char* num1_reg)
+ctypes_t str_get_memtype(int num)
 {
-	var_t a0 , a1;
-	mem_t t0, t1;
-	if(num0_reg == NULL) {
-		switch(str_get(num0)->synt) {
-		case S_CONST:
-		case S_CONST_PARAM:
-		case S_CHAR:
-			t0 = CONSTANT;
-			break;
-		case S_ID_ARRAY:
-		case S_ID_PARAM:
-		case S_ID_UNDEFINED:
-		case S_ID_VARIABLE:
-		case S_ID_FUNCTION:
-		case S_STRING:
-			t0 = MEMORY_LOC;
-			break;
-		default:
-			t0 = MEMORY_LOC;
-		}
-	} else
-		t0 = REGISTER;
-	if(num1_reg == NULL) {
-		switch(str_get(num0)->synt) {
-		case S_CONST:
-		case S_CONST_PARAM:
-		case S_CHAR:
-			t1 = CONSTANT;
-			break;
-		case S_ID_ARRAY:
-		case S_ID_PARAM:
-		case S_ID_UNDEFINED:
-		case S_ID_VARIABLE:
-		case S_ID_FUNCTION:
-		case S_STRING:
-			t1 = MEMORY_LOC;
-			break;
-		default:
-			t1 = MEMORY_LOC;
-		}
-	} else
-		t1 = REGISTER;
-	a0.type = t0;
-	a1.type = t1;
-	//a0.inst = (t0 == REGISTER)?str_alloc(num0_reg):str_alloc(str_get_inst(num0));
-	//a1.inst = (t1 == REGISTER)?str_alloc(num1_reg):str_alloc(str_get_inst(num1));
-	return _add(op, 2, &a0, &a1);
+	switch(str_get(num)->synt) {
+	case S_CONST:
+	case S_CONST_PARAM:
+	case S_CHAR:
+		return CONSTANT;
+		break;
+	case S_ID_ARRAY:
+	case S_ID_PARAM:
+	case S_ID_UNDEFINED:
+	case S_ID_VARIABLE:
+	case S_ID_FUNCTION:
+	case S_STRING:
+		return MEMORY_LOC;
+		break;
+	default:
+		return MEMORY_LOC;
+	}
 }
 
-int add_un(op_t op, int num0, char *num0_reg)
+int add_bin(op_t op, var_t* var0, var_t* var1)
 {
-	var_t a0;
-	mem_t t0;
-	if(num0_reg == NULL) {
-		switch(str_get(num0)->synt) {
-		case S_CONST:
-		case S_CONST_PARAM:
-		case S_CHAR:
-			t0 = CONSTANT;
-			break;
-		case S_ID_ARRAY:
-		case S_ID_PARAM:
-		case S_ID_UNDEFINED:
-		case S_ID_VARIABLE:
-		case S_ID_FUNCTION:
-		case S_STRING:
-			t0 = MEMORY_LOC;
-			break;
-		default:
-			t0 = MEMORY_LOC;
-		}
-	} else
-		t0 = REGISTER;
-	a0.type = t0;
-	//a0.inst = (t0 == REGISTER)?str_alloc(num0_reg):str_alloc(str_get_inst(num0));
-	return _add(op, 1, &a0, NULL);
+	return _add(op, 2, var0, var1);
+}
+
+int add_un(op_t op, var_t*var0)
+{
+	return _add(op, 1, var0, NULL);
 }
 
 int add_noarg(op_t op)
@@ -172,6 +124,7 @@ char* op_to_str(op_t op)
 	case CONV:
 		return "CONV";
 	}
+	return NULL;
 }
 
 void prelim_print_debug(void)
@@ -179,21 +132,45 @@ void prelim_print_debug(void)
 	pr_info("Prelim output:");
 	for(int i=0; i<pre_code.amount; i++) {
 		inst_t* inst = &pre_code.inst[i];
-		//pr_info("<%s\t%s, %s>", op_to_str(inst->opcode),
-		//		(inst->argc>0)?inst->arg0.inst:"",
-		//				(inst->argc>1)?inst->arg1.inst:""
-		//);
+		printf("\t%s\t", op_to_str(inst->opcode));
+		switch(inst->argc) {
+		case 0:
+			puts("");
+			break;
+		case 1:
+			printf("<%s>%s%s", type_to_str(inst->arg0.type),
+						var_get_inst(&inst->arg0),
+						(inst->arg0.arrayel)?"[]":""
+						);
+			puts("");
+			break;
+		case 2:
+			printf("<%s>%s%s", type_to_str(inst->arg0.type),
+						var_get_inst(&inst->arg0),
+						(inst->arg0.arrayel)?"[]":""
+						);
+			printf(",\t");
+			printf("<%s>%s%s", type_to_str(inst->arg1.type),
+						var_get_inst(&inst->arg1),
+						(inst->arg1.arrayel)?"[]":""
+						);
+			puts("");
+			break;
+		}
 	}
 }
 
 struct regs_vm_t {
 	bool reg_res[REGS_AMOUNT];
+	var_t regs[REGS_AMOUNT];
 }regs_vm;
 
-int reserve_reg(void)
+int reserve_reg(ctypes_t type)
 {
 	for(int i=0; i<REGS_AMOUNT; i++) {
 		if(!regs_vm.reg_res[i]) {
+			regs_vm.regs[i].memtype = REGISTER;
+			regs_vm.regs[i].type = type;
 			regs_vm.reg_res[i] = true;
 			return i;
 		}
@@ -208,6 +185,11 @@ void free_reg(int r)
 		 return;
 	 }
 	 regs_vm.reg_res[r] = false;
+}
+
+var_t* get_reg(int num)
+{
+	return &regs_vm.regs[num];
 }
 
 char* reg_to_str(int r)
@@ -272,12 +254,25 @@ int var_get(int num, mem_t mem, var_t* var)
 	var->num = num;
 	switch(mem) {
 	case MEMORY_LOC:
-	{
 		var->conv = str_get(num)->conv_to;
 		var->type = str_get(num)->ctype;
 		var->arrayel = str_get(num)->array;
-	}
-	break;
+		break;
+	case REGISTER:
+		*var = *get_reg(num);
+		break;
 	}
 	return 0;
+}
+
+char* var_get_inst(var_t *var)
+{
+	switch(var->memtype) {
+	case REGISTER:
+		return reg_to_str(var->num);
+	case MEMORY_LOC:
+		return str_get(var->num)->inst;
+	default:
+		return NULL;
+	}
 }

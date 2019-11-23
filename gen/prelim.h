@@ -69,14 +69,17 @@ typedef struct {
 extern code_t pre_code;
 
 /* utils */
+ctypes_t str_get_memtype(int num);
+char* var_get_inst(var_t *var);
 int var_get(int num, mem_t mem, var_t* var);
-int add_bin(op_t op, int num0, char *num0_reg, int num1, char* num1_reg);
-int add_un(op_t op, int num0, char *num0_reg);
+int add_bin(op_t op, var_t* var0, var_t* var1);
+int add_un(op_t op, var_t*var0);
 int add_noarg(op_t op);
 char* op_to_str(op_t op);
 void prelim_print_debug(void);
-int reserve_reg(void);
+int reserve_reg(ctypes_t type);
 void free_reg(int r);
+var_t* get_reg(int num);
 char* reg_to_str(int r);
 void free_ops(void);
 void init_prelim(void);
