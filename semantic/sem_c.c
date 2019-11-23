@@ -225,6 +225,7 @@ static int process_expression(int num, bool param, bool inside_array)
 
 static int process_array(int num, bool param)
 {
+	str_get(num)->array = true;
 	/* we are at the beginning */
 	num += 2;
 	/* at the expr */

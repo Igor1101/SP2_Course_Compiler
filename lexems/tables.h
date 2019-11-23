@@ -31,6 +31,7 @@ typedef struct {
 	bool syn_err;
 	bool lex_err;
 	bool sem_err;
+	bool array;
 }str_t;
 
 typedef struct {
