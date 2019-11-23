@@ -183,6 +183,7 @@ int reserve_reg(ctypes_t type)
 		if(!regs_vm.reg_res[i]) {
 			regs_vm.regs[i].memtype = REGISTER;
 			regs_vm.regs[i].type = type;
+			regs_vm.regs[i].num = i;
 			regs_vm.reg_res[i] = true;
 			return i;
 		}
@@ -289,4 +290,44 @@ char* var_get_inst(var_t *var)
 	}
 }
 
+/***************************/
 
+bool var_is_same(var_t* v0, var_t* v1)
+{
+	if((v0->memtype == v1->memtype) &&
+			(v0->num == v1->num))
+			return true;
+	return false;
+}
+/* instructions */
+
+int inc(var_t*to)
+{
+	return add_un(INC, to);
+}
+
+int dec(var_t*to)
+{
+	return add_un(DEC, to);
+}
+
+int sign(var_t*to, var_t*from)
+{
+	if(var_is_same(to, from))
+		return add_un(SIGN, from);
+	return add_bin(SIGN, to, from);
+}
+
+int mov(var_t*to, var_t*from)
+{
+	if(var_is_same(to, from))
+		return to->num;
+	return add_bin(MOV, to, from);
+}
+
+int conv(var_t*to, var_t*from)
+{
+	if(var_is_same(to, from) || from->type == from->conv)
+		return to->num;
+	return add_bin(CONV, to, from);
+}

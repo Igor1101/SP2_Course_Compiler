@@ -86,4 +86,12 @@ void init_prelim(void);
 /* lan specific */
 int preliminary_gen(void);
 
+/* instr */
+
+int inc(var_t*to);
+int dec(var_t*to);
+int sign(var_t*to, var_t*from);
+int mov(var_t*to, var_t*from);
+int conv(var_t*to, var_t*from);
+
 #endif /* GEN_PRELIM_H_ */
