@@ -89,6 +89,7 @@ char* type_to_str(ctypes_t t)
 	case C_UKNOWN:
 		return "unknown";
 	}
+	return NULL;
 }
 
 ctype_conv_t type0_to_type1_acc(ctypes_t t0, ctypes_t t1)
