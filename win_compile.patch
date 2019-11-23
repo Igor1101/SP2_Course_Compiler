@@ -1,0 +1,113 @@
+diff --git a/gen/prelim_utils.c b/gen/prelim_utils.c
+index 6b5790d..91a985c 100644
+--- a/gen/prelim_utils.c
++++ b/gen/prelim_utils.c
+@@ -21,7 +21,7 @@ static int _add(op_t op, int argc, arg_t* a0, arg_t* a1)
+ 	} else {
+ 		pre_code.amount++;
+ 		pre_code.inst =
+-				reallocarray(pre_code.inst, pre_code.amount, sizeof(inst_t));
++				realloc(pre_code.inst, pre_code.amount * sizeof(inst_t));
+ 		if(pre_code.inst == NULL) {
+ 			pr_err("array alloc failed");
+ 			exit(-1);
+diff --git a/lexems/lex_c.c b/lexems/lex_c.c
+index 3111992..a48b920 100644
+--- a/lexems/lex_c.c
++++ b/lexems/lex_c.c
+@@ -115,7 +115,7 @@ char* get_next_lexem_alloc(char*str, int* i, lexem_t* lexerror)
+ 				ch = '?';
+ 				*lexerror = L_UNACCEPTABLE_CHAR;
+ 			}
+-			lex = reallocarray(lex, index+1, 1);
++			lex = realloc(lex, (index+1) * 1);
+ 			lex[index++] = ch;
+ 			ch = u8_nextchar(str, i);
+ 		} while((ch != 0 ) &&
+@@ -124,7 +124,7 @@ char* get_next_lexem_alloc(char*str, int* i, lexem_t* lexerror)
+ 				(!is_char_in(ch, op_ch)) &&
+ 				(!is_char_in(ch, "()[]{}<>")));
+ 		/* set null char */
+-		lex = reallocarray(lex, index+1, 1);
++		lex = realloc(lex, index+1);
+ 		lex[index] = '\0';
+ 		/* move to previous char */
+ 		u8_dec(str, i);
+@@ -140,13 +140,13 @@ char* get_next_lexem_alloc(char*str, int* i, lexem_t* lexerror)
+ 				ch = '?';
+ 				*lexerror = L_UNACCEPTABLE_CHAR;
+ 			}
+-			lex = reallocarray(lex, index+1, 1);
++			lex = realloc(lex, index+1);
+ 			lex[index++] = ch;
+ 			ch = u8_nextchar(str, i);
+ 		} while(is_char_in(ch, op_ch));
+ 		pr_debug("alloc %s", lex);
+ 		/* set null char */
+-		lex = reallocarray(lex, index+1, 1);
++		lex = realloc(lex, index+1);
+ 		lex[index] = '\0';
+ 		/* move to previous char */
+ 		u8_dec(str, i);
+diff --git a/lexems/tables.c b/lexems/tables.c
+index f9136b1..a335350 100644
+--- a/lexems/tables.c
++++ b/lexems/tables.c
+@@ -30,7 +30,7 @@ int str_add(char*str, lexem_t lt)
+ 	} else {
+ 		str_array.amount++;
+ 		str_array.instcs =
+-				reallocarray(str_array.instcs, str_array.amount, sizeof(str_t));
++				realloc(str_array.instcs, str_array.amount * sizeof(str_t));
+ 		if(str_array.instcs == NULL) {
+ 			pr_err("array alloc failed");
+ 			exit(-1);
+@@ -200,7 +200,7 @@ void str_del(int index)
+ 		str_array.instcs[i-1] = str_array.instcs[i];
+ 	}
+ 	str_array.amount--;
+-	str_array.instcs = reallocarray(str_array.instcs, str_array.amount, sizeof(str_t));
++	str_array.instcs = realloc(str_array.instcs, str_array.amount * sizeof(str_t));
+ }
+ 
+ void str_modify(int index, char* new)
+@@ -294,7 +294,7 @@ void str_insert(int index, char* str)
+ 	/* realloc array */
+ 	str_array.amount++;
+ 	str_array.instcs =
+-			reallocarray(str_array.instcs, str_array.amount, sizeof(str_t));
++			realloc(str_array.instcs, str_array.amount * sizeof(str_t));
+ 	if(str_array.instcs == NULL) {
+ 		pr_err("array alloc failed");
+ 		exit(-1);
+diff --git a/semantic/tables_sem.c b/semantic/tables_sem.c
+index 361852c..dcab665 100644
+--- a/semantic/tables_sem.c
++++ b/semantic/tables_sem.c
+@@ -29,7 +29,7 @@ int ident_add(char*str, ctypes_t t, bool array)
+ 	} else {
+ 		ident_array.amount++;
+ 		ident_array.instcs =
+-				reallocarray(ident_array.instcs, ident_array.amount, sizeof(ident_t));
++				realloc(ident_array.instcs, ident_array.amount * sizeof(ident_t));
+ 		if(ident_array.instcs == NULL) {
+ 			pr_err("array alloc failed");
+ 			exit(-1);
+@@ -143,7 +143,7 @@ void ident_del(int index)
+ 		ident_array.instcs[i-1] = ident_array.instcs[i];
+ 	}
+ 	ident_array.amount--;
+-	ident_array.instcs = reallocarray(ident_array.instcs, ident_array.amount, sizeof(ident_t));
++	ident_array.instcs = realloc(ident_array.instcs, ident_array.amount * sizeof(ident_t));
+ }
+ 
+ void ident_modify(int index, char* new)
+@@ -169,7 +169,7 @@ void ident_insert(int index, char* str)
+ 	/* realloc array */
+ 	ident_array.amount++;
+ 	ident_array.instcs =
+-			reallocarray(ident_array.instcs, ident_array.amount, sizeof(ident_t));
++			realloc(ident_array.instcs, ident_array.amount * sizeof(ident_t));
+ 	if(ident_array.instcs == NULL) {
+ 		pr_err("array alloc failed");
+ 		exit(-1);
