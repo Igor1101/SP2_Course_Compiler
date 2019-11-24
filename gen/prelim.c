@@ -331,3 +331,16 @@ int conv(var_t*to, var_t*from)
 		return to->num;
 	return add_bin(CONV, to, from);
 }
+
+int binary_op(int opnum, var_t*to, var_t*from)
+{
+	op_t op;
+	if(!strcmp(str_get(opnum)->inst, "+")) op = ADD;
+	if(!strcmp(str_get(opnum)->inst, "-")) op = SUB;
+	if(!strcmp(str_get(opnum)->inst, "/")) op = DIV;
+	if(!strcmp(str_get(opnum)->inst, "*")) op = MUL;
+	if(!strcmp(str_get(opnum)->inst, "%")) op = REM;
+	if(!strcmp(str_get(opnum)->inst, "<<")) op = SHL;
+	if(!strcmp(str_get(opnum)->inst, ">>")) op = SHR;
+	add_bin(op, to, from);
+}

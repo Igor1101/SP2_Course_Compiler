@@ -14,6 +14,9 @@
 #define REGS_AMOUNT 8
 typedef enum {
 	NOP,
+	DIV,
+	REM,
+	MUL,
 	INC,
 	DEC,
 	CONV,
@@ -93,5 +96,6 @@ int dec(var_t*to);
 int sign(var_t*to, var_t*from);
 int mov(var_t*to, var_t*from);
 int conv(var_t*to, var_t*from);
+int binary_op(int opnum, var_t*to, var_t*from);
 
 #endif /* GEN_PRELIM_H_ */

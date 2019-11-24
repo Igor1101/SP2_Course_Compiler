@@ -68,7 +68,7 @@ static int process_expression(int num, bool param)
 	{
 		struct var_node*i = var0;
 		do {
-			if(i->varnum == varnum && i->in_reg) {
+			if(i->varnum == varnum && !i->in_reg) {
 				i->reg = reg;
 				i->in_reg = true;
 				return 0;
@@ -112,6 +112,7 @@ static int process_expression(int num, bool param)
 				struct var_node*i = var0;
 				do {
 					if(i->varnum == num && i->in_reg) {
+						pr_debug("using reg instead of var");
 						num = i->reg;
 						mem = REGISTER;
 					}
@@ -195,6 +196,17 @@ static int process_expression(int num, bool param)
 		int reg_data;
 		struct region*next;
 	}region0;
+	region0.next = NULL;
+	void add_region(int start, int end, int level, int data)
+	{
+		struct region* r = &region0;
+		do {
+			if(r->next == NULL) {
+				r->next = calloc(1, sizeof(struct region));
+				break;
+			}
+		} while(r!=NULL);
+	}
 	/* get max level of binary op */
 	for(num=savenum;num<next_delimiter(num, 0, false);num++) {
 		if(str_get(num)->synt == S_OPERAT_BINARY) {
@@ -205,16 +217,30 @@ static int process_expression(int num, bool param)
 	}
 	less_than = max_binop_level;
 	/* bin op run */
-	for(num=savenum;num<next_delimiter(num, 0, false);num++) {
-		if(str_get(num)->synt == S_OPERAT_BINARY) {
-			if(str_get(num)->level == max_binop_level) {
-				/* do op */
-				var_t to, from;
-				var_get_local(num + 1, MEMORY_LOC, &from);
-				var_get_local(num - 1, MEMORY_LOC, &to);
+	int get_rvalue(int start, int level, int end, var_t* result, ctypes_t type)
+	{
+		bool firstop = true;
+		int reg_result = reserve_reg(type);
+		var_get_local(reg_result, REGISTER, result);
+		for(int num=start; num<end; num++) {
+			if(str_get(num)->synt == S_OPERAT_BINARY) {
+				if(str_get(num)->level == level) {
+					int var_prev = num-1;
+					int var_nxt = num+1;
+					var_t from, to;
+					var_get_local(var_prev, MEMORY_LOC, &to);
+					var_get_local(var_nxt, MEMORY_LOC, &from);
+					if(firstop)
+						mov(result, &to);
+					firstop = false;
+					binary_op(num, result, &from);
+				}
 			}
 		}
 	}
+	var_t rvalue;
+	get_rvalue(savenum, max_binop_level, next_delimiter(num, 0, false),
+			&rvalue, C_INT_T);
 	/* assignment op */
 	for(num=savenum;num<next_delimiter(num, 0, false);num++) {
 		if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
