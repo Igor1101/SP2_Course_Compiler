@@ -151,9 +151,9 @@ static int process_expression(int num, bool param)
 			var_get(reg_to, REGISTER, &to);
 			var_get(cvt, MEMORY_LOC, &from);
 			conv(&to, &from);
+			set_var_reg(reg_to, cvt);
 		}
 	}
-
 	/* assignment op */
 	for(num=savenum;num<next_delimiter(num, 0, false);num++) {
 		if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
