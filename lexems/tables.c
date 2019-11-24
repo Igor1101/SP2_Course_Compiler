@@ -30,7 +30,7 @@ int str_add(char*str, lexem_t lt)
 	} else {
 		str_array.amount++;
 		str_array.instcs =
-				reallocarray(str_array.instcs, str_array.amount, sizeof(str_t));
+				str_realloc(str_array.instcs, str_array.amount * sizeof(str_t));
 		if(str_array.instcs == NULL) {
 			pr_err("array alloc failed");
 			exit(-1);
@@ -61,6 +61,17 @@ void str_free(void**str)
 	free(*str);
 	*str = NULL;
 }
+
+void *str_realloc(void *ptr, size_t size)
+{
+	void* p = realloc(ptr, size);
+	if(p == NULL) {
+		pr_err("memory exhausted");
+		exit(-1);
+	}
+	return p;
+}
+
 
 char* str_get_inst(int index)
 {
@@ -200,7 +211,7 @@ void str_del(int index)
 		str_array.instcs[i-1] = str_array.instcs[i];
 	}
 	str_array.amount--;
-	str_array.instcs = reallocarray(str_array.instcs, str_array.amount, sizeof(str_t));
+	str_array.instcs = str_realloc(str_array.instcs, str_array.amount * sizeof(str_t));
 }
 
 void str_modify(int index, char* new)
@@ -294,7 +305,7 @@ void str_insert(int index, char* str)
 	/* realloc array */
 	str_array.amount++;
 	str_array.instcs =
-			reallocarray(str_array.instcs, str_array.amount, sizeof(str_t));
+			str_realloc(str_array.instcs, str_array.amount * sizeof(str_t));
 	if(str_array.instcs == NULL) {
 		pr_err("array alloc failed");
 		exit(-1);

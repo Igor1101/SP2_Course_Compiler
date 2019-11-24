@@ -54,6 +54,7 @@ void str_get_max_bin(void(*func)(int));
 void str_max_update(void);
 void str_coincidence(int index);
 char* str_alloc(char* str);
+void *str_realloc(void *ptr, size_t size);
 void str_free(void**str);
 void key_set(char* str);
 void str_sort(void);

@@ -118,7 +118,7 @@ char* get_next_lexem_alloc(char*str, int* i, lexem_t* lexerror)
 				ch = '?';
 				*lexerror = L_UNACCEPTABLE_CHAR;
 			}
-			lex = reallocarray(lex, index+1, 1);
+			lex = str_realloc(lex, index+1, 1);
 			lex[index++] = ch;
 			ch = u8_nextchar(str, i);
 		} while((ch != 0 ) &&
@@ -127,7 +127,7 @@ char* get_next_lexem_alloc(char*str, int* i, lexem_t* lexerror)
 				(!is_char_in(ch, op_ch)) &&
 				(!is_char_in(ch, "()[]{}<>")));
 		/* set null char */
-		lex = reallocarray(lex, index+1, 1);
+		lex = str_realloc(lex, index+1, 1);
 		lex[index] = '\0';
 		/* move to previous char */
 		u8_dec(str, i);
@@ -143,13 +143,13 @@ char* get_next_lexem_alloc(char*str, int* i, lexem_t* lexerror)
 				ch = '?';
 				*lexerror = L_UNACCEPTABLE_CHAR;
 			}
-			lex = reallocarray(lex, index+1, 1);
+			lex = str_realloc(lex, index+1, 1);
 			lex[index++] = ch;
 			ch = u8_nextchar(str, i);
 		} while(is_char_in(ch, op_ch));
 		pr_debug("alloc %s", lex);
 		/* set null char */
-		lex = reallocarray(lex, index+1, 1);
+		lex = str_realloc(lex, index+1, 1);
 		lex[index] = '\0';
 		/* move to previous char */
 		u8_dec(str, i);

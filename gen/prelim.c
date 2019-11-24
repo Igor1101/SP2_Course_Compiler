@@ -34,7 +34,7 @@ static int _add(op_t op, int argc, var_t* a0, var_t* a1)
 	} else {
 		pre_code.amount++;
 		pre_code.inst =
-				reallocarray(pre_code.inst, pre_code.amount, sizeof(inst_t));
+				str_realloc(pre_code.inst, pre_code.amount * sizeof(inst_t));
 		if(pre_code.inst == NULL) {
 			pr_err("array alloc failed");
 			exit(-1);
