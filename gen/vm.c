@@ -12,6 +12,7 @@
 #include "prelim.h"
 
 static int process_expression(int num, bool param);
+static int next_binop(int start, int end);
 
 int vm_run(void)
 {
@@ -51,8 +52,10 @@ struct var_node{
 static int process_expression(int num, bool param)
 {
 	int savenum = num;
-	int rvalue_reg = -1;
-	int rvalue_num = -1;
+	bool has_assignment=false;
+	var_t rvalue;
+	var_t lvalue;
+	ctypes_t main_type;
 	struct var_node* var0 = calloc(1, sizeof(struct var_node));
 	void free_vars(void)
 	{
@@ -60,7 +63,8 @@ static int process_expression(int num, bool param)
 		while(i->next != NULL) {
 			struct var_node*pr = i;
 			i = i->next;
-			free(pr);
+			free_reg(pr->reg);
+			str_free((void**)&pr);
 		}
 		free(i);
 	}
@@ -149,6 +153,18 @@ static int process_expression(int num, bool param)
 			num++;
 		}
 	}
+	/* assignment info get */
+	for(num=savenum;num<next_delimiter(num, 0, false);num++) {
+		if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
+			has_assignment = true;
+			/* get lvalue */
+			if(!strcmp(str_get(num-1)->inst, "]")) {
+				/*TODO this is array */
+			}
+			main_type = str_get(num-1)->ctype;
+		}
+	}
+
 	/* unary op  (unchangeable) */
 	for(num=savenum;num<next_delimiter(num, 0, false);) {
 		switch(str_get(num)->synt) {
@@ -159,7 +175,6 @@ static int process_expression(int num, bool param)
 					/*ignore + */
 				if(!strcmp(str_get(num)->inst, "-")) {
 					int reg = reserve_reg(str_get(var)->ctype);
-					rvalue_reg = reg;
 					var_t from, to;
 					var_get_local(var, MEMORY_LOC, &from);
 					var_get_local(reg, REGISTER, &to);
@@ -187,8 +202,7 @@ static int process_expression(int num, bool param)
 		}
 	}
 
-	int max_binop_level = 0;
-	int less_than = 5000;
+	int min_binop_level = 5000;
 	struct region {
 		int start;
 		int end;
@@ -207,22 +221,33 @@ static int process_expression(int num, bool param)
 			}
 		} while(r!=NULL);
 	}
-	/* get max level of binary op */
+	/* get min level of binary op */
 	for(num=savenum;num<next_delimiter(num, 0, false);num++) {
 		if(str_get(num)->synt == S_OPERAT_BINARY) {
-			if(str_get(num)->level > max_binop_level &&
-					less_than > str_get(num)->level)
-				max_binop_level = str_get(num)->level;
+			if(str_get(num)->level < min_binop_level)
+				min_binop_level = str_get(num)->level;
 		}
 	}
-	less_than = max_binop_level;
 	/* bin op run */
-	int get_rvalue(int start, int level, int end, var_t* result, ctypes_t type)
+
+	int get_rvalue(int start, int end, int level, var_t* result)
 	{
 		bool firstop = true;
-		int reg_result = reserve_reg(type);
-		var_get_local(reg_result, REGISTER, result);
+		if(next_binop(num, end) < 0) {
+			for(int num=start; num<end; num++) {
+				if(str_get(num)->lext == L_IDENTIFIER) {
+					var_t from;
+					var_get_local(num, MEMORY_LOC, &from);
+					mov(result, &from);
+				}
+			}
+		}
 		for(int num=start; num<end; num++) {
+			int nxtlevel = str_get(next_binop(num, end))->level;
+			if(nxtlevel > level) {
+				var_t local_res;
+				num = get_rvalue(num, end, nxtlevel, &local_res);
+			}
 			if(str_get(num)->synt == S_OPERAT_BINARY) {
 				if(str_get(num)->level == level) {
 					int var_prev = num-1;
@@ -238,23 +263,28 @@ static int process_expression(int num, bool param)
 			}
 		}
 	}
-	var_t rvalue;
-	get_rvalue(savenum, max_binop_level, next_delimiter(num, 0, false),
-			&rvalue, C_INT_T);
+	int reg_result = reserve_reg(main_type);
+	var_get_local(reg_result, REGISTER, &rvalue);
+	get_rvalue(savenum, next_delimiter(num, 0, false), min_binop_level,
+			&rvalue);
 	/* assignment op */
 	for(num=savenum;num<next_delimiter(num, 0, false);num++) {
 		if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
 			int result = num - 1;
-			var_t from, to;
-			var_get(result, MEMORY_LOC, &to);
-			if(rvalue_reg >= 0)
-				var_get(rvalue_reg, REGISTER, &from);
-			else
-				var_get(rvalue_num, MEMORY_LOC, &from);
-			mov(&to, &from);
+			var_get(result, MEMORY_LOC, &lvalue);
+			mov(&lvalue, &rvalue);
 		}
 	}
+	end_of_assign_op:
 	free_vars();
 	return num;
 }
 
+static int next_binop(int start, int end)
+{
+	for(int num=start; num<end; num++)  {
+		if(str_get(num)->synt == S_OPERAT_BINARY)
+			return num;
+	}
+	return -1;
+}
