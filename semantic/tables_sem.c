@@ -11,6 +11,7 @@
 #include <string.h>
 #include <defs.h>
 #include <lexems/ch_utf8.h>
+#include <lexems/tables.h>
 
 ident_array_t ident_array = {
 		.instcs = NULL,
@@ -29,7 +30,7 @@ int ident_add(char*str, ctypes_t t, bool array)
 	} else {
 		ident_array.amount++;
 		ident_array.instcs =
-				reallocarray(ident_array.instcs, ident_array.amount, sizeof(ident_t));
+				str_realloc(ident_array.instcs, ident_array.amount * sizeof(ident_t));
 		if(ident_array.instcs == NULL) {
 			pr_err("array alloc failed");
 			exit(-1);
@@ -143,7 +144,7 @@ void ident_del(int index)
 		ident_array.instcs[i-1] = ident_array.instcs[i];
 	}
 	ident_array.amount--;
-	ident_array.instcs = reallocarray(ident_array.instcs, ident_array.amount, sizeof(ident_t));
+	ident_array.instcs = str_realloc(ident_array.instcs, ident_array.amount * sizeof(ident_t));
 }
 
 void ident_modify(int index, char* new)
@@ -169,7 +170,7 @@ void ident_insert(int index, char* str)
 	/* realloc array */
 	ident_array.amount++;
 	ident_array.instcs =
-			reallocarray(ident_array.instcs, ident_array.amount, sizeof(ident_t));
+			str_realloc(ident_array.instcs, ident_array.amount * sizeof(ident_t));
 	if(ident_array.instcs == NULL) {
 		pr_err("array alloc failed");
 		exit(-1);
