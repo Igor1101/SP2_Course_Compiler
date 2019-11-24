@@ -54,7 +54,6 @@ static int process_expression(int num, bool param)
 	int rvalue_reg = -1;
 	int rvalue_num = -1;
 	struct var_node* var0 = calloc(1, sizeof(struct var_node));
-	struct var_node* prev = var0;
 	void free_vars(void)
 	{
 		struct var_node*i = var0;
@@ -69,8 +68,9 @@ static int process_expression(int num, bool param)
 	{
 		struct var_node*i = var0;
 		do {
-			if(i->varnum == varnum && i->reg == -1) {
+			if(i->varnum == varnum && i->in_reg) {
 				i->reg = reg;
+				i->in_reg = true;
 				return 0;
 			}
 			i = i->next;
@@ -79,6 +79,7 @@ static int process_expression(int num, bool param)
 	}
 	void get_vars(void)
 	{
+		struct var_node* prev = var0;
 		for(num=savenum; num<next_delimiter(num, 0, param);num++) {
 			if(str_get(num)->synt == S_ID_VARIABLE) {
 				prev->varnum = num;
@@ -89,6 +90,36 @@ static int process_expression(int num, bool param)
 				prev->reg = -1;
 			}
 		}
+	}
+	bool var_has_reg(int varnum)
+	{
+		struct var_node*i = var0;
+		do {
+			if(i->varnum == varnum && !i->in_reg) {
+				return false;
+			}
+			if(i->varnum == varnum && i->in_reg) {
+				return true;
+			}
+			i = i->next;
+		} while(i != NULL);
+		return false;
+	}
+	int var_get_local(int num, int mem, var_t*var)
+	{
+		if(mem == MEMORY_LOC) {
+			if(var_has_reg(num)) {
+				struct var_node*i = var0;
+				do {
+					if(i->varnum == num && i->in_reg) {
+						num = i->reg;
+						mem = REGISTER;
+					}
+					i = i->next;
+				} while(i != NULL);
+			}
+		}
+		return var_get(num, mem, var);
 	}
 	/* get all vars */
 	get_vars();
@@ -101,12 +132,12 @@ static int process_expression(int num, bool param)
 			if(str_get(var)->lext == L_IDENTIFIER) {
 				if(!strcmp(str_get(num)->inst, "++")) {
 					var_t v;
-					var_get(var, MEMORY_LOC, &v);
+					var_get_local(var, MEMORY_LOC, &v);
 					inc(&v);
 				}
 				if(!strcmp(str_get(num)->inst, "--")) {
 					var_t v;
-					var_get(var, MEMORY_LOC, &v);
+					var_get_local(var, MEMORY_LOC, &v);
 					dec(&v);
 				}
 			}
@@ -129,8 +160,8 @@ static int process_expression(int num, bool param)
 					int reg = reserve_reg(str_get(var)->ctype);
 					rvalue_reg = reg;
 					var_t from, to;
-					var_get(var, MEMORY_LOC, &from);
-					var_get(reg, REGISTER, &to);
+					var_get_local(var, MEMORY_LOC, &from);
+					var_get_local(reg, REGISTER, &to);
 					sign(&to, &from);
 					set_var_reg(reg, var);
 				}
@@ -148,10 +179,40 @@ static int process_expression(int num, bool param)
 			int cvt = num;
 			var_t from, to;
 			int reg_to = reserve_reg(str_get(num)->conv_to);
-			var_get(reg_to, REGISTER, &to);
-			var_get(cvt, MEMORY_LOC, &from);
+			var_get_local(reg_to, REGISTER, &to);
+			var_get_local(cvt, MEMORY_LOC, &from);
 			conv(&to, &from);
 			set_var_reg(reg_to, cvt);
+		}
+	}
+
+	int max_binop_level = 0;
+	int less_than = 5000;
+	struct region {
+		int start;
+		int end;
+		int level;
+		int reg_data;
+		struct region*next;
+	}region0;
+	/* get max level of binary op */
+	for(num=savenum;num<next_delimiter(num, 0, false);num++) {
+		if(str_get(num)->synt == S_OPERAT_BINARY) {
+			if(str_get(num)->level > max_binop_level &&
+					less_than > str_get(num)->level)
+				max_binop_level = str_get(num)->level;
+		}
+	}
+	less_than = max_binop_level;
+	/* bin op run */
+	for(num=savenum;num<next_delimiter(num, 0, false);num++) {
+		if(str_get(num)->synt == S_OPERAT_BINARY) {
+			if(str_get(num)->level == max_binop_level) {
+				/* do op */
+				var_t to, from;
+				var_get_local(num + 1, MEMORY_LOC, &from);
+				var_get_local(num - 1, MEMORY_LOC, &to);
+			}
 		}
 	}
 	/* assignment op */
