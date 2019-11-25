@@ -242,7 +242,8 @@ static int process_expression(int num, bool param)
 		bool firstop = true;
 		if(next_binop(start, end) < 0) {
 			for(int num=start; num<end; num++) {
-				if(str_get(num)->lext == L_IDENTIFIER) {
+				if(str_get(num)->lext == L_IDENTIFIER ||
+						str_get(num)->synt == S_CONST) {
 					var_t from;
 					var_get_local(num, MEMORY_LOC, &from);
 					mov(result, &from);

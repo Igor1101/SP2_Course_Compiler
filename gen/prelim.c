@@ -273,6 +273,8 @@ int var_get(int num, mem_t mem, var_t* var)
 	var->num = num;
 	switch(mem) {
 	case MEMORY_LOC:
+		if(str_get(num)->synt == S_CONST)
+			var->memtype = CONSTANT;
 		var->conv = str_get(num)->conv_to;
 		var->type = str_get(num)->ctype;
 		var->arrayel = str_get(num)->array;
@@ -290,6 +292,8 @@ char* var_get_inst(var_t *var)
 	case REGISTER:
 		return reg_to_str(var->num);
 	case MEMORY_LOC:
+		return str_get(var->num)->inst;
+	case CONSTANT:
 		return str_get(var->num)->inst;
 	default:
 		return NULL;
