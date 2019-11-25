@@ -94,13 +94,11 @@ static int process_expression(int num, bool param, bool inside_array)
 			break;
 		case S_CONST:
 			if(str_get(num)->lext == L_CONSTANT) {
-
 				str_get(num)->ctype = C_INT_T;
 				if(main_type == C_UKNOWN)
 					main_type = C_INT_T;
-				num++;
-				break;
 			}
+
 			if(str_get(num)->lext == L_CONSTANT_FLOAT) {
 				str_get(num)->ctype = C_FLOAT_T;
 				if(main_type != C_UKNOWN) {
@@ -109,8 +107,21 @@ static int process_expression(int num, bool param, bool inside_array)
 				} else {
 					main_type = C_DOUBLE_T;
 				}
-				num++;
-				break;
+			}
+			{
+				ctypes_t t = str_get(num)->ctype;
+				if(main_type != C_UKNOWN) {
+				switch(type0_to_type1_acc(t, main_type)) {
+				case ACCEPT:
+					break;
+				case NOTACCEPT:
+					set_err_type(num, t, main_type);
+					break;
+				case CONVERT:
+					str_get(num)->conv_to = main_type;
+					break;
+				}
+				}
 			}
 			num++;
 			break;

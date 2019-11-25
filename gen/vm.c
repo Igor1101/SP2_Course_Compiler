@@ -198,7 +198,8 @@ static int process_expression(int num, bool param)
 	}
 	/* conversion op */
 	for(num=savenum;num<next_delimiter(num, 0, false);num++) {
-		if(str_get(num)->conv_to != C_UKNOWN) {
+		if(str_get(num)->conv_to != C_UKNOWN &&
+				str_get(num)->lext == L_IDENTIFIER) {
 			int cvt = num;
 			var_t from, to;
 			int reg_to = reserve_reg(str_get(num)->conv_to);
