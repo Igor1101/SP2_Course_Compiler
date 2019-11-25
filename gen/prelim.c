@@ -89,6 +89,12 @@ int add_noarg(op_t op)
 char* op_to_str(op_t op)
 {
 	switch(op) {
+	case DIV:
+		return "DIV";
+	case REM:
+		return "REM";
+	case MUL:
+		return "MUL";
 	case NOP:
 		return "NOP";
 	case INC:

@@ -11,16 +11,22 @@
 #include <string.h>
 #include "prelim.h"
 
+static int next_var_expr(int num);
+static int prev_var_expr(int num);
 static int process_expression(int num, bool param);
+static int process_declaration(int num, bool param);
 static int next_binop(int start, int end);
+static int last_assignment(int start, int end);
 
 int vm_run(void)
 {
 	for(int num=0; num<str_array.amount;) {
 		switch(str_get(num)->synt) {
+		case S_KEYWORD_TYPE:
+			num = process_declaration(num, false);
+			break;
 		case S_OPERAT_ASSIGNMENT:
 		{
-			pr_debug("assignment detected");
 			num = process_expression(num-1, false);
 			break;
 		}
@@ -162,6 +168,7 @@ static int process_expression(int num, bool param)
 				/*TODO this is array */
 			}
 			main_type = str_get(num-1)->ctype;
+			break;
 		}
 	}
 
@@ -233,39 +240,57 @@ static int process_expression(int num, bool param)
 	int get_rvalue(int start, int end, int level, var_t* result)
 	{
 		bool firstop = true;
-		if(next_binop(num, end) < 0) {
+		if(next_binop(start, end) < 0) {
 			for(int num=start; num<end; num++) {
 				if(str_get(num)->lext == L_IDENTIFIER) {
 					var_t from;
 					var_get_local(num, MEMORY_LOC, &from);
 					mov(result, &from);
+					return ++num;
 				}
 			}
 		}
 		for(int num=start; num<end; num++) {
+			int num_after;
+			if(next_binop(num, end) < 0) {
+				return num;
+			}
+			/*
 			int nxtlevel = str_get(next_binop(num, end))->level;
 			if(nxtlevel > level) {
 				var_t local_res;
 				num = get_rvalue(num, end, nxtlevel, &local_res);
-			}
+			}*/
 			if(str_get(num)->synt == S_OPERAT_BINARY) {
-				if(str_get(num)->level == level) {
-					int var_prev = num-1;
-					int var_nxt = num+1;
+				int op_num = num;
+				/* use current function to calc*/
+				if(str_get(num)->level >= level) {
+					int var_prev = prev_var_expr(num);
+					int var_nxt = next_var_expr(num);
 					var_t from, to;
 					var_get_local(var_prev, MEMORY_LOC, &to);
-					var_get_local(var_nxt, MEMORY_LOC, &from);
+					int nxtlevel = str_get(next_binop(num+1, end))->level;
+					if(next_binop(num+1, end) >=0 && nxtlevel > level) {
+						int reg = reserve_reg(main_type);
+						var_get_local(reg, REGISTER, &from);
+						num = get_rvalue(num+1, end, nxtlevel, &from);
+					} else
+						var_get_local(var_nxt, MEMORY_LOC, &from);
 					if(firstop)
 						mov(result, &to);
 					firstop = false;
-					binary_op(num, result, &from);
+					binary_op(op_num, result, &from);
+				} else {
+					return num-1;
 				}
 			}
 		}
+		return num;
 	}
 	int reg_result = reserve_reg(main_type);
 	var_get_local(reg_result, REGISTER, &rvalue);
-	get_rvalue(savenum, next_delimiter(num, 0, false), min_binop_level,
+	int startfrom = 1 + last_assignment(savenum, next_delimiter(num, 0, false));
+	get_rvalue(startfrom, next_delimiter(num, 0, false), min_binop_level,
 			&rvalue);
 	/* assignment op */
 	for(num=savenum;num<next_delimiter(num, 0, false);num++) {
@@ -287,4 +312,39 @@ static int next_binop(int start, int end)
 			return num;
 	}
 	return -1;
+}
+
+static int last_assignment(int start, int end)
+{
+	for(int num=end; num>start; --num) {
+		if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
+			return num;
+		}
+	}
+	return -1;
+}
+
+static int prev_var_expr(int num)
+{
+	do {
+		num--;
+		if(str_get(num)->synt == S_ID_VARIABLE
+				|| str_get(num)->synt == S_CONST)
+			return num;
+	} while(true);
+}
+
+static int next_var_expr(int num)
+{
+	do {
+		num++;
+		if(str_get(num)->synt == S_ID_VARIABLE
+				|| str_get(num)->synt == S_CONST)
+			return num;
+	} while(true);
+}
+
+static int process_declaration(int num, bool param)
+{
+	return ++num;
 }
