@@ -23,6 +23,7 @@ void set_err(int num, char* format, ...)
 	char* output = malloc(MAX_SERRSZ);
 	if(output == NULL) {
 		pr_err("malloc err");
+		va_end(argp);
 		return ;
 	}
 	vsnprintf(output, MAX_SERRSZ, format, argp);
