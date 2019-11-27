@@ -131,29 +131,6 @@ int open_brace(int num)
 	return ret;
 }
 
-int push(syn_t op)
-{
-	if(st.__op_p >= MAX_DEPTH) {
-		pr_err("op push overflow");
-		return -1;
-	}
-	st.op[st.__op_p++] = op;
-	return 0;
-}
-syn_t pop(void)
-{
-	if(st.__op_p == 0) {
-		pr_err("op pop is underflow");
-		return S_NOTDEFINED;
-	}
-	return st.op[st.__op_p--];
-}
-
-void reset(void)
-{
-	st.__op_p = 0;
-}
-
 static int process_ident(int num, int level, bool maybeparam, bool inside_expr)
 {
 	if(num < (str_array.amount-1)) {

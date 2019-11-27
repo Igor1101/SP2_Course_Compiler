@@ -72,8 +72,6 @@ int syn_err_amount(void);
 int syn_analyze(void);
 int close_brace(int num);
 int open_brace(int num);
-int push(syn_t op);
-syn_t pop(void);
 void init_syn_analyzer(void);
 int next_delimiter(int num, int level, bool param);
 int next_closing_brace(int num, int level);
