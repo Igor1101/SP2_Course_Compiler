@@ -14,6 +14,12 @@
 #define REGS_AMOUNT 8
 typedef enum {
 	NOP,
+	CMP_EQ,
+	CMP_NEQ,
+	CMP_B,
+	CMP_L,
+	CMP_BEQ,
+	CMP_LEQ,
 	DIV,
 	REM,
 	MUL,
@@ -60,6 +66,7 @@ typedef struct {
 	op_t opcode;
 	var_t arg0;
 	var_t arg1;
+	var_t arg2;
 	int argc;
 }inst_t;
 

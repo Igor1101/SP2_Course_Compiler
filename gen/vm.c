@@ -242,6 +242,7 @@ static int process_expression(int num, bool param)
 	{
 		bool firstop = true;
 		if(next_binop(start, end) < 0) {
+			/* looks like no operation, just number */
 			for(int num=start; num<end; num++) {
 				if(str_get(num)->lext == L_IDENTIFIER ||
 						str_get(num)->synt == S_CONST) {

@@ -18,14 +18,14 @@ code_t pre_code = {
 		.inst = NULL
 };
 
-static int _add(op_t op, int argc, var_t* a0, var_t* a1);
+static int _add(op_t op, int argc, var_t* a0, var_t* a1, var_t* a2);
 
 int preliminary_gen(void)
 {
 	return vm_run();
 }
 
-static int _add(op_t op, int argc, var_t* a0, var_t* a1)
+static int _add(op_t op, int argc, var_t* a0, var_t* a1, var_t* a2)
 {
 	int strindex = pre_code.amount;
 	if(pre_code.inst == NULL) {
@@ -46,6 +46,8 @@ static int _add(op_t op, int argc, var_t* a0, var_t* a1)
 		pre_code.inst[strindex].arg0 = *a0;
 	if(a1 != NULL && argc >= 2)
 		pre_code.inst[strindex].arg1 = *a1;
+	if(a2 != NULL && argc >= 3)
+		pre_code.inst[strindex].arg2 = *a2;
 	/* return index */
 	return strindex;
 }
@@ -71,24 +73,41 @@ ctypes_t str_get_memtype(int num)
 	}
 }
 
+int add_3(op_t op, var_t* var0, var_t* var1, var_t* var2)
+{
+	return _add(op, 3, var0, var1, var2);
+}
+
 int add_bin(op_t op, var_t* var0, var_t* var1)
 {
-	return _add(op, 2, var0, var1);
+	return _add(op, 2, var0, var1, NULL);
 }
 
 int add_un(op_t op, var_t*var0)
 {
-	return _add(op, 1, var0, NULL);
+	return _add(op, 1, var0, NULL, NULL);
 }
 
 int add_noarg(op_t op)
 {
-	return _add(op, 0, NULL, NULL);
+	return _add(op, 0, NULL, NULL, NULL);
 }
 
 char* op_to_str(op_t op)
 {
 	switch(op) {
+	case CMP_NEQ:
+		return "CMPNEQ";
+	case CMP_EQ:
+		return "CMPEQ";
+	case CMP_BEQ:
+		return "CMPBEQ";
+	case CMP_LEQ:
+		return "CMPLEQ";
+	case CMP_B:
+		return "CMPB";
+	case CMP_L:
+		return "CMPL";
 	case DIV:
 		return "DIV";
 	case REM:
@@ -344,7 +363,7 @@ int conv(var_t*to, var_t*from)
 
 int binary_op(int opnum, var_t*to, var_t*from)
 {
-	op_t op;
+	op_t op = NOP;
 	if(!strcmp(str_get(opnum)->inst, "+")) op = ADD;
 	if(!strcmp(str_get(opnum)->inst, "-")) op = SUB;
 	if(!strcmp(str_get(opnum)->inst, "/")) op = DIV;
@@ -352,5 +371,17 @@ int binary_op(int opnum, var_t*to, var_t*from)
 	if(!strcmp(str_get(opnum)->inst, "%")) op = REM;
 	if(!strcmp(str_get(opnum)->inst, "<<")) op = SHL;
 	if(!strcmp(str_get(opnum)->inst, ">>")) op = SHR;
-	add_bin(op, to, from);
+	return add_bin(op, to, from);
+}
+
+int comparison_op(int opnum, var_t*result, var_t*to, var_t*from)
+{
+	op_t op;
+	if(!strcmp(str_get(opnum)->inst, "==")) op = CMP_EQ;
+	if(!strcmp(str_get(opnum)->inst, "!=")) op = CMP_NEQ;
+	if(!strcmp(str_get(opnum)->inst, "<=")) op = CMP_LEQ;
+	if(!strcmp(str_get(opnum)->inst, ">=")) op = CMP_BEQ;
+	if(!strcmp(str_get(opnum)->inst, "<")) op = CMP_L;
+	if(!strcmp(str_get(opnum)->inst, ">")) op = CMP_B;
+	return add_3(op, result, to, from);
 }
