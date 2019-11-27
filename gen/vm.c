@@ -28,6 +28,7 @@ int vm_run(void)
 		case S_OPERAT_ASSIGNMENT:
 		{
 			num = process_expression(num-1, false);
+			add_noarg(EXPR_FINI);
 			break;
 		}
 		case S_ID_ARRAY:
@@ -39,6 +40,7 @@ int vm_run(void)
 		{
 			pr_debug("expr detected");
 			num = process_expression(num, false);
+			add_noarg(EXPR_FINI);
 			break;
 		}
 		default:
