@@ -95,6 +95,8 @@ char* reg_to_str(int r);
 void free_ops(void);
 void init_prelim(void);
 var_t* get_arg(int num, int argnum);
+op_t get_opcode(int num);
+inst_t* get_instr(int num);
 /* lan specific */
 int preliminary_gen(void);
 

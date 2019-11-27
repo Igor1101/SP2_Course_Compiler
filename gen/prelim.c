@@ -420,3 +420,12 @@ var_t* get_arg(int num, int argnum)
 	return NULL;
 }
 
+op_t get_opcode(int num)
+{
+	return pre_code.inst[num].opcode;
+}
+
+inst_t* get_instr(int num)
+{
+	return &pre_code.inst[num];
+}
