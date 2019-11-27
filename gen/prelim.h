@@ -104,5 +104,6 @@ int sign(var_t*to, var_t*from);
 int mov(var_t*to, var_t*from);
 int conv(var_t*to, var_t*from);
 int binary_op(int opnum, var_t*to, var_t*from);
+int comparison_op(int opnum, var_t*result, var_t*to, var_t*from);
 
 #endif /* GEN_PRELIM_H_ */

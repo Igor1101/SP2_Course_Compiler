@@ -193,6 +193,23 @@ void prelim_print_debug(void)
 						);
 			puts("");
 			break;
+		case 3:
+			printf("<%s>%s%s", type_to_str(inst->arg0.type),
+						var_get_inst(&inst->arg0),
+						(inst->arg0.arrayel)?"[]":""
+						);
+			printf(",\t");
+			printf("<%s>%s%s", type_to_str(inst->arg1.type),
+						var_get_inst(&inst->arg1),
+						(inst->arg1.arrayel)?"[]":""
+						);
+			printf(",\t");
+			printf("<%s>%s%s", type_to_str(inst->arg2.type),
+						var_get_inst(&inst->arg2),
+						(inst->arg2.arrayel)?"[]":""
+						);
+			puts("");
+			break;
 		}
 	}
 }

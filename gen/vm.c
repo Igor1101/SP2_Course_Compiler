@@ -264,7 +264,7 @@ static int process_expression(int num, bool param)
 				var_t local_res;
 				num = get_rvalue(num, end, nxtlevel, &local_res);
 			}*/
-			if(str_get(num)->synt == S_OPERAT_BINARY) {
+			if(str_get(num)->synt == S_OPERAT_BINARY && str_get(num)->lext != L_OPERAT_RELATION) {
 				int op_num = num;
 				/* use current function to calc*/
 				if(str_get(num)->level >= level) {
@@ -286,6 +286,26 @@ static int process_expression(int num, bool param)
 				} else {
 					return num-1;
 				}
+			} else if(str_get(num)->lext == L_OPERAT_RELATION) {
+				int op_num = num;
+					/* use current function to calc*/
+				if(str_get(num)->level >= level) {
+					int var_prev = prev_var_expr(num);
+					int var_nxt = next_var_expr(num);
+					var_t comp1, comp2;
+					var_get_local(var_prev, MEMORY_LOC, &comp1);
+					int nxtlevel = str_get(next_binop(num+1, end))->level;
+					if(next_binop(num+1, end) >=0 && nxtlevel > level) {
+						int reg = reserve_reg(main_type);
+						var_get_local(reg, REGISTER, &comp2);
+						num = get_rvalue(num+1, end, nxtlevel, &comp2);
+					} else
+						var_get_local(var_nxt, MEMORY_LOC, &comp2);
+					firstop = false;
+					comparison_op(op_num, result, &comp1, &comp2);
+				} else {
+					return num-1;
+				}
 			}
 		}
 		return num;
@@ -303,7 +323,6 @@ static int process_expression(int num, bool param)
 			mov(&lvalue, &rvalue);
 		}
 	}
-	end_of_assign_op:
 	free_vars();
 	return num;
 }
@@ -311,7 +330,8 @@ static int process_expression(int num, bool param)
 static int next_binop(int start, int end)
 {
 	for(int num=start; num<end; num++)  {
-		if(str_get(num)->synt == S_OPERAT_BINARY)
+		if(str_get(num)->synt == S_OPERAT_BINARY ||
+				str_get(num)->synt == S_OPERAT_RELATION)
 			return num;
 	}
 	return -1;
