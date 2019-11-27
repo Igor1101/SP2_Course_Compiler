@@ -160,6 +160,8 @@ char* op_to_str(op_t op)
 		return "JZ";
 	case CONV:
 		return "CONV";
+	case EXPR_FINI:
+		return "EXPR FINI";
 	}
 	return NULL;
 }
@@ -404,3 +406,17 @@ int comparison_op(int opnum, var_t*result, var_t*to, var_t*from)
 	if(!strcmp(str_get(opnum)->inst, ">")) op = CMP_B;
 	return add_3(op, result, to, from);
 }
+
+var_t* get_arg(int num, int argnum)
+{
+	switch(argnum) {
+	case 0:
+		return &pre_code.inst[num].arg0;
+	case 1:
+		return &pre_code.inst[num].arg1;
+	case 2:
+		return &pre_code.inst[num].arg2;
+	}
+	return NULL;
+}
+

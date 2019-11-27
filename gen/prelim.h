@@ -14,6 +14,7 @@
 #define REGS_AMOUNT 15
 typedef enum {
 	NOP,
+	EXPR_FINI,
 	CMP_EQ,
 	CMP_NEQ,
 	CMP_B,
@@ -93,6 +94,7 @@ var_t* get_reg(int num);
 char* reg_to_str(int r);
 void free_ops(void);
 void init_prelim(void);
+var_t* get_arg(int num, int argnum);
 /* lan specific */
 int preliminary_gen(void);
 
