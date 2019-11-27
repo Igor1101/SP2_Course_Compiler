@@ -251,33 +251,35 @@ char* reg_to_str(int r)
 {
 	switch(r) {
 	case 0:
-		return "r8";
+		return "R8";
 	case 1:
-		return "r9";
+		return "R9";
 	case 2:
-		return "r10";
+		return "R10";
 	case 3:
-		return "r11";
+		return "R11";
 	case 4:
-		return "r12";
+		return "R12";
 	case 5:
-		return "r13";
+		return "R13";
 	case 6:
-		return "r14";
+		return "R14";
 	case 7:
-		return "r15";
+		return "R15";
 	case 8:
-		return "rax";
+		return "RBP";
 	case 9:
-		return "rbx";
+		return "RSI";
 	case 10:
-		return "rcx";
+		return "RDI";
 	case 11:
-		return "rdx";
+		return "RAX";
 	case 12:
-		return "rbp";
+		return "RBX";
 	case 13:
-		return "rdx";
+		return "RCX";
+	case 14:
+		return "RDX";
 	}
 	return "invalid reg";
 }

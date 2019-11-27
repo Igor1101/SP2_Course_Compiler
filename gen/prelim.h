@@ -11,7 +11,7 @@
 #include <defs.h>
 #include <semantic/tables_sem.h>
 
-#define REGS_AMOUNT 8
+#define REGS_AMOUNT 15
 typedef enum {
 	NOP,
 	CMP_EQ,
