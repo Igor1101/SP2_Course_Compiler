@@ -15,6 +15,7 @@
 #include <semantic/sem.h>
 #include <string.h>
 #include <gen/prelim.h>
+#include <gen/nasm.h>
 
 void prg_exit(int r)
 {
@@ -75,6 +76,8 @@ int main(void)
 		init_prelim();
 		preliminary_gen();
 		prelim_print_debug();
+		pr_debug("assembly generation");
+		gen_nasm();
 	}
 	return 0;
 };

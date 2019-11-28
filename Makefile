@@ -25,6 +25,7 @@ APP_SRC += tables_sem.c
 APP_SRC += sem_utils.c
 APP_SRC += prelim.c
 APP_SRC += vm.c
+APP_SRC += nasm.c
 # app includes
 INCFLAGS +=-I$(realpath $(APP_PATH))
 # rtos includes
