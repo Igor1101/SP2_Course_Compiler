@@ -18,6 +18,7 @@ FILE* asmfile;
 
 static int process_cmd(int num);
 static void process_mov(int num);
+static void process_exprfini(int num);
 
 int gen_nasm(void)
 {
@@ -56,7 +57,8 @@ static int process_cmd(int num)
 	case MOV:
 		process_mov(num);
 		break;
-
+	case EXPR_FINI:
+		process_exprfini(num);
 	}
 	return ++num;
 }
@@ -199,4 +201,11 @@ void out_deinit(void)
 	out("MOV RSP, RBP\n");
 	out("POP RBP\n");
 	out("RET\n");
+}
+
+static void process_exprfini(int num)
+{
+	for(int i=0; i<REGS_AMOUNT; i++) {
+		rstate[i].used = false;
+	}
 }
