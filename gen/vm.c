@@ -13,6 +13,7 @@
 
 static int next_var_expr(int num);
 static int prev_var_expr(int num);
+static int next_brace_closing(int num);
 static int process_expression(int num, bool param);
 static int process_declaration(int num, bool param);
 static int next_binop(int start, int end);
@@ -28,7 +29,6 @@ int vm_run(void)
 		case S_OPERAT_ASSIGNMENT:
 		{
 			num = process_expression(num-1, false);
-			add_noarg(EXPR_FINI);
 			break;
 		}
 		case S_ID_ARRAY:
@@ -40,7 +40,6 @@ int vm_run(void)
 		{
 			pr_debug("expr detected");
 			num = process_expression(num, false);
-			add_noarg(EXPR_FINI);
 			break;
 		}
 		default:
@@ -163,7 +162,7 @@ static int process_expression(int num, bool param)
 		}
 	}
 	/* assignment info get */
-	for(num=savenum;num<next_delimiter(num, 0, false);num++) {
+	for(num=savenum;num<next_delimiter(num, 0, param);num++) {
 		if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
 			has_assignment = true;
 			/* get lvalue */
@@ -176,7 +175,7 @@ static int process_expression(int num, bool param)
 	}
 
 	/* unary op  (unchangeable) */
-	for(num=savenum;num<next_delimiter(num, 0, false);) {
+	for(num=savenum;num<next_delimiter(num, 0, param);) {
 		switch(str_get(num)->synt) {
 		case S_OPERAT_UNARY:
 		{
@@ -200,7 +199,7 @@ static int process_expression(int num, bool param)
 		}
 	}
 	/* conversion op */
-	for(num=savenum;num<next_delimiter(num, 0, false);num++) {
+	for(num=savenum;num<next_delimiter(num, 0, param);num++) {
 		if(str_get(num)->conv_to != C_UKNOWN &&
 				str_get(num)->lext == L_IDENTIFIER) {
 			int cvt = num;
@@ -233,7 +232,7 @@ static int process_expression(int num, bool param)
 		} while(r!=NULL);
 	}
 	/* get min level of binary op */
-	for(num=savenum;num<next_delimiter(num, 0, false);num++) {
+	for(num=savenum;num<next_delimiter(num, 0, param);num++) {
 		if(str_get(num)->synt == S_OPERAT_BINARY) {
 			if(str_get(num)->level < min_binop_level)
 				min_binop_level = str_get(num)->level;
@@ -295,15 +294,16 @@ static int process_expression(int num, bool param)
 				}
 			}
 		}
+		add_noarg(EXPR_FINI);
 		return num;
 	}
 	int reg_result = reserve_reg(main_type);
 	var_get_local(reg_result, REGISTER, &rvalue);
-	int startfrom = 1 + last_assignment(savenum, next_delimiter(num, 0, false));
-	get_rvalue(startfrom, next_delimiter(num, 0, false), min_binop_level,
+	int startfrom = 1 + last_assignment(savenum, next_delimiter(num, 0, param));
+	get_rvalue(startfrom, next_delimiter(num, 0, param), min_binop_level,
 			&rvalue);
 	/* assignment op */
-	for(num=savenum;num<next_delimiter(num, 0, false);num++) {
+	for(num=savenum;num<next_delimiter(num, 0, param);num++) {
 		if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
 			int result = num - 1;
 			var_get(result, MEMORY_LOC, &lvalue);
@@ -356,5 +356,31 @@ static int next_var_expr(int num)
 
 static int process_declaration(int num, bool param)
 {
-	return ++num;
+	int decl_type = num;
+	num++;
+	int end = next_delimiter(num, 0, param);
+	for(;num<end;) {
+		int id = num;
+		int nlex = num+1;
+		if(str_get(nlex)->synt == S_BRACE_OPEN) {
+			/* array */
+			num = next_brace_closing(nlex) + 1;
+		} else {
+			num = nlex;
+		}
+		if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
+			num = process_expression(id, true);
+		}
+		num++;
+	}
+	return num;
+}
+
+static int next_brace_closing(int num)
+{
+	while(true) {
+		if(str_get(num)->synt == S_BRACE_CLOSE)
+			return num;
+		num++;
+	}
 }

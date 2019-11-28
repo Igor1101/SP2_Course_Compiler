@@ -545,5 +545,7 @@ char* var_to_str(var_t*v)
 		return reg_to_str(v->num);
 	case MEMORY_LOC:
 		return str_get(v->num)->inst;
+	case CONSTANT:
+		return str_get(v->num)->inst;
 	}
 }
