@@ -19,6 +19,9 @@ static int process_array(int num, bool param);
 int sem_analyze(void)
 {
 	ident_array_remove();
+	for(int i = 0; i<str_array.amount; i++) {
+		str_get(i)->sem_err = false;
+	}
 	for(int num=0; num<str_array.amount;) {
 		switch(str_get(num)->synt) {
 		case S_KEYWORD_TYPE:

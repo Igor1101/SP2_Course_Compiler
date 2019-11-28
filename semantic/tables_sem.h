@@ -29,10 +29,10 @@ typedef enum {
 typedef struct {
 	char* inst;
 	ctypes_t type;
+	int amount;
 	bool init;
 	bool used;
 	bool array;
-	int amount;
 }ident_t;
 
 typedef struct {
