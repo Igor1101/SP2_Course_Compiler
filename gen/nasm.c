@@ -19,6 +19,8 @@ FILE* asmfile;
 static int process_cmd(int num);
 static void process_mov(int num);
 static void process_exprfini(int num);
+static void process_add(int num);
+static void process_sub(int num);
 
 int gen_nasm(void)
 {
@@ -31,6 +33,7 @@ int gen_nasm(void)
 	}
 	out_deinit();
 	fclose(asmfile);
+	return 0;
 }
 
 void set_regs_used(int num)
@@ -59,6 +62,13 @@ static int process_cmd(int num)
 		break;
 	case EXPR_FINI:
 		process_exprfini(num);
+		break;
+	case ADD:
+		process_add(num);
+		break;
+	case SUB:
+		process_sub(num);
+		break;
 	}
 	return ++num;
 }
@@ -98,7 +108,7 @@ int isEmpty(struct Stack* stack)
 }
 
 // Function to add an item to stack.  It increases top by 1
-void push(struct Stack* stack, r64_t reg)
+void push(r64_t reg)
 {
     if (isFull(stack)) {
     	pr_err("stack is full!");
@@ -106,22 +116,45 @@ void push(struct Stack* stack, r64_t reg)
     }
     stack->array[++stack->top] = reg;
     pr_debug("%d pushed to stack", reg);
+    /* now push it really to stack:) */
+    out("PUSH\t%s", reg_to_str(reg));
 }
 
 // Function to remove an item from stack.  It decreases top by 1
-r64_t pop(struct Stack* stack)
+r64_t pop(void)
 {
     if (isEmpty(stack))
         return INT_MIN;
-    return stack->array[stack->top--];
+    r64_t reg = stack->array[stack->top--];
+    out("POP\t%s\n", reg_to_str(reg));
+    return reg;
 }
 
 // Function to return the top from stack without removing it
-r64_t peek(struct Stack* stack)
+r64_t peek(void)
 {
     if (isEmpty(stack))
         return INT_MIN;
     return stack->array[stack->top];
+}
+
+int regsafetely_use(r64_t reg)
+{
+	if(rstate[reg].used) {
+		push(reg);
+		rstate[reg].pushedtimes++;
+	}
+	return rstate[reg].pushedtimes;
+}
+
+r64_t regsafetely_unuse(r64_t reg)
+{
+	if(rstate[reg].used) {
+		r64_t regpoped = pop();
+		assert(reg == regpoped);
+		return regpoped;
+	}
+	return reg;
 }
 
 static void process_mov(int num)
@@ -207,5 +240,58 @@ static void process_exprfini(int num)
 {
 	for(int i=0; i<REGS_AMOUNT; i++) {
 		rstate[i].used = false;
+	}
+}
+
+static void process_add(int num)
+{
+	assert(get_instr(num)->argc == 2);
+	var_t* a0 = get_arg(num, 0);
+	var_t* a1 = get_arg(num, 1);
+	if(a0->memtype == MEMORY_LOC
+		&& a1->memtype == REGISTER) {
+		out("ADD   [%s],    %s\n", var_to_str(a0), var_to_str(a1));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == MEMORY_LOC) {
+		out("ADD    %s,    [%s]\n", var_to_str(a0), var_to_str(a1));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == CONSTANT) {
+		out("ADD    %s,    %s\n", var_to_str(a0), var_to_str(a1));
+	}
+}
+
+static void process_mul(int num)
+{
+	assert(get_instr(num)->argc == 2);
+	var_t* a0 = get_arg(num, 0);
+	var_t* a1 = get_arg(num, 1);
+	regsafetely_use(RAX);
+	if(a0->memtype == MEMORY_LOC
+		&& a1->memtype == REGISTER) {
+		out("MUL   [%s],    %s\n", var_to_str(a0), var_to_str(a1));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == MEMORY_LOC) {
+		out("MUL    %s,    [%s]\n", var_to_str(a0), var_to_str(a1));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == CONSTANT) {
+		out("MUL    %s,    %s\n", var_to_str(a0), var_to_str(a1));
+	}
+	regsafetely_unuse(RAX);
+}
+
+static void process_sub(int num)
+{
+	assert(get_instr(num)->argc == 2);
+	var_t* a0 = get_arg(num, 0);
+	var_t* a1 = get_arg(num, 1);
+	if(a0->memtype == MEMORY_LOC
+		&& a1->memtype == REGISTER) {
+		out("SUB   [%s],    %s\n", var_to_str(a0), var_to_str(a1));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == MEMORY_LOC) {
+		out("SUB    %s,    [%s]\n", var_to_str(a0), var_to_str(a1));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == CONSTANT) {
+		out("SUB    %s,    %s\n", var_to_str(a0), var_to_str(a1));
 	}
 }

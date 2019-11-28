@@ -20,7 +20,7 @@ typedef int r64_t;
 
 typedef struct {
 	bool used;
-	bool pushed;
+	int pushedtimes;
 }r_stat_t;
 
 extern r_stat_t rstate[REGS_AMOUNT];
