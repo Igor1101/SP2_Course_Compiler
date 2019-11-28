@@ -12,6 +12,22 @@
 #include <semantic/tables_sem.h>
 
 #define REGS_AMOUNT 15
+#define R8 0
+#define R9 1
+#define R10 2
+#define R11 3
+#define R12 4
+#define R13 5
+#define R14 6
+#define R15 7
+#define RBP 8
+#define RSI 9
+#define RDI 10
+#define RAX 11
+#define RBX 12
+#define RCX 13
+#define RDX 14
+
 typedef enum {
 	NOP,
 	EXPR_FINI,
@@ -92,6 +108,7 @@ int reserve_reg(ctypes_t type);
 void free_reg(int r);
 var_t* get_reg(int num);
 char* reg_to_str(int r);
+char* var_to_str(var_t*v);
 void free_ops(void);
 void init_prelim(void);
 var_t* get_arg(int num, int argnum);

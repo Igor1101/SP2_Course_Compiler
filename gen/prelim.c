@@ -252,35 +252,35 @@ var_t* get_reg(int num)
 char* reg_to_str(int r)
 {
 	switch(r) {
-	case 0:
+	case R8:
 		return "R8";
-	case 1:
+	case R9:
 		return "R9";
-	case 2:
+	case R10:
 		return "R10";
-	case 3:
+	case R11:
 		return "R11";
-	case 4:
+	case R12:
 		return "R12";
-	case 5:
+	case R13:
 		return "R13";
-	case 6:
+	case R14:
 		return "R14";
-	case 7:
+	case R15:
 		return "R15";
-	case 8:
+	case RBP:
 		return "RBP";
-	case 9:
+	case RSI:
 		return "RSI";
-	case 10:
+	case RDI:
 		return "RDI";
-	case 11:
+	case RAX:
 		return "RAX";
-	case 12:
+	case RBX:
 		return "RBX";
-	case 13:
+	case RCX:
 		return "RCX";
-	case 14:
+	case RDX:
 		return "RDX";
 	}
 	return "invalid reg";
@@ -428,4 +428,14 @@ op_t get_opcode(int num)
 inst_t* get_instr(int num)
 {
 	return &pre_code.inst[num];
+}
+
+char* var_to_str(var_t*v)
+{
+	switch(v->memtype) {
+	case REGISTER:
+		return reg_to_str(v->num);
+	case MEMORY_LOC:
+		return str_get(v->num)->inst;
+	}
 }
