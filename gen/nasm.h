@@ -27,6 +27,11 @@ extern r_stat_t rstate[REGS_AMOUNT];
 extern FILE* asmfile;
 
 
+void set_regs_used(int num);
+
 int gen_nasm(void);
+void out_decl(void);
+void out_init(void);
+void out_deinit(void);
 
 #endif /* GEN_NASM_H_ */

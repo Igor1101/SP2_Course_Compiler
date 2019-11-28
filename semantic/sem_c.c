@@ -46,7 +46,7 @@ static int process_declaration(int num)
 		switch(str_get(num)->synt) {
 		case S_ID_VARIABLE:
 		{
-			int idnum = ident_add(str_get_inst(num), t, false, 0);
+			int idnum = ident_add(str_get_inst(num), t, false, 1);
 			if(idnum<0) {
 				set_err_already_decl(num);
 			}

@@ -11,6 +11,7 @@
 #include <lexems/tables.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <semantic/tables_sem.h>
 
 r_stat_t rstate[REGS_AMOUNT];
 FILE* asmfile;
@@ -20,11 +21,15 @@ static void process_mov(int num);
 
 int gen_nasm(void)
 {
-	asmfile = stdout;
+	asmfile = fopen("/home/igor/result/result.asm", "w");
+	out_decl();
+	out_init();
 	for(int i=0; i<pre_code.amount; ) {
 		set_regs_used(i);
 		i = process_cmd(i);
 	}
+	out_deinit();
+	fclose(asmfile);
 }
 
 void set_regs_used(int num)
@@ -50,8 +55,8 @@ static int process_cmd(int num)
 		break;
 	case MOV:
 		process_mov(num);
-
 		break;
+
 	}
 	return ++num;
 }
@@ -128,6 +133,70 @@ static void process_mov(int num)
 	} else if(a0->memtype == REGISTER
 		&& a1->memtype == MEMORY_LOC) {
 		out("MOV    %s,    [%s]\n", var_to_str(a0), var_to_str(a1));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == CONSTANT) {
+		out("MOV    %s,    %s\n", var_to_str(a0), var_to_str(a1));
+	}
+
+}
+
+void out_decl(void)
+{
+	/*
+	out("section .data\n");
+	for(int i=0; i<ident_array.amount; i++) {
+		ident_t* id = ident_get(i);
+		out("%s: TIMES %d ", id->inst, id->amount);
+		switch(id->type) {
+		case C_CHAR_T:
+			out("DB");
+			break;
+		case C_INT_T:
+		case C_UNSIGNED_T:
+		case C_FLOAT_T:
+		case C_SIGNED_T:
+			out("DD");
+			break;
+		case C_DOUBLE_T:
+		case C_LONG_T:
+			out("DQ");
+			break;
+		case C_SHORT_T:
+			out("DW");
+			break;
+		case C_UKNOWN:
+			out("DQ");
+			break;
+		}
+		out(" 0 \n");
+	}
+	out("\nsection .text\n");
+	*/
+	for(int i=0; i<ident_array.amount; i++) {
+		out("extern %s\n", ident_get(i)->inst);
 	}
 }
 
+void out_init(void)
+{
+	out("section .text\n");
+	out("extern exit\n");
+	out("extern printf\n");
+	out("global result\n");
+	out("result:\n");
+	out("PUSH RBP\n");
+	out("MOV RBP, RSP\n");
+	out("\n");
+	out("\n");
+}
+
+void out_deinit(void)
+{
+	out("\n");
+	out("\n");
+	//out("MOV RCX, 0\n");
+	//out("CALL exit\n");
+	out("MOV RSP, RBP\n");
+	out("POP RBP\n");
+	out("RET\n");
+}
