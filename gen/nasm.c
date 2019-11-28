@@ -124,10 +124,10 @@ static void process_mov(int num)
 	var_t* a1 = get_arg(num, 1);
 	if(a0->memtype == MEMORY_LOC
 		&& a1->memtype == REGISTER) {
-		out("MOV   [%s]    %s\n", var_to_str(a0), var_to_str(a1));
+		out("MOV   [%s],    %s\n", var_to_str(a0), var_to_str(a1));
 	} else if(a0->memtype == REGISTER
 		&& a1->memtype == MEMORY_LOC) {
-		out("MOV    %s     [%s]\n", var_to_str(a0), var_to_str(a1));
+		out("MOV    %s,    [%s]\n", var_to_str(a0), var_to_str(a1));
 	}
 }
 
