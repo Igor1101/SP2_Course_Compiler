@@ -46,7 +46,7 @@ static int process_declaration(int num)
 		switch(str_get(num)->synt) {
 		case S_ID_VARIABLE:
 		{
-			int idnum = ident_add(str_get_inst(num), t, false);
+			int idnum = ident_add(str_get_inst(num), t, false, 0);
 			if(idnum<0) {
 				set_err_already_decl(num);
 			}
@@ -58,7 +58,8 @@ static int process_declaration(int num)
 			break;
 		}
 		case S_ID_ARRAY:
-			if(ident_add(str_get_inst(num), t, true)<0) {
+			if(ident_add(str_get_inst(num), t, true,
+					strtol(str_get(num+2)->inst, NULL, 10))<0) {
 				set_err_already_decl(num);
 			}
 			str_get(num)->ctype = t;

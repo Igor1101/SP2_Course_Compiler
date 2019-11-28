@@ -32,6 +32,7 @@ typedef struct {
 	bool init;
 	bool used;
 	bool array;
+	int amount;
 }ident_t;
 
 typedef struct {
@@ -41,7 +42,7 @@ typedef struct {
 
 extern ident_array_t ident_array;
 
-int ident_add(char*str, ctypes_t t, bool init);
+int ident_add(char*str, ctypes_t t, bool array, int amount);
 void ident_del(int index);
 void ident_modify(int index, char* new);
 void ident_modify_max(char* new);
