@@ -11,4 +11,5 @@
 *.pdf
 sp2cc
 *.out
+*.cc
 .settings/org.eclipse.cdt.codan.core.prefs
