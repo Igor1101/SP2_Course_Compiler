@@ -24,7 +24,7 @@ static void process_sub(int num);
 
 int gen_nasm(void)
 {
-	asmfile = fopen("/home/igor/result/result.asm", "w");
+	asmfile = fopen("result.asm", "w");
 	out_decl();
 	out_init();
 	for(int i=0; i<pre_code.amount; ) {
@@ -177,7 +177,6 @@ static void process_mov(int num)
 
 void out_decl(void)
 {
-	/*
 	out("section .data\n");
 	for(int i=0; i<ident_array.amount; i++) {
 		ident_t* id = ident_get(i);
@@ -205,11 +204,10 @@ void out_decl(void)
 		}
 		out(" 0 \n");
 	}
-	out("\nsection .text\n");
-	*/
+	/*out("\nsection .text\n");
 	for(int i=0; i<ident_array.amount; i++) {
 		out("extern %s\n", ident_get(i)->inst);
-	}
+	}*/
 }
 
 void out_init(void)
@@ -217,8 +215,8 @@ void out_init(void)
 	out("section .text\n");
 	out("extern exit\n");
 	out("extern printf\n");
-	out("global result\n");
-	out("result:\n");
+	out("global main\n");
+	out("main:\n");
 	out("PUSH RBP\n");
 	out("MOV RBP, RSP\n");
 	out("\n");

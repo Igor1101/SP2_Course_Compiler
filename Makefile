@@ -1,4 +1,4 @@
-TARGET := app
+TARGET := sp2cc
 PLATFORM ?= posix 
 CC ?= gcc
 LANGUAGE_ ?=c
@@ -41,19 +41,20 @@ COBJS = $(patsubst %.c,%.o,$(APP_SRC))
 vpath %.c $(APP_PATH):$(LAB1_PATH):$(SYN_PATH):$(SEM_PATH):$(GEN_PATH):trees
 
 
-all: $(APP_SRC) $(COBJS) $(TARGET).elf 
+all: $(APP_SRC) $(COBJS) $(TARGET)
 
 
 
 %.o: %.c $(BUILD_DIR) 
 	$(CC) $(CFLAGS)  $(RTOS_DEFS) $(INCFLAGS) -c $< -o $@
-$(TARGET).elf: $(COBJS)
+$(TARGET): $(COBJS)
 	$(CC) $(LDFLAGS) -o $@ $^ $(INCFLAGS)
 clean:
 	-rm -rf *.o
 	-rm -rf *.elf
+	-rm $(TARGET)
 $(BUILD_DIR):
 	mkdir -p  $(BUILD_DIR)
 
 run:
-	./$(TARGET).elf
+	./$(TARGET)

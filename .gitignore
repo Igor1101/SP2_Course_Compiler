@@ -1,3 +1,4 @@
+*.asm
 *.o
 *.elf
 *.docx
@@ -8,4 +9,6 @@
 .antiplug/
 *.sig
 *.pdf
+sp2cc
+*.out
 .settings/org.eclipse.cdt.codan.core.prefs
