@@ -330,7 +330,7 @@ static void process_mul(int num)
 		&& a1->memtype == CONSTANT) {
 		out("MOV   %s,    %s\n", var_to_str(&rax), var_to_str(a1));
 	}
-	out("MUL    %s\n", var_to_str(&rax));
+	out("MUL    %s\n", var_to_str(a0));
 	if(a0->memtype == MEMORY_LOC
 		&& a1->memtype == REGISTER) {
 		out("MOV   [%s],    %s\n", var_to_str(a0), var_to_str(&rax));
