@@ -262,7 +262,7 @@ void out_decl_printf(void)
 			out("ld");
 			break;
 		case C_SHORT_T:
-			out("h");
+			out("hi");
 			break;
 		case C_UKNOWN:
 			out("d");

@@ -101,6 +101,11 @@ static int process_expression(int num, bool param, bool inside_array)
 				str_get(num)->ctype = C_INT_T;
 				if(main_type == C_UKNOWN)
 					main_type = C_INT_T;
+				else if(main_type == C_INT_T ||
+						main_type == C_SHORT_T ||
+						main_type == C_LONG_T ||
+						main_type == C_CHAR_T)
+					str_get(num)->ctype = main_type;
 			}
 
 			if(str_get(num)->lext == L_CONSTANT_FLOAT) {

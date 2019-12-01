@@ -64,7 +64,7 @@ static int process_main(int num, int level, bool inside_block)
 		case L_KEYWORD:
 		{
 			const static char* types[] = { "int", "float",
-			"char", "double", "long"};
+			"char", "double", "long", "short"};
 			if(is_str_in(str_get(num)->inst, types, sizeof types)) {
 				num = process_declaration(num, level, false);
 				break;
@@ -502,7 +502,7 @@ static int process_array(int num, int level, bool maybeparam, bool inside_expr)
 static int process_declaration(int num, int level, bool param)
 {
 	const static char* types[] = { "int", "float",
-			"char", "double", "long", "unsigned"};
+			"char", "double", "long", "unsigned", "short"};
 	if(!is_str_in(str_get_inst(num), types, sizeof types)) {
 		set_synt_err(num, S_KEYWORD_TYPE);
 		return num+1;

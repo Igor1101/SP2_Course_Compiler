@@ -16,7 +16,7 @@
 
 static const char * c_reservedwords[] = {
 		"auto", "signed", "const", "extern", "register", "unsigned", "static",
-		"int", "float", "char", "double", "long",
+		"int", "float", "char", "double", "long", "short",
 		"void",
 		"if", "else", "switch", "case", "default",
 		"break", "continue",
