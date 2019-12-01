@@ -294,7 +294,6 @@ static int process_expression(int num, bool param)
 				}
 			}
 		}
-		add_noarg(EXPR_FINI);
 		return num;
 	}
 	int reg_result = reserve_reg(main_type);
@@ -311,6 +310,7 @@ static int process_expression(int num, bool param)
 		}
 	}
 	free_vars();
+	add_noarg(EXPR_FINI);
 	return num;
 }
 

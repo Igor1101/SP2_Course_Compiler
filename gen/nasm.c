@@ -20,6 +20,7 @@ static int process_cmd(int num);
 static void process_mov(int num);
 static void process_exprfini(int num);
 static void process_add(int num);
+static void process_mul(int num);
 static void process_sub(int num);
 
 int gen_nasm(void)
@@ -69,6 +70,9 @@ static int process_cmd(int num)
 		break;
 	case SUB:
 		process_sub(num);
+		break;
+	case MUL:
+		process_mul(num);
 		break;
 	}
 	return ++num;
@@ -282,6 +286,7 @@ static void process_exprfini(int num)
 	for(int i=0; i<REGS_AMOUNT; i++) {
 		rstate[i].used = false;
 	}
+	out("; END OF EXPRESSION\n\n");
 }
 
 static void process_add(int num)
@@ -298,6 +303,9 @@ static void process_add(int num)
 	} else if(a0->memtype == REGISTER
 		&& a1->memtype == CONSTANT) {
 		out("ADD    %s,    %s\n", var_to_str(a0), var_to_str(a1));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == REGISTER) {
+		out("ADD    %s,    %s\n", var_to_str(a0), var_to_str(a1));
 	}
 }
 
@@ -306,17 +314,34 @@ static void process_mul(int num)
 	assert(get_instr(num)->argc == 2);
 	var_t* a0 = get_arg(num, 0);
 	var_t* a1 = get_arg(num, 1);
+	var_t rax;
+	get_reg_force(RAX, (a1->conv==C_UKNOWN)?a1->type:a1->conv);
+	var_get(RAX, REGISTER, &rax);
 	regsafetely_use(RAX);
+	regsafetely_use(RDX);
+	out("; MUL EXPRESSION\n");
 	if(a0->memtype == MEMORY_LOC
 		&& a1->memtype == REGISTER) {
-		out("MUL   [%s],    %s\n", var_to_str(a0), var_to_str(a1));
+		out("MOV   %s,    %s\n", var_to_str(&rax), var_to_str(a1));
 	} else if(a0->memtype == REGISTER
 		&& a1->memtype == MEMORY_LOC) {
-		out("MUL    %s,    [%s]\n", var_to_str(a0), var_to_str(a1));
+		out("MOV   %s,    [%s]\n", var_to_str(&rax), var_to_str(a1));
 	} else if(a0->memtype == REGISTER
 		&& a1->memtype == CONSTANT) {
-		out("MUL    %s,    %s\n", var_to_str(a0), var_to_str(a1));
+		out("MOV   %s,    %s\n", var_to_str(&rax), var_to_str(a1));
 	}
+	out("MUL    %s\n", var_to_str(&rax));
+	if(a0->memtype == MEMORY_LOC
+		&& a1->memtype == REGISTER) {
+		out("MOV   [%s],    %s\n", var_to_str(a0), var_to_str(&rax));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == MEMORY_LOC) {
+		out("MOV   %s,    %s\n", var_to_str(a0), var_to_str(&rax));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == CONSTANT) {
+		out("MOV   %s,    %s\n", var_to_str(a0), var_to_str(&rax));
+	}
+	regsafetely_unuse(RDX);
 	regsafetely_unuse(RAX);
 }
 
