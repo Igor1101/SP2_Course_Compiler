@@ -111,7 +111,7 @@ char* get_next_lexem_alloc(char*str, int* i, lexem_t* lexerror)
 		char*lex = calloc(1, 1);
 		int index = 0;
 		do {
-			if(ch > 255) {
+			if(ch > 255 && ch != EOF) {
 				ch = '?';
 				*lexerror = L_UNACCEPTABLE_CHAR;
 			}
@@ -179,10 +179,9 @@ int lex_parse(char*str)
 		if(ch == 0) {
 			break;
 		}
-		if(ch > 255 ) {
-			pr_err("non ascii character detected outside quatation");
-			ret_status++;
-			continue;
+		if(ch > 255 && ch != EOF) {
+			pr_err("non ascii character detected outside quatation =%u", ch);
+			break;
 		}
 		if(is_char_in(ch, ";,:")) {
 			pr_debug("found delimiter");
