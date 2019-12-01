@@ -107,6 +107,7 @@ void prelim_print_debug(void);
 int reserve_reg(ctypes_t type);
 void free_reg(int r);
 var_t* get_reg(int num);
+var_t* get_reg_force(int num, ctypes_t type);
 char* reg_to_str(int r);
 char* var_to_str(var_t*v);
 void free_ops(void);

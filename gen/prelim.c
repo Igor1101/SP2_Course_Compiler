@@ -244,8 +244,18 @@ void free_reg(int r)
 	 regs_vm.reg_res[r] = false;
 }
 
+var_t* get_reg_force(int num, ctypes_t type)
+{
+	regs_vm.regs[num].memtype = REGISTER;
+	regs_vm.regs[num].type = type;
+	regs_vm.regs[num].num = num;
+	return &regs_vm.regs[num];
+}
+
 var_t* get_reg(int num)
 {
+	regs_vm.regs[num].memtype = REGISTER;
+	regs_vm.regs[num].num = num;
 	return &regs_vm.regs[num];
 }
 
