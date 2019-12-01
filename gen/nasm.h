@@ -33,5 +33,6 @@ int gen_nasm(void);
 void out_decl(void);
 void out_init(void);
 void out_deinit(void);
+void out_decl_printf(void);
 
 #endif /* GEN_NASM_H_ */

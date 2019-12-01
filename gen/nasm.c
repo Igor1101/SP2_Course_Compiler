@@ -31,6 +31,7 @@ int gen_nasm(void)
 		set_regs_used(i);
 		i = process_cmd(i);
 	}
+	out_decl_printf();
 	out_deinit();
 	fclose(asmfile);
 	return 0;
@@ -232,6 +233,48 @@ void out_deinit(void)
 	out("MOV RSP, RBP\n");
 	out("POP RBP\n");
 	out("RET\n");
+}
+
+void out_decl_printf(void)
+{
+#define STR_DATA "STR_%s_%d"
+	/* setting rodata strings for vars */
+	out("section .rodata\n");
+	for(int i=0; i<ident_array.amount; i++) {
+		ident_t* id = ident_get(i);
+		out(STR_DATA ": DB \"%s=%%", id->inst, id->amount, id->inst);
+		switch(id->type) {
+		case C_CHAR_T:
+			out("c");
+			break;
+		case C_INT_T:
+		case C_UNSIGNED_T:
+		case C_FLOAT_T:
+		case C_SIGNED_T:
+			out("d");
+			break;
+		case C_DOUBLE_T:
+		case C_LONG_T:
+			out("ld");
+			break;
+		case C_SHORT_T:
+			out("h");
+			break;
+		case C_UKNOWN:
+			out("d");
+			break;
+		}
+		out("\",0\n");
+	}
+	/* setting output of them */
+	out("section .text\n");
+	for(int i=0; i<ident_array.amount; i++) {
+		ident_t* id = ident_get(i);
+		out("MOV\tRAX,\t0\n");
+		out("MOV\tRDI,\t" STR_DATA "\n", id->inst, id->amount);
+		out("MOV\tRSI,\t[%s]\n", id->inst);
+		out("CALL printf\n");
+	}
 }
 
 static void process_exprfini(int num)
