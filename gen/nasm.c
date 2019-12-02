@@ -122,7 +122,7 @@ void push(r64_t reg)
     stack->array[++stack->top] = reg;
     pr_debug("%d pushed to stack", reg);
     /* now push it really to stack:) */
-    out("PUSH\t%s", reg_to_str(reg));
+    out("PUSH\t%s", reg_to_str(reg, false));
 }
 
 // Function to remove an item from stack.  It decreases top by 1
@@ -131,7 +131,7 @@ r64_t pop(void)
     if (isEmpty(stack))
         return INT_MIN;
     r64_t reg = stack->array[stack->top--];
-    out("POP\t%s\n", reg_to_str(reg));
+    out("POP\t%s\n", reg_to_str(reg, false));
     return reg;
 }
 
@@ -358,6 +358,9 @@ static void process_sub(int num)
 		out("SUB    %s,    [%s]\n", var_to_str(a0), var_to_str(a1));
 	} else if(a0->memtype == REGISTER
 		&& a1->memtype == CONSTANT) {
+		out("SUB    %s,    %s\n", var_to_str(a0), var_to_str(a1));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == REGISTER) {
 		out("SUB    %s,    %s\n", var_to_str(a0), var_to_str(a1));
 	}
 }
