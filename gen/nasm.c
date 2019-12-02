@@ -23,6 +23,9 @@ static void process_add(int num);
 static void process_mul(int num);
 static void process_sub(int num);
 
+static void mov_simple(var_t * a0, var_t* a1);
+static void mov_floating(var_t * a0, var_t* a1);
+
 int gen_nasm(void)
 {
 	asmfile = fopen("result.asm", "w");
@@ -122,7 +125,7 @@ void push(r64_t reg)
     stack->array[++stack->top] = reg;
     pr_debug("%d pushed to stack", reg);
     /* now push it really to stack:) */
-    out("PUSH\t%s", reg_to_str(reg));
+    out("PUSH\t%s\n", reg_to_str(reg));
 }
 
 // Function to remove an item from stack.  It decreases top by 1
@@ -167,17 +170,16 @@ static void process_mov(int num)
 	assert(get_instr(num)->argc == 2);
 	var_t* a0 = get_arg(num, 0);
 	var_t* a1 = get_arg(num, 1);
-	if(a0->memtype == MEMORY_LOC
-		&& a1->memtype == REGISTER) {
-		out("MOV   [%s],    %s\n", var_to_str(a0), var_to_str(a1));
-	} else if(a0->memtype == REGISTER
-		&& a1->memtype == MEMORY_LOC) {
-		out("MOV    %s,    [%s]\n", var_to_str(a0), var_to_str(a1));
-	} else if(a0->memtype == REGISTER
-		&& a1->memtype == CONSTANT) {
-		out("MOV    %s,    %s\n", var_to_str(a0), var_to_str(a1));
+	ctypes_t t = a0->type;
+	switch (t) {
+		case C_DOUBLE_T:
+		case C_FLOAT_T:
+			mov_floating(a0, a1);
+			break;
+		default:
+			mov_simple(a0, a1);
+			break;
 	}
-
 }
 
 void out_decl(void)
@@ -253,11 +255,9 @@ void out_decl_printf(void)
 			break;
 		case C_INT_T:
 		case C_UNSIGNED_T:
-		case C_FLOAT_T:
 		case C_SIGNED_T:
 			out("d");
 			break;
-		case C_DOUBLE_T:
 		case C_LONG_T:
 			out("ld");
 			break;
@@ -267,16 +267,29 @@ void out_decl_printf(void)
 		case C_UKNOWN:
 			out("d");
 			break;
+		case C_DOUBLE_T:
+		case C_FLOAT_T:
+			out("f");
+			break;
 		}
-		out("\",0\n");
+		out("\", 0xA, 0\n");
 	}
 	/* setting output of them */
 	out("section .text\n");
 	for(int i=0; i<ident_array.amount; i++) {
 		ident_t* id = ident_get(i);
-		out("MOV\tRAX,\t0\n");
+		switch(id->type) {
+		case C_DOUBLE_T:
+		case C_FLOAT_T:
+			out("MOV\tRAX,\t1\n");
+			out("MOV\tRBX,\t[%s]\n", id->inst);
+			out("MOVQ\tXMM0,\tRBX\n");
+			break;
+		default:
+			out("MOV\tRAX,\t0\n");
+			out("MOV\tRSI,\t[%s]\n", id->inst);
+		}
 		out("MOV\tRDI,\t" STR_DATA "\n", id->inst, id->amount);
-		out("MOV\tRSI,\t[%s]\n", id->inst);
 		out("CALL printf\n");
 	}
 }
@@ -362,4 +375,47 @@ static void process_sub(int num)
 		&& a1->memtype == REGISTER) {
 		out("SUB    %s,    %s\n", var_to_str(a0), var_to_str(a1));
 	}
+}
+
+static void mov_simple(var_t * a0, var_t* a1)
+{
+	if(a0->memtype == MEMORY_LOC
+		&& a1->memtype == REGISTER) {
+		out("MOV   [%s],    %s\n", var_to_str(a0), var_to_str(a1));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == MEMORY_LOC) {
+		out("MOV    %s,    [%s]\n", var_to_str(a0), var_to_str(a1));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == CONSTANT) {
+		out("MOV    %s,    %s\n", var_to_str(a0), var_to_str(a1));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == REGISTER) {
+		out("MOV    %s,    %s\n", var_to_str(a0), var_to_str(a1));
+	}
+}
+
+static void mov_floating(var_t * a0, var_t* a1)
+{
+	static int floating_num = 0;
+	if(a0->memtype == MEMORY_LOC
+		&& a1->memtype == REGISTER) {
+		out("MOVQ   [%s],    %s\n", var_to_str(a0), var_to_str(a1));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == MEMORY_LOC) {
+		out("MOVQ    %s,    [%s]\n", var_to_str(a0), var_to_str(a1));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == CONSTANT) {
+		out("section .rodata\n");
+		out("FLOATING_NUM_%d: DQ %s\n", floating_num, var_to_str(a1));
+		out("section .text\n");
+		regsafetely_use(R8);
+		var_t* r8 = get_reg_force(R8, C_LONG_T);
+		out("MOV    %s,    [FLOATING_NUM_%d]\n", var_to_str(r8), floating_num);
+		out("MOVQ    %s,   %s\n", var_to_str(a0), var_to_str(r8));
+		regsafetely_unuse(R8);
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == REGISTER) {
+		out("MOVQ    %s,    %s\n", var_to_str(a0), var_to_str(a1));
+	}
+	floating_num++;
 }
