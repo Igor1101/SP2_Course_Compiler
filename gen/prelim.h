@@ -31,22 +31,24 @@
  * SSE2 - XMM REGISTERS
  */
 #define XMM_REGS_AMOUNT 15
-#define XMM0 0
-#define XMM1 1
-#define XMM2 2
-#define XMM3 3
-#define XMM4 4
-#define XMM5 5
-#define XMM6 6
-#define XMM7 7
-#define XMM8 8
-#define XMM9 9
-#define XMM10 10
-#define XMM11 11
-#define XMM12 12
-#define XMM13 13
-#define XMM14 14
-#define XMM15 15
+#define XMM0 15
+#define XMM1 16
+#define XMM2 17
+#define XMM3 18
+#define XMM4 19
+#define XMM5 20
+#define XMM6 21
+#define XMM7 22
+#define XMM8 23
+#define XMM9 24
+#define XMM10 25
+#define XMM11 26
+#define XMM12 27
+#define XMM13 28
+#define XMM14 29
+#define XMM15 30
+
+#define ALL_REGS_AMOUNT (REGS_AMOUNT + XMM_REGS_AMOUNT)
 
 typedef enum {
 	NOP,
@@ -85,7 +87,6 @@ typedef enum {
 }op_t;
 typedef enum {
 	REGISTER,
-	XMM_REGISTER,
 	MEMORY_LOC,
 	STACK_INST,
 	CONSTANT
@@ -126,10 +127,10 @@ int add_noarg(op_t op);
 char* op_to_str(op_t op);
 void prelim_print_debug(void);
 int reserve_reg(ctypes_t type);
-void free_reg(int r, ctypes_t type);
+void free_reg(int r);
 var_t* get_reg(int num);
 var_t* get_reg_force(int num, ctypes_t type);
-char* reg_to_str(int r, bool xmm);
+char* reg_to_str(int r);
 char* var_to_str(var_t*v);
 void free_ops(void);
 void init_prelim(void);

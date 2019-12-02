@@ -23,7 +23,7 @@ typedef struct {
 	int pushedtimes;
 }r_stat_t;
 
-extern r_stat_t rstate[REGS_AMOUNT];
+extern r_stat_t rstate[ALL_REGS_AMOUNT];
 extern FILE* asmfile;
 
 

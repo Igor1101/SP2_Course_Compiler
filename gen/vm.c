@@ -71,10 +71,10 @@ static int process_expression(int num, bool param)
 		while(i->next != NULL) {
 			struct var_node*pr = i;
 			i = i->next;
-			free_reg(pr->reg, pr->type);
+			free_reg(pr->reg);
 			str_free((void**)&pr);
 		}
-		free_reg(i->reg, i->type);
+		free_reg(i->reg);
 		free(i);
 	}
 	int set_var_reg(int reg, int varnum, ctypes_t t)
@@ -282,7 +282,7 @@ static int process_expression(int num, bool param)
 						int reg = reserve_reg(main_type);
 						var_get_local(reg, REGISTER, &from);
 						num = get_rvalue(num+1, end, nxtlevel, &from);
-						free_reg(reg, main_type);
+						free_reg(reg);
 					} else
 						var_get_local(var_nxt, MEMORY_LOC, &from);
 					if(firstop && str_get(op_num)->lext != L_OPERAT_RELATION)

@@ -13,7 +13,7 @@
 #include <stdbool.h>
 #include <semantic/tables_sem.h>
 
-r_stat_t rstate[REGS_AMOUNT];
+r_stat_t rstate[ALL_REGS_AMOUNT];
 FILE* asmfile;
 
 static int process_cmd(int num);
@@ -122,7 +122,7 @@ void push(r64_t reg)
     stack->array[++stack->top] = reg;
     pr_debug("%d pushed to stack", reg);
     /* now push it really to stack:) */
-    out("PUSH\t%s", reg_to_str(reg, false));
+    out("PUSH\t%s", reg_to_str(reg));
 }
 
 // Function to remove an item from stack.  It decreases top by 1
@@ -131,7 +131,7 @@ r64_t pop(void)
     if (isEmpty(stack))
         return INT_MIN;
     r64_t reg = stack->array[stack->top--];
-    out("POP\t%s\n", reg_to_str(reg, false));
+    out("POP\t%s\n", reg_to_str(reg));
     return reg;
 }
 
@@ -319,7 +319,6 @@ static void process_mul(int num)
 	var_get(RAX, REGISTER, &rax);
 	regsafetely_use(RAX);
 	regsafetely_use(RDX);
-	out("; MUL EXPRESSION\n");
 	if(a0->memtype == MEMORY_LOC
 		&& a1->memtype == REGISTER) {
 		out("MOV   %s,    %s\n", var_to_str(&rax), var_to_str(a1));

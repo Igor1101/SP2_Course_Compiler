@@ -217,29 +217,24 @@ void prelim_print_debug(void)
 }
 
 struct regs_vm_t {
-	bool reg_res[REGS_AMOUNT];
-	bool reg_res_xmm[REGS_AMOUNT];
-	var_t regs[REGS_AMOUNT];
-	var_t regs_xmm[REGS_AMOUNT];
+	bool reg_res[ALL_REGS_AMOUNT];
+	var_t regs[ALL_REGS_AMOUNT];
 }regs_vm;
 
 int reserve_reg(ctypes_t type)
 {
+	int start, end;
 	switch(type) {
-	case C_DOUBLE_T:
 	case C_FLOAT_T:
-	for(int i=0; i<XMM_REGS_AMOUNT; i++) {
-		if(!regs_vm.reg_res_xmm[i]) {
-			regs_vm.regs_xmm[i].memtype = REGISTER;
-			regs_vm.regs_xmm[i].type = type;
-			regs_vm.regs_xmm[i].num = i;
-			regs_vm.reg_res_xmm[i] = true;
-			return i;
-		}
-	}
-	break;
+	case C_DOUBLE_T:
+		start = REGS_AMOUNT;
+		end = ALL_REGS_AMOUNT;
+		break;
 	default:
-	for(int i=0; i<REGS_AMOUNT; i++) {
+		start = 0;
+		end = REGS_AMOUNT;
+	}
+	for(int i=start; i<end; i++) {
 		if(!regs_vm.reg_res[i]) {
 			regs_vm.regs[i].memtype = REGISTER;
 			regs_vm.regs[i].type = type;
@@ -248,29 +243,16 @@ int reserve_reg(ctypes_t type)
 			return i;
 		}
 	}
-	}
-
 	return -1;
 }
 
-void free_reg(int r, ctypes_t type)
+void free_reg(int r)
 {
-	switch(type) {
-	case C_DOUBLE_T:
-	case C_FLOAT_T:
-		if(r>=XMM_REGS_AMOUNT) {
-			pr_err("free reg xmm out of region");
-			return;
-		}
-		regs_vm.reg_res_xmm[r] = false;
-		return;
-	default:
-		if(r>=REGS_AMOUNT) {
-			pr_err("free reg out of region");
-			return;
-		}
-		regs_vm.reg_res[r] = false;
+	if(r>=ALL_REGS_AMOUNT) {
+		pr_err("free reg out of region");
 	}
+	return;
+	regs_vm.reg_res[r] = false;
 }
 
 var_t* get_reg_force(int num, ctypes_t type)
@@ -288,9 +270,11 @@ var_t* get_reg(int num)
 	return &regs_vm.regs[num];
 }
 
-char* reg_to_str(int r, bool xmm)
+char* reg_to_str(int r)
 {
-	if(xmm) {
+	switch(regs_vm.regs[r].type) {
+	case C_DOUBLE_T:
+	case C_FLOAT_T:
 		switch(r) {
 		case XMM0:
 			return "XMM0";
@@ -316,10 +300,16 @@ char* reg_to_str(int r, bool xmm)
 			return "XMM10";
 		case XMM11:
 			return "XMM11";
+		case XMM12:
+			return "XMM12";
+		case XMM13:
+			return "XMM13";
+		case XMM14:
+			return "XMM14";
+		case XMM15:
+			return "XMM15";
 		}
-		return "XMM UNKNOWN";
-	}
-	switch(regs_vm.regs[r].type) {
+		break;
 	case C_LONG_T:
 		switch(r) {
 		case R8:
@@ -506,9 +496,7 @@ char* var_get_inst(var_t *var)
 {
 	switch(var->memtype) {
 	case REGISTER:
-		return reg_to_str(var->num, false);
-	case XMM_REGISTER:
-		return reg_to_str(var->num, true);
+		return reg_to_str(var->num);
 	case MEMORY_LOC:
 		return str_get(var->num)->inst;
 	case CONSTANT:
@@ -612,9 +600,7 @@ char* var_to_str(var_t*v)
 {
 	switch(v->memtype) {
 	case REGISTER:
-		return reg_to_str(v->num, false);
-	case XMM_REGISTER:
-		return reg_to_str(v->num, true);
+		return reg_to_str(v->num);
 	case MEMORY_LOC:
 		return str_get(v->num)->inst;
 	case CONSTANT:
