@@ -27,6 +27,26 @@
 #define RBX 12
 #define RCX 13
 #define RDX 14
+/*
+ * SSE2 - XMM REGISTERS
+ */
+#define XMM_REGS_AMOUNT 15
+#define XMM0 0
+#define XMM1 1
+#define XMM2 2
+#define XMM3 3
+#define XMM4 4
+#define XMM5 5
+#define XMM6 6
+#define XMM7 7
+#define XMM8 8
+#define XMM9 9
+#define XMM10 10
+#define XMM11 11
+#define XMM12 12
+#define XMM13 13
+#define XMM14 14
+#define XMM15 15
 
 typedef enum {
 	NOP,
@@ -65,6 +85,7 @@ typedef enum {
 }op_t;
 typedef enum {
 	REGISTER,
+	XMM_REGISTER,
 	MEMORY_LOC,
 	STACK_INST,
 	CONSTANT
@@ -105,10 +126,10 @@ int add_noarg(op_t op);
 char* op_to_str(op_t op);
 void prelim_print_debug(void);
 int reserve_reg(ctypes_t type);
-void free_reg(int r);
+void free_reg(int r, ctypes_t type);
 var_t* get_reg(int num);
 var_t* get_reg_force(int num, ctypes_t type);
-char* reg_to_str(int r);
+char* reg_to_str(int r, bool xmm);
 char* var_to_str(var_t*v);
 void free_ops(void);
 void init_prelim(void);

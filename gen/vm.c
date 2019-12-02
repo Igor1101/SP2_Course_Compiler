@@ -53,6 +53,7 @@ struct var_node{
 	int varnum;
 	bool in_reg;
 	int reg;
+	ctypes_t type;
 	struct var_node* next;
 };
 
@@ -70,19 +71,20 @@ static int process_expression(int num, bool param)
 		while(i->next != NULL) {
 			struct var_node*pr = i;
 			i = i->next;
-			free_reg(pr->reg);
+			free_reg(pr->reg, pr->type);
 			str_free((void**)&pr);
 		}
-		free_reg(i->reg);
+		free_reg(i->reg, i->type);
 		free(i);
 	}
-	int set_var_reg(int reg, int varnum)
+	int set_var_reg(int reg, int varnum, ctypes_t t)
 	{
 		struct var_node*i = var0;
 		do {
 			if(i->varnum == varnum && !i->in_reg) {
 				i->reg = reg;
 				i->in_reg = true;
+				i->type = t;
 				return 0;
 			}
 			i = i->next;
@@ -100,6 +102,7 @@ static int process_expression(int num, bool param)
 				prev->next = NULL;
 				prev->varnum = -1;
 				prev->reg = -1;
+				prev->type = str_get(num)->ctype;
 			}
 		}
 	}
@@ -188,7 +191,7 @@ static int process_expression(int num, bool param)
 					var_get_local(var, MEMORY_LOC, &from);
 					var_get_local(reg, REGISTER, &to);
 					sign(&to, &from);
-					set_var_reg(reg, var);
+					set_var_reg(reg, var, str_get(var)->ctype);
 				}
 			}
 			num++;
@@ -208,7 +211,7 @@ static int process_expression(int num, bool param)
 			var_get_local(reg_to, REGISTER, &to);
 			var_get_local(cvt, MEMORY_LOC, &from);
 			conv(&to, &from);
-			set_var_reg(reg_to, cvt);
+			set_var_reg(reg_to, cvt, str_get(cvt)->conv_to);
 		}
 	}
 
@@ -279,7 +282,7 @@ static int process_expression(int num, bool param)
 						int reg = reserve_reg(main_type);
 						var_get_local(reg, REGISTER, &from);
 						num = get_rvalue(num+1, end, nxtlevel, &from);
-						free_reg(reg);
+						free_reg(reg, main_type);
 					} else
 						var_get_local(var_nxt, MEMORY_LOC, &from);
 					if(firstop && str_get(op_num)->lext != L_OPERAT_RELATION)

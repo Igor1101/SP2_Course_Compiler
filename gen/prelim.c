@@ -218,11 +218,27 @@ void prelim_print_debug(void)
 
 struct regs_vm_t {
 	bool reg_res[REGS_AMOUNT];
+	bool reg_res_xmm[REGS_AMOUNT];
 	var_t regs[REGS_AMOUNT];
+	var_t regs_xmm[REGS_AMOUNT];
 }regs_vm;
 
 int reserve_reg(ctypes_t type)
 {
+	switch(type) {
+	case C_DOUBLE_T:
+	case C_FLOAT_T:
+	for(int i=0; i<XMM_REGS_AMOUNT; i++) {
+		if(!regs_vm.reg_res_xmm[i]) {
+			regs_vm.regs_xmm[i].memtype = REGISTER;
+			regs_vm.regs_xmm[i].type = type;
+			regs_vm.regs_xmm[i].num = i;
+			regs_vm.reg_res_xmm[i] = true;
+			return i;
+		}
+	}
+	break;
+	default:
 	for(int i=0; i<REGS_AMOUNT; i++) {
 		if(!regs_vm.reg_res[i]) {
 			regs_vm.regs[i].memtype = REGISTER;
@@ -232,16 +248,29 @@ int reserve_reg(ctypes_t type)
 			return i;
 		}
 	}
+	}
+
 	return -1;
 }
 
-void free_reg(int r)
+void free_reg(int r, ctypes_t type)
 {
-	 if(r>=REGS_AMOUNT) {
-		 pr_err("free reg out of region");
-		 return;
-	 }
-	 regs_vm.reg_res[r] = false;
+	switch(type) {
+	case C_DOUBLE_T:
+	case C_FLOAT_T:
+		if(r>=XMM_REGS_AMOUNT) {
+			pr_err("free reg xmm out of region");
+			return;
+		}
+		regs_vm.reg_res_xmm[r] = false;
+		return;
+	default:
+		if(r>=REGS_AMOUNT) {
+			pr_err("free reg out of region");
+			return;
+		}
+		regs_vm.reg_res[r] = false;
+	}
 }
 
 var_t* get_reg_force(int num, ctypes_t type)
@@ -259,8 +288,37 @@ var_t* get_reg(int num)
 	return &regs_vm.regs[num];
 }
 
-char* reg_to_str(int r)
+char* reg_to_str(int r, bool xmm)
 {
+	if(xmm) {
+		switch(r) {
+		case XMM0:
+			return "XMM0";
+		case XMM1:
+			return "XMM1";
+		case XMM2:
+			return "XMM2";
+		case XMM3:
+			return "XMM3";
+		case XMM4:
+			return "XMM4";
+		case XMM5:
+			return "XMM5";
+		case XMM6:
+			return "XMM6";
+		case XMM7:
+			return "XMM7";
+		case XMM8:
+			return "XMM8";
+		case XMM9:
+			return "XMM9";
+		case XMM10:
+			return "XMM10";
+		case XMM11:
+			return "XMM11";
+		}
+		return "XMM UNKNOWN";
+	}
 	switch(regs_vm.regs[r].type) {
 	case C_LONG_T:
 		switch(r) {
@@ -448,7 +506,9 @@ char* var_get_inst(var_t *var)
 {
 	switch(var->memtype) {
 	case REGISTER:
-		return reg_to_str(var->num);
+		return reg_to_str(var->num, false);
+	case XMM_REGISTER:
+		return reg_to_str(var->num, true);
 	case MEMORY_LOC:
 		return str_get(var->num)->inst;
 	case CONSTANT:
@@ -552,7 +612,9 @@ char* var_to_str(var_t*v)
 {
 	switch(v->memtype) {
 	case REGISTER:
-		return reg_to_str(v->num);
+		return reg_to_str(v->num, false);
+	case XMM_REGISTER:
+		return reg_to_str(v->num, true);
 	case MEMORY_LOC:
 		return str_get(v->num)->inst;
 	case CONSTANT:
