@@ -13,7 +13,11 @@
 
 static int next_var_expr(int num);
 static int prev_var_expr(int num);
+static int next_brace_opening(int num);
+static int prev_brace_opening(int num);
+static int prev_brace_closing(int num);
 static int next_brace_closing(int num);
+
 static int process_expression(int num, bool param);
 static int process_declaration(int num, bool param);
 static int next_binop(int start, int end);
@@ -352,7 +356,7 @@ static int process_declaration(int num, bool param)
 		int nlex = num+1;
 		if(str_get(nlex)->synt == S_BRACE_OPEN) {
 			/* array */
-			num = next_brace_closing(nlex) + 1;
+			num = next_brace_closing(nlex);
 		} else {
 			num = nlex;
 		}
@@ -367,8 +371,35 @@ static int process_declaration(int num, bool param)
 static int next_brace_closing(int num)
 {
 	while(true) {
+		num++;
 		if(str_get(num)->synt == S_BRACE_CLOSE)
 			return num;
+	}
+}
+
+static int prev_brace_closing(int num)
+{
+	while(true) {
+		num--;
+		if(str_get(num)->synt == S_BRACE_CLOSE)
+			return num;
+	}
+}
+
+static int prev_brace_opening(int num)
+{
+	while(true) {
+		num--;
+		if(str_get(num)->synt == S_BRACE_OPEN)
+			return num;
+	}
+}
+
+static int next_brace_opening(int num)
+{
+	while(true) {
 		num++;
+		if(str_get(num)->synt == S_BRACE_OPEN)
+			return num;
 	}
 }
