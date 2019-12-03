@@ -341,6 +341,11 @@ static int prev_var_expr(int num)
 {
 	do {
 		num--;
+		/* if array found */
+		if(str_get(num)->synt == S_BRACE_CLOSE) {
+			while(str_get(num)->synt != S_BRACE_OPEN)
+				num--;
+		}
 		if(str_get(num)->synt == S_ID_VARIABLE
 				|| str_get(num)->synt == S_CONST)
 			return num;
@@ -351,6 +356,11 @@ static int next_var_expr(int num)
 {
 	do {
 		num++;
+		/* if array found */
+		if(str_get(num)->synt == S_BRACE_OPEN) {
+			while(str_get(num)->synt != S_BRACE_CLOSE)
+				num++;
+		}
 		if(str_get(num)->synt == S_ID_VARIABLE
 				|| str_get(num)->synt == S_CONST)
 			return num;
