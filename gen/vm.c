@@ -216,24 +216,7 @@ static int process_expression(int num, bool param)
 	}
 
 	int min_binop_level = 5000;
-	struct region {
-		int start;
-		int end;
-		int level;
-		int reg_data;
-		struct region*next;
-	}region0;
-	region0.next = NULL;
-	void add_region(int start, int end, int level, int data)
-	{
-		struct region* r = &region0;
-		do {
-			if(r->next == NULL) {
-				r->next = calloc(1, sizeof(struct region));
-				break;
-			}
-		} while(r!=NULL);
-	}
+
 	/* get min level of binary op */
 	for(num=savenum;num<next_delimiter(num, 0, param);num++) {
 		if(str_get(num)->synt == S_OPERAT_BINARY) {
@@ -259,16 +242,9 @@ static int process_expression(int num, bool param)
 			}
 		}
 		for(int num=start; num<end; num++) {
-			int num_after;
 			if(next_binop(num, end) < 0) {
 				return num;
 			}
-			/*
-			int nxtlevel = str_get(next_binop(num, end))->level;
-			if(nxtlevel > level) {
-				var_t local_res;
-				num = get_rvalue(num, end, nxtlevel, &local_res);
-			}*/
 			if(str_get(num)->synt == S_OPERAT_BINARY || str_get(num)->synt == S_OPERAT_RELATION) {
 				int op_num = num;
 				/* use current function to calc*/
@@ -369,7 +345,6 @@ static int next_var_expr(int num)
 
 static int process_declaration(int num, bool param)
 {
-	int decl_type = num;
 	num++;
 	int end = next_delimiter(num, 0, param);
 	for(;num<end;) {
