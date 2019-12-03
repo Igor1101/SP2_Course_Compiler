@@ -194,11 +194,11 @@ void out_decl(void)
 			break;
 		case C_INT_T:
 		case C_UNSIGNED_T:
-		case C_FLOAT_T:
 		case C_SIGNED_T:
 			out("DD");
 			break;
 		case C_DOUBLE_T:
+		case C_FLOAT_T:
 		case C_LONG_T:
 			out("DQ");
 			break;
