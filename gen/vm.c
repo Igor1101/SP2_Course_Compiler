@@ -69,6 +69,18 @@ static int process_expression(int num, bool param)
 	var_t lvalue;
 	ctypes_t main_type;
 	struct var_node* var0 = calloc(1, sizeof(struct var_node));
+
+	int min_level_binop(int start, int end)
+	{
+		int min = 5000;
+		for(num=start;num<end;num++) {
+			if(str_get(num)->synt == S_OPERAT_BINARY) {
+				if(str_get(num)->level < min)
+					min = str_get(num)->level;
+			}
+		}
+		return min;
+	}
 	void free_vars(void)
 	{
 		struct var_node*i = var0;
@@ -141,95 +153,6 @@ static int process_expression(int num, bool param)
 		}
 		return var_get(num, mem, var);
 	}
-	/* get all vars */
-	get_vars();
-	/* unary op first ++<var> (changeable) */
-	for(num=savenum;num<next_delimiter(num, 0, param);) {
-		switch(str_get(num)->synt) {
-		case S_OPERAT_UNARY:
-		{
-			int var = num+1;
-			if(str_get(var)->lext == L_IDENTIFIER) {
-				if(!strcmp(str_get(num)->inst, "++")) {
-					var_t v;
-					var_get_local(var, MEMORY_LOC, &v);
-					inc(&v);
-				}
-				if(!strcmp(str_get(num)->inst, "--")) {
-					var_t v;
-					var_get_local(var, MEMORY_LOC, &v);
-					dec(&v);
-				}
-			}
-			num++;
-			break;
-		}
-		default:
-			num++;
-		}
-	}
-	/* assignment info get */
-	for(num=savenum;num<next_delimiter(num, 0, param);num++) {
-		if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
-			has_assignment = true;
-			/* get lvalue */
-			if(!strcmp(str_get(num-1)->inst, "]")) {
-				/*TODO this is array */
-			}
-			main_type = str_get(num-1)->ctype;
-			break;
-		}
-	}
-
-	/* unary op  (unchangeable) */
-	for(num=savenum;num<next_delimiter(num, 0, param);) {
-		switch(str_get(num)->synt) {
-		case S_OPERAT_UNARY:
-		{
-			int var = num+1;
-			if(str_get(var)->lext == L_IDENTIFIER) {
-					/*ignore + */
-				if(!strcmp(str_get(num)->inst, "-")) {
-					int reg = reserve_reg(str_get(var)->ctype);
-					var_t from, to;
-					var_get_local(var, MEMORY_LOC, &from);
-					var_get_local(reg, REGISTER, &to);
-					sign(&to, &from);
-					set_var_reg(reg, var, str_get(var)->ctype);
-				}
-			}
-			num++;
-			break;
-		}
-		default:
-			num++;
-		}
-	}
-	/* conversion op */
-	for(num=savenum;num<next_delimiter(num, 0, param);num++) {
-		if(str_get(num)->conv_to != C_UKNOWN &&
-				str_get(num)->lext == L_IDENTIFIER) {
-			int cvt = num;
-			var_t from, to;
-			int reg_to = reserve_reg(str_get(num)->conv_to);
-			var_get_local(reg_to, REGISTER, &to);
-			var_get_local(cvt, MEMORY_LOC, &from);
-			conv(&to, &from);
-			set_var_reg(reg_to, cvt, str_get(cvt)->conv_to);
-		}
-	}
-
-	int min_binop_level = 5000;
-
-	/* get min level of binary op */
-	for(num=savenum;num<next_delimiter(num, 0, param);num++) {
-		if(str_get(num)->synt == S_OPERAT_BINARY) {
-			if(str_get(num)->level < min_binop_level)
-				min_binop_level = str_get(num)->level;
-		}
-	}
-	/* bin op run */
-
 	int get_rvalue(int start, int end, int level, var_t* result)
 	{
 		bool firstop = true;
@@ -279,10 +202,94 @@ static int process_expression(int num, bool param)
 		}
 		return num;
 	}
+
+	/* get all vars */
+	get_vars();
+	/* unary op first ++<var> (changeable) */
+	for(num=savenum;num<next_delimiter(num, 0, param);) {
+		switch(str_get(num)->synt) {
+		case S_OPERAT_UNARY:
+		{
+			int var = num+1;
+			if(str_get(var)->lext == L_IDENTIFIER) {
+				if(!strcmp(str_get(num)->inst, "++")) {
+					var_t v;
+					var_get_local(var, MEMORY_LOC, &v);
+					inc(&v);
+				}
+				if(!strcmp(str_get(num)->inst, "--")) {
+					var_t v;
+					var_get_local(var, MEMORY_LOC, &v);
+					dec(&v);
+				}
+			}
+			num++;
+			break;
+		}
+		default:
+			num++;
+		}
+	}
+	/* assignment info get */
+	for(num=savenum;num<next_delimiter(num, 0, param);num++) {
+		if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
+			has_assignment = true;
+			/* get lvalue */
+			if(!strcmp(str_get(num-1)->inst, "]")) {
+				int snum = prev_brace_opening(num-1);
+				snum++;/* inside array expr */
+			}
+			main_type = str_get(num-1)->ctype;
+			break;
+		}
+	}
+
+	/* unary op  (unchangeable) */
+	for(num=savenum;num<next_delimiter(num, 0, param);) {
+		switch(str_get(num)->synt) {
+		case S_OPERAT_UNARY:
+		{
+			int var = num+1;
+			if(str_get(var)->lext == L_IDENTIFIER) {
+					/*ignore + */
+				if(!strcmp(str_get(num)->inst, "-")) {
+					int reg = reserve_reg(str_get(var)->ctype);
+					var_t from, to;
+					var_get_local(var, MEMORY_LOC, &from);
+					var_get_local(reg, REGISTER, &to);
+					sign(&to, &from);
+					set_var_reg(reg, var, str_get(var)->ctype);
+				}
+			}
+			num++;
+			break;
+		}
+		default:
+			num++;
+		}
+	}
+	/* conversion op */
+	for(num=savenum;num<next_delimiter(savenum, 0, param);num++) {
+		if(str_get(num)->conv_to != C_UKNOWN &&
+				str_get(num)->lext == L_IDENTIFIER) {
+			int cvt = num;
+			var_t from, to;
+			int reg_to = reserve_reg(str_get(num)->conv_to);
+			var_get_local(reg_to, REGISTER, &to);
+			var_get_local(cvt, MEMORY_LOC, &from);
+			conv(&to, &from);
+			set_var_reg(reg_to, cvt, str_get(cvt)->conv_to);
+		}
+	}
+
+	/* get min level of binary op */
+	int min_binop_level = min_level_binop(savenum, next_delimiter(savenum, 0, param));
+	/* bin op run */
+
 	int reg_result = reserve_reg(main_type);
 	var_get_local(reg_result, REGISTER, &rvalue);
-	int startfrom = 1 + last_assignment(savenum, next_delimiter(num, 0, param));
-	get_rvalue(startfrom, next_delimiter(num, 0, param), min_binop_level,
+	int startfrom = 1 + last_assignment(savenum, next_delimiter(savenum, 0, param));
+	get_rvalue(startfrom, next_delimiter(savenum, 0, param), min_binop_level,
 			&rvalue);
 	/* assignment op */
 	for(num=savenum;num<next_delimiter(num, 0, param);num++) {
