@@ -11,8 +11,8 @@
 #include <string.h>
 #include "prelim.h"
 
-static int next_var_expr(int num);
-static int prev_var_expr(int num);
+static int next_var_expr(int start, int end);
+static int prev_var_expr(int start, int end);
 static int next_brace_opening(int num);
 static int prev_brace_opening(int num);
 static int prev_brace_closing(int num);
@@ -61,8 +61,11 @@ struct var_node{
 	struct var_node* next;
 };
 
+bool res_for_arrays[REGS_AMOUNT];
+
 static int process_expression(int num, bool param)
 {
+	memset(res_for_arrays, 0, sizeof res_for_arrays);
 	int savenum = num;
 	bool has_assignment=false;
 	var_t rvalue;
@@ -158,15 +161,11 @@ static int process_expression(int num, bool param)
 		bool firstop = true;
 		if(next_binop(start, end) < 0) {
 			/* looks like no operation, just number */
-			for(int num=start; num<end; num++) {
-				if(str_get(num)->lext == L_IDENTIFIER ||
-						str_get(num)->synt == S_CONST) {
-					var_t from;
-					var_get_local(num, MEMORY_LOC, &from);
-					mov(result, &from);
-					return ++num;
-				}
-			}
+			int num = next_var_expr(start-1, end);
+			var_t from;
+			var_get_local(num, MEMORY_LOC, &from);
+			mov(result, &from);
+			return ++num;
 		}
 		for(int num=start; num<end; num++) {
 			if(next_binop(num, end) < 0) {
@@ -176,8 +175,8 @@ static int process_expression(int num, bool param)
 				int op_num = num;
 				/* use current function to calc*/
 				if(str_get(num)->level >= level) {
-					int var_prev = prev_var_expr(num);
-					int var_nxt = next_var_expr(num);
+					int var_prev = prev_var_expr(start, num);
+					int var_nxt = next_var_expr(num, end);
 					var_t from, to;
 					var_get_local(var_prev, MEMORY_LOC, &to);
 					int nxtlevel = str_get(next_binop(num+1, end))->level;
@@ -241,6 +240,7 @@ static int process_expression(int num, bool param)
 				start++;/* inside array expr */
 				int lm = min_level_binop(start, end);
 				int reg_offs = reserve_reg(C_LONG_T);
+				res_for_arrays[reg_offs] = true;
 				var_t var_offs;
 				var_get_local(reg_offs, REGISTER, &var_offs);
 				get_rvalue(start, end, lm, &var_offs);
@@ -289,24 +289,32 @@ static int process_expression(int num, bool param)
 		}
 	}
 
-	/* get min level of binary op */
-	int min_binop_level = min_level_binop(savenum, next_delimiter(savenum, 0, param));
-	/* bin op run */
+	if(has_assignment) {
+		/* get min level of binary op */
+		int min_binop_level = min_level_binop(savenum, next_delimiter(savenum, 0, param));
+		/* bin op run */
 
-	int reg_result = reserve_reg(main_type);
-	var_get_local(reg_result, REGISTER, &rvalue);
-	int startfrom = 1 + last_assignment(savenum, next_delimiter(savenum, 0, param));
-	get_rvalue(startfrom, next_delimiter(savenum, 0, param), min_binop_level,
-			&rvalue);
-	/* assignment op */
-	for(num=savenum;num<next_delimiter(num, 0, param);num++) {
-		if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
-			int result = prev_var_expr(num);
-			var_get(result, MEMORY_LOC, &lvalue);
-			mov(&lvalue, &rvalue);
+		int reg_result = reserve_reg(main_type);
+		var_get_local(reg_result, REGISTER, &rvalue);
+		int startfrom = 1 + last_assignment(savenum, next_delimiter(savenum, 0, param));
+		get_rvalue(startfrom, next_delimiter(savenum, 0, param), min_binop_level,
+				&rvalue);
+		/* assignment op */
+		for(num=savenum;num<next_delimiter(num, 0, param);num++) {
+			if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
+				int result = prev_var_expr(savenum, num);
+				var_get(result, MEMORY_LOC, &lvalue);
+				mov(&lvalue, &rvalue);
+			}
 		}
 	}
 	free_vars();
+	for(int i=0; i<REGS_AMOUNT; i++) {
+		if(res_for_arrays[i]) {
+			free_reg(i);
+			res_for_arrays[i] = false;
+		}
+	}
 	add_noarg(EXPR_FINI);
 	return num;
 }
@@ -331,8 +339,9 @@ static int last_assignment(int start, int end)
 	return -1;
 }
 
-static int prev_var_expr(int num)
+static int prev_var_expr(int start, int end)
 {
+	int num = end;
 	do {
 		num--;
 		/* if array found */
@@ -344,11 +353,12 @@ static int prev_var_expr(int num)
 				|| str_get(num)->synt == S_CONST ||
 				str_get(num)->synt == S_ID_ARRAY)
 			return num;
-	} while(true);
+	} while(num>=start);
 }
 
-static int next_var_expr(int num)
+static int next_var_expr(int start, int end)
 {
+	int num = start;
 	do {
 		num++;
 		/* if array found */
@@ -357,9 +367,10 @@ static int next_var_expr(int num)
 				num++;
 		}
 		if(str_get(num)->synt == S_ID_VARIABLE
-				|| str_get(num)->synt == S_CONST)
+				|| str_get(num)->synt == S_CONST ||
+				str_get(num)->synt == S_ID_ARRAY)
 			return num;
-	} while(true);
+	} while(num<end);
 }
 
 static int process_declaration(int num, bool param)
