@@ -357,6 +357,7 @@ static int prev_var_expr(int start, int end)
 				str_get(num)->synt == S_ID_ARRAY)
 			return num;
 	} while(num>=start);
+	return num;
 }
 
 static int next_var_expr(int start, int end)
@@ -374,6 +375,7 @@ static int next_var_expr(int start, int end)
 				str_get(num)->synt == S_ID_ARRAY)
 			return num;
 	} while(num<end);
+	return num;
 }
 
 static int process_declaration(int num, bool param)
