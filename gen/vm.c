@@ -114,7 +114,8 @@ static int process_expression(int num, bool param)
 	{
 		struct var_node* prev = var0;
 		for(num=savenum; num<next_delimiter(num, 0, param);num++) {
-			if(str_get(num)->synt == S_ID_VARIABLE) {
+			if(str_get(num)->synt == S_ID_VARIABLE||
+					str_get(num)->synt == S_ID_ARRAY) {
 				prev->varnum = num;
 				prev->next = calloc(1, sizeof (struct var_node));
 				prev = prev->next;
@@ -307,6 +308,7 @@ static int process_expression(int num, bool param)
 				mov(&lvalue, &rvalue);
 			}
 		}
+		free_reg(reg_result);
 	}
 	free_vars();
 	for(int i=0; i<REGS_AMOUNT; i++) {
@@ -316,6 +318,7 @@ static int process_expression(int num, bool param)
 		}
 	}
 	add_noarg(EXPR_FINI);
+	free_allregs();
 	return num;
 }
 

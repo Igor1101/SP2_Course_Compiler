@@ -262,6 +262,12 @@ void free_reg(int r)
 	regs_vm.reg_res[r] = false;
 }
 
+void free_allregs(void)
+{
+	for(int r=0; r<ALL_REGS_AMOUNT; r++)
+		regs_vm.reg_res[r] = false;
+}
+
 var_t* get_reg_force(int num, ctypes_t type)
 {
 	regs_vm.regs[num].memtype = REGISTER;

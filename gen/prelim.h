@@ -129,6 +129,7 @@ char* op_to_str(op_t op);
 void prelim_print_debug(void);
 int reserve_reg(ctypes_t type);
 void free_reg(int r);
+void free_allregs(void);
 var_t* get_reg(int num);
 var_t* get_reg_force(int num, ctypes_t type);
 char* reg_to_str(int r);
