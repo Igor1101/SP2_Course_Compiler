@@ -99,6 +99,7 @@ typedef struct {
 	mem_t memtype;
 	bool pointer;
 	bool arrayel;
+	int arrreg_offset;
 } var_t;
 
 typedef struct {

@@ -177,38 +177,45 @@ void prelim_print_debug(void)
 			puts("");
 			break;
 		case 1:
-			printf("<%s>%s%s", type_to_str(inst->arg0.type),
+			printf("<%s>%s%s off %d", type_to_str(inst->arg0.type),
 						var_get_inst(&inst->arg0),
-						(inst->arg0.arrayel)?"[]":""
+						(inst->arg0.arrayel)?"[]":"",
+						(inst->arg0.arrreg_offset)
 						);
 			puts("");
 			break;
 		case 2:
-			printf("<%s>%s%s", type_to_str(inst->arg0.type),
+			printf("<%s>%s%s off %d", type_to_str(inst->arg0.type),
 						var_get_inst(&inst->arg0),
-						(inst->arg0.arrayel)?"[]":""
+						(inst->arg0.arrayel)?"[]":"",
+						(inst->arg0.arrreg_offset)
 						);
 			printf(",\t");
-			printf("<%s>%s%s", type_to_str(inst->arg1.type),
+			printf("<%s>%s%s off %d", type_to_str(inst->arg1.type),
 						var_get_inst(&inst->arg1),
-						(inst->arg1.arrayel)?"[]":""
+						(inst->arg1.arrayel)?"[]":"",
+						(inst->arg1.arrreg_offset)
 						);
 			puts("");
 			break;
 		case 3:
-			printf("<%s>%s%s", type_to_str(inst->arg0.type),
+			printf("<%s>%s%s off %d", type_to_str(inst->arg0.type),
 						var_get_inst(&inst->arg0),
-						(inst->arg0.arrayel)?"[]":""
+						(inst->arg0.arrayel)?"[]":"",
+						(inst->arg0.arrreg_offset)
 						);
+
 			printf(",\t");
-			printf("<%s>%s%s", type_to_str(inst->arg1.type),
+			printf("<%s>%s%s off %d", type_to_str(inst->arg1.type),
 						var_get_inst(&inst->arg1),
-						(inst->arg1.arrayel)?"[]":""
+						(inst->arg1.arrayel)?"[]":"",
+						(inst->arg1.arrreg_offset)
 						);
 			printf(",\t");
-			printf("<%s>%s%s", type_to_str(inst->arg2.type),
+			printf("<%s>%s%s off %d", type_to_str(inst->arg2.type),
 						var_get_inst(&inst->arg2),
-						(inst->arg2.arrayel)?"[]":""
+						(inst->arg2.arrayel)?"[]":"",
+						(inst->arg2.arrreg_offset)
 						);
 			puts("");
 			break;

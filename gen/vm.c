@@ -236,8 +236,15 @@ static int process_expression(int num, bool param)
 			has_assignment = true;
 			/* get lvalue */
 			if(!strcmp(str_get(num-1)->inst, "]")) {
-				int snum = prev_brace_opening(num-1);
-				snum++;/* inside array expr */
+				int start = prev_brace_opening(num-1);
+				int end =  next_brace_closing(start);
+				start++;/* inside array expr */
+				int lm = min_level_binop(start, end);
+				int reg_offs = reserve_reg(C_LONG_T);
+				var_t var_offs;
+				var_get_local(reg_offs, REGISTER, &var_offs);
+				get_rvalue(start, end, lm, &var_offs);
+				lvalue.arrreg_offset = reg_offs;
 			}
 			main_type = str_get(num-1)->ctype;
 			break;
@@ -294,7 +301,7 @@ static int process_expression(int num, bool param)
 	/* assignment op */
 	for(num=savenum;num<next_delimiter(num, 0, param);num++) {
 		if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
-			int result = num - 1;
+			int result = prev_var_expr(num);
 			var_get(result, MEMORY_LOC, &lvalue);
 			mov(&lvalue, &rvalue);
 		}
@@ -334,7 +341,8 @@ static int prev_var_expr(int num)
 				num--;
 		}
 		if(str_get(num)->synt == S_ID_VARIABLE
-				|| str_get(num)->synt == S_CONST)
+				|| str_get(num)->synt == S_CONST ||
+				str_get(num)->synt == S_ID_ARRAY)
 			return num;
 	} while(true);
 }
