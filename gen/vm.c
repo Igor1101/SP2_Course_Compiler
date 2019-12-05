@@ -172,6 +172,11 @@ static int process_expression(int num, bool param)
 			if(next_binop(num, end) < 0) {
 				return num;
 			}
+			/* if array found */
+			if(str_get(num)->synt == S_BRACE_OPEN) {
+				while(str_get(num)->synt != S_BRACE_CLOSE)
+					num++;
+			}
 			if(str_get(num)->synt == S_OPERAT_BINARY || str_get(num)->synt == S_OPERAT_RELATION) {
 				int op_num = num;
 				/* use current function to calc*/
@@ -325,6 +330,11 @@ static int process_expression(int num, bool param)
 static int next_binop(int start, int end)
 {
 	for(int num=start; num<end; num++)  {
+		/* if array found */
+		if(str_get(num)->synt == S_BRACE_OPEN) {
+			while(str_get(num)->synt != S_BRACE_CLOSE)
+				num++;
+		}
 		if(str_get(num)->synt == S_OPERAT_BINARY ||
 				str_get(num)->synt == S_OPERAT_RELATION)
 			return num;
