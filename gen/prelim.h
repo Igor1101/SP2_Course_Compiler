@@ -121,6 +121,7 @@ extern code_t pre_code;
 /* utils */
 ctypes_t str_get_memtype(int num);
 char* var_get_inst(var_t *var);
+int var_get_extended(int num, mem_t mem, var_t* var, int offsreg);
 int var_get(int num, mem_t mem, var_t* var);
 int add_bin(op_t op, var_t* var0, var_t* var1);
 int add_un(op_t op, var_t*var0);

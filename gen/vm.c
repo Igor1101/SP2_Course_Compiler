@@ -149,6 +149,7 @@ static int process_expression(int num, bool param)
 	}
 	int var_get_local(int num, int mem, var_t*var)
 	{
+		int offs=0;
 		if(mem == MEMORY_LOC) {
 			if(var_has_reg(num)) {
 				struct var_node*i = var0;
@@ -156,13 +157,14 @@ static int process_expression(int num, bool param)
 					if(i->varnum == num && i->in_reg) {
 						pr_debug("using reg instead of var");
 						num = i->reg;
+						offs = i->arrregoffset;
 						mem = REGISTER;
 					}
 					i = i->next;
 				} while(i != NULL);
 			}
 		}
-		return var_get(num, mem, var);
+		return var_get_extended(num, mem, var, offs);
 	}
 	int get_rvalue(int start, int end, int level, var_t* result)
 	{

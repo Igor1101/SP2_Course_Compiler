@@ -177,45 +177,45 @@ void prelim_print_debug(void)
 			puts("");
 			break;
 		case 1:
-			printf("<%s>%s%s off %d", type_to_str(inst->arg0.type),
+			printf("<%s>%s%s %s", type_to_str(inst->arg0.type),
 						var_get_inst(&inst->arg0),
-						(inst->arg0.arrayel)?"[]":"",
-						(inst->arg0.arrreg_offset)
+						(inst->arg0.arrayel)?"[]+":"",
+						(inst->arg0.arrayel)?reg_to_str(inst->arg0.arrreg_offset):""
 						);
 			puts("");
 			break;
 		case 2:
-			printf("<%s>%s%s off %d", type_to_str(inst->arg0.type),
+			printf("<%s>%s%s%s", type_to_str(inst->arg0.type),
 						var_get_inst(&inst->arg0),
-						(inst->arg0.arrayel)?"[]":"",
-						(inst->arg0.arrreg_offset)
+						(inst->arg0.arrayel)?"[]+":"",
+						(inst->arg0.arrayel)?reg_to_str(inst->arg0.arrreg_offset):""
 						);
 			printf(",\t");
-			printf("<%s>%s%s off %d", type_to_str(inst->arg1.type),
+			printf("<%s>%s%s%s", type_to_str(inst->arg1.type),
 						var_get_inst(&inst->arg1),
-						(inst->arg1.arrayel)?"[]":"",
-						(inst->arg1.arrreg_offset)
+						(inst->arg1.arrayel)?"[]+":"",
+						(inst->arg1.arrayel)?reg_to_str(inst->arg1.arrreg_offset):""
 						);
 			puts("");
 			break;
 		case 3:
-			printf("<%s>%s%s off %d", type_to_str(inst->arg0.type),
+			printf("<%s>%s%s%s", type_to_str(inst->arg0.type),
 						var_get_inst(&inst->arg0),
-						(inst->arg0.arrayel)?"[]":"",
-						(inst->arg0.arrreg_offset)
+						(inst->arg0.arrayel)?"[]+":"",
+						(inst->arg0.arrayel)?reg_to_str(inst->arg0.arrreg_offset):""
 						);
 
 			printf(",\t");
-			printf("<%s>%s%s off %d", type_to_str(inst->arg1.type),
+			printf("<%s>%s%s%s", type_to_str(inst->arg1.type),
 						var_get_inst(&inst->arg1),
-						(inst->arg1.arrayel)?"[]":"",
-						(inst->arg1.arrreg_offset)
+						(inst->arg1.arrayel)?"[]+":"",
+						(inst->arg1.arrayel)?reg_to_str(inst->arg1.arrreg_offset):""
 						);
 			printf(",\t");
-			printf("<%s>%s%s off %d", type_to_str(inst->arg2.type),
+			printf("<%s>%s%s%s", type_to_str(inst->arg2.type),
 						var_get_inst(&inst->arg2),
-						(inst->arg2.arrayel)?"[]":"",
-						(inst->arg2.arrreg_offset)
+						(inst->arg2.arrayel)?"[]+":"",
+						(inst->arg2.arrayel)?reg_to_str(inst->arg2.arrreg_offset):""
 						);
 			puts("");
 			break;
@@ -501,6 +501,30 @@ int var_get(int num, mem_t mem, var_t* var)
 		var->conv = str_get(num)->conv_to;
 		var->type = str_get(num)->ctype;
 		var->arrayel = str_get(num)->array;
+		break;
+	case REGISTER:
+		*var = *get_reg(num);
+		break;
+	}
+	return 0;
+}
+
+int var_get_extended(int num, mem_t mem, var_t* var, int offsreg)
+{
+	if(var == NULL) {
+		pr_err("str_get_var NULL pointer");
+		return -1;
+	}
+	var->memtype = mem;
+	var->num = num;
+	switch(mem) {
+	case MEMORY_LOC:
+		if(str_get(num)->synt == S_CONST)
+			var->memtype = CONSTANT;
+		var->conv = str_get(num)->conv_to;
+		var->type = str_get(num)->ctype;
+		var->arrayel = str_get(num)->array;
+		var->arrreg_offset = offsreg;
 		break;
 	case REGISTER:
 		*var = *get_reg(num);
