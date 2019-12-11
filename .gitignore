@@ -2,8 +2,6 @@
 *.o
 *.elf
 *.docx
-.cproject
-.project
 *.docx#
 *.doc#
 .antiplug/
@@ -12,4 +10,3 @@
 sp2cc
 *.out
 *.cc
-.settings/org.eclipse.cdt.codan.core.prefs
