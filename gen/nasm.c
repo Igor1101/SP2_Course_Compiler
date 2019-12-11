@@ -22,6 +22,7 @@ static void process_exprfini(int num);
 static void process_add(int num);
 static void process_mul(int num);
 static void process_sub(int num);
+static void process_beq(int num);
 
 static void mov_simple(var_t * a0, var_t* a1);
 static void mov_floating(var_t * a0, var_t* a1);
@@ -63,19 +64,26 @@ static int process_cmd(int num)
 		outop0("NOP");
 		break;
 	case MOV:
+		pr_debug("processing mov");
 		process_mov(num);
 		break;
 	case EXPR_FINI:
+		pr_debug("processing fini");
 		process_exprfini(num);
 		break;
 	case ADD:
+		pr_debug("processing add");
 		process_add(num);
 		break;
 	case SUB:
+		pr_debug("processing sub");
 		process_sub(num);
 		break;
 	case MUL:
 		process_mul(num);
+		break;
+	case CMP_BEQ:
+		process_beq(num);
 		break;
 	}
 	return ++num;
@@ -245,52 +253,59 @@ void out_decl_printf(void)
 {
 #define STR_DATA "STR_%s_%d"
 	/* setting rodata strings for vars */
-	out("section .rodata\n");
-	for(int i=0; i<ident_array.amount; i++) {
-		ident_t* id = ident_get(i);
-		out(STR_DATA ": DB \"%s=%%", id->inst, id->amount, id->inst);
-		switch(id->type) {
-		case C_CHAR_T:
-			out("c");
-			break;
-		case C_INT_T:
-		case C_UNSIGNED_T:
-		case C_SIGNED_T:
-			out("d");
-			break;
-		case C_LONG_T:
-			out("ld");
-			break;
-		case C_SHORT_T:
-			out("hi");
-			break;
-		case C_UKNOWN:
-			out("d");
-			break;
-		case C_DOUBLE_T:
-		case C_FLOAT_T:
-			out("f");
-			break;
+	for(int j=0; j<ident_array.amount; j++) {
+		ident_t* id = ident_get(j);
+		for(int i=0; i<id->amount; i++){
+			out("section .rodata\n");
+			out(STR_DATA ": DB \"%s[%i]=%%", id->inst, i, id->inst, i);
+			switch(id->type) {
+			case C_CHAR_T:
+				out("c");
+				break;
+			case C_INT_T:
+			case C_UNSIGNED_T:
+			case C_SIGNED_T:
+				out("d");
+				break;
+			case C_LONG_T:
+				out("ld");
+				break;
+			case C_SHORT_T:
+				out("hi");
+				break;
+			case C_UKNOWN:
+				out("d");
+				break;
+			case C_DOUBLE_T:
+			case C_FLOAT_T:
+				out("f");
+				break;
+			}
+			out("\", 0xA, 0\n");
+
+			/* setting output of them */
+			out("section .text\n");
+			ident_t* id = ident_get(j);
+			switch(id->type) {
+			case C_DOUBLE_T:
+			case C_FLOAT_T:
+				out("MOV\tRAX,\t1\n");
+				out("MOV\tRBX,\t[%s+%s%s%d]\n", id->inst,
+						id->array?ctype_sz(id->type):"",
+						id->array?"*":"",
+						i);
+				out("MOVQ\tXMM0,\tRBX\n");
+				break;
+			default:
+				out("MOV\tRAX,\t0\n");
+				out("MOV\tRSI,\t[%s+%s%s%d]\n", id->inst,
+						id->array?ctype_sz(id->type):"",
+						id->array?"*":"",
+						i);
+			}
+			out("MOV\tRDI,\t" STR_DATA "\n", id->inst, i);
+			out("CALL printf\n");
 		}
-		out("\", 0xA, 0\n");
-	}
-	/* setting output of them */
-	out("section .text\n");
-	for(int i=0; i<ident_array.amount; i++) {
-		ident_t* id = ident_get(i);
-		switch(id->type) {
-		case C_DOUBLE_T:
-		case C_FLOAT_T:
-			out("MOV\tRAX,\t1\n");
-			out("MOV\tRBX,\t[%s]\n", id->inst);
-			out("MOVQ\tXMM0,\tRBX\n");
-			break;
-		default:
-			out("MOV\tRAX,\t0\n");
-			out("MOV\tRSI,\t[%s]\n", id->inst);
-		}
-		out("MOV\tRDI,\t" STR_DATA "\n", id->inst, id->amount);
-		out("CALL printf\n");
 	}
 }
 
@@ -381,10 +396,21 @@ static void mov_simple(var_t * a0, var_t* a1)
 {
 	if(a0->memtype == MEMORY_LOC
 		&& a1->memtype == REGISTER) {
-		out("MOV   [%s],    %s\n", var_to_str(a0), var_to_str(a1));
+		out("MOV   [%s%s%s%s%s],    %s\n", var_to_str(a0),
+				a0->arrayel?"+":"",
+				a0->arrayel?reg_to_str(a0->arrreg_offset):"",
+				a0->arrayel?"*":"",
+				a0->arrayel?ctype_sz(a0->type):"",
+						var_to_str(a1));
 	} else if(a0->memtype == REGISTER
 		&& a1->memtype == MEMORY_LOC) {
-		out("MOV    %s,    [%s]\n", var_to_str(a0), var_to_str(a1));
+		out("MOV   %s,     [%s%s%s%s%s]\n", var_to_str(a0),
+				var_to_str(a1),
+				a1->arrayel?"+":"",
+				a1->arrayel?reg_to_str(a1->arrreg_offset):"",
+				a1->arrayel?"*":"",
+				a1->arrayel?ctype_sz(a1->type):""
+						);
 	} else if(a0->memtype == REGISTER
 		&& a1->memtype == CONSTANT) {
 		out("MOV    %s,    %s\n", var_to_str(a0), var_to_str(a1));
@@ -418,4 +444,50 @@ static void mov_floating(var_t * a0, var_t* a1)
 		out("MOVQ    %s,    %s\n", var_to_str(a0), var_to_str(a1));
 	}
 	floating_num++;
+}
+
+char* ctype_sz(ctypes_t t)
+{
+	switch(t) {
+	case C_UNSIGNED_T:
+		return "4";
+	case C_UKNOWN:
+		return "8";
+	case C_SIGNED_T:
+		return "4";
+	case C_SHORT_T:
+		return "2";
+	case C_LONG_T:
+		return "8";
+	case C_INT_T:
+		return "4";
+	case C_FLOAT_T:
+		return "8";
+	case C_DOUBLE_T:
+		return "8";
+	case C_CHAR_T:
+		return "1";
+	}
+	return 0;
+}
+
+static void process_beq(int num)
+{
+	assert(get_instr(num)->argc == 3);
+	var_t* a0 = get_arg(num, 0);
+	var_t* a1 = get_arg(num, 1);
+	var_t* a2 = get_arg(num, 2);
+	if(a0->memtype == MEMORY_LOC
+		&& a1->memtype == REGISTER) {
+		out("ADD   [%s],    %s\n", var_to_str(a0), var_to_str(a1));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == MEMORY_LOC) {
+		out("ADD    %s,    [%s]\n", var_to_str(a0), var_to_str(a1));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == CONSTANT) {
+		out("ADD    %s,    %s\n", var_to_str(a0), var_to_str(a1));
+	} else if(a0->memtype == REGISTER
+		&& a1->memtype == REGISTER) {
+		out("ADD    %s,    %s\n", var_to_str(a0), var_to_str(a1));
+	}
 }

@@ -28,6 +28,7 @@ extern FILE* asmfile;
 
 
 void set_regs_used(int num);
+char* ctype_sz(ctypes_t t);
 
 int gen_nasm(void);
 void out_decl(void);

@@ -285,6 +285,10 @@ var_t* get_reg(int num)
 
 char* reg_to_str(int r)
 {
+	if(r>=ALL_REGS_AMOUNT) {
+		pr_err("invalid register access reg_to_str");
+		return NULL;
+	}
 	switch(regs_vm.regs[r].type) {
 	case C_DOUBLE_T:
 	case C_FLOAT_T:

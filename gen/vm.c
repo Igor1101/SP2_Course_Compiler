@@ -59,6 +59,8 @@ struct var_node{
 	int reg;
 	ctypes_t type;
 	struct var_node* next;
+	bool arrayel;
+	int arrregoffset;
 };
 
 bool res_for_arrays[REGS_AMOUNT];
@@ -123,6 +125,11 @@ static int process_expression(int num, bool param)
 				prev->varnum = -1;
 				prev->reg = -1;
 				prev->type = str_get(num)->ctype;
+				if(str_get(num)->synt == S_ID_ARRAY) {
+					int reg = reserve_reg(C_LONG_T);
+					prev->arrayel = true;
+					prev->arrregoffset = reg;
+				}
 			}
 		}
 	}
@@ -210,6 +217,26 @@ static int process_expression(int num, bool param)
 
 	/* get all vars */
 	get_vars();
+	/* get all arrays indexes */
+	for(num=savenum; num<next_delimiter(num, 0, param); num++) {
+		if(str_get(num)->lext == L_IDENTIFIER &&
+				str_get(num)->synt == S_ID_ARRAY) {
+			int id = num;
+			int bropen = next_brace_opening(num);
+			int brclose = next_brace_closing(bropen);
+			int start = bropen;
+			int end = brclose;
+			start++;/* inside array expr */
+			int lm = min_level_binop(start, end);
+			int reg_offs = reserve_reg(C_LONG_T);
+			res_for_arrays[reg_offs] = true;
+			var_t var_offs, var;
+			var_get_local(reg_offs, REGISTER, &var_offs);
+			var_get_local(num, MEMORY_LOC, &var);
+			get_rvalue(start, end, lm, &var_offs);
+			var.arrreg_offset = reg_offs;
+		}
+	}
 	/* unary op first ++<var> (changeable) */
 	for(num=savenum;num<next_delimiter(num, 0, param);) {
 		switch(str_get(num)->synt) {
