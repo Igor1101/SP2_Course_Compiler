@@ -230,11 +230,11 @@ static int process_expression(int num, bool param)
 			int end = brclose;
 			start++;/* inside array expr */
 			int lm = min_level_binop(start, end);
-			int reg_offs = reserve_reg(C_LONG_T);
-			res_for_arrays[reg_offs] = true;
 			var_t var_offs, var;
-			var_get_local(reg_offs, REGISTER, &var_offs);
 			var_get_local(num, MEMORY_LOC, &var);
+			int reg_offs = var.arrreg_offset;
+			var_get_local(reg_offs, REGISTER, &var_offs);
+			res_for_arrays[reg_offs] = true;
 			get_rvalue(start, end, lm, &var_offs);
 			var.arrreg_offset = reg_offs;
 		}
