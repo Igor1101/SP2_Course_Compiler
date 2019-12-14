@@ -343,7 +343,7 @@ static int process_expression(int num, bool param)
 		for(num=savenum;num<next_delimiter(num, 0, param);num++) {
 			if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
 				int result = prev_var_expr(savenum, num);
-				var_get(result, MEMORY_LOC, &lvalue);
+				var_get_local(result, MEMORY_LOC, &lvalue);
 				mov(&lvalue, &rvalue);
 			}
 		}
