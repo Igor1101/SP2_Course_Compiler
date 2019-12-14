@@ -54,13 +54,10 @@ int vm_run(void)
 }
 
 struct var_node{
-	int varnum;
 	bool in_reg;
 	int reg;
-	ctypes_t type;
+	var_t inst;
 	struct var_node* next;
-	bool arrayel;
-	int arrregoffset;
 };
 
 bool res_for_arrays[REGS_AMOUNT];
@@ -102,10 +99,10 @@ static int process_expression(int num, bool param)
 	{
 		struct var_node*i = var0;
 		do {
-			if(i->varnum == varnum && !i->in_reg) {
+			if(i->inst.num == varnum && !i->in_reg) {
 				i->reg = reg;
 				i->in_reg = true;
-				i->type = t;
+				i->inst.type = t;
 				return 0;
 			}
 			i = i->next;
@@ -118,18 +115,18 @@ static int process_expression(int num, bool param)
 		for(num=savenum; num<next_delimiter(num, 0, param);num++) {
 			if(str_get(num)->synt == S_ID_VARIABLE||
 					str_get(num)->synt == S_ID_ARRAY) {
-				prev->varnum = num;
-				prev->type = str_get(num)->ctype;
+				prev->inst.num = num;
+				prev->inst.type = str_get(num)->ctype;
 				if(str_get(num)->synt == S_ID_ARRAY) {
 					int reg = reserve_reg(C_LONG_T);
-					prev->arrayel = true;
-					prev->arrregoffset = reg;
+					prev->inst.arrayel = true;
+					prev->inst.arrreg_offset = reg;
 				}
 				prev->next = calloc(1, sizeof (struct var_node));
 				prev = prev->next;
 				/* empty next */
 				prev->next = NULL;
-				prev->varnum = -1;
+				prev->inst.num = -1;
 				prev->reg = -1;
 			}
 		}
@@ -138,10 +135,10 @@ static int process_expression(int num, bool param)
 	{
 		struct var_node*i = var0;
 		do {
-			if(i->varnum == varnum && !i->in_reg) {
+			if(i->inst.num == varnum && !i->in_reg) {
 				return false;
 			}
-			if(i->varnum == varnum && i->in_reg) {
+			if(i->inst.num == varnum && i->in_reg) {
 				return true;
 			}
 			i = i->next;
@@ -154,8 +151,8 @@ static int process_expression(int num, bool param)
 		if(mem == MEMORY_LOC) {
 			struct var_node*i = var0;
 			do {
-				if(i->varnum == num) {
-					offs = i->arrregoffset;
+				if(i->inst.num == num) {
+					offs = i->inst.arrreg_offset;
 				}
 				i = i->next;
 			} while(i != NULL);
@@ -163,10 +160,10 @@ static int process_expression(int num, bool param)
 			if(var_has_reg(num)) {
 				struct var_node*i = var0;
 				do {
-					if(i->varnum == num && i->in_reg) {
+					if(i->inst.num == num && i->in_reg) {
 						pr_debug("using reg instead of var");
 						num = i->reg;
-						offs = i->arrregoffset;
+						offs = i->inst.arrreg_offset;
 						mem = REGISTER;
 					}
 					i = i->next;
