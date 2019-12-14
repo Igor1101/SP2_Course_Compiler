@@ -119,17 +119,18 @@ static int process_expression(int num, bool param)
 			if(str_get(num)->synt == S_ID_VARIABLE||
 					str_get(num)->synt == S_ID_ARRAY) {
 				prev->varnum = num;
-				prev->next = calloc(1, sizeof (struct var_node));
-				prev = prev->next;
-				prev->next = NULL;
-				prev->varnum = -1;
-				prev->reg = -1;
 				prev->type = str_get(num)->ctype;
 				if(str_get(num)->synt == S_ID_ARRAY) {
 					int reg = reserve_reg(C_LONG_T);
 					prev->arrayel = true;
 					prev->arrregoffset = reg;
 				}
+				prev->next = calloc(1, sizeof (struct var_node));
+				prev = prev->next;
+				/* empty next */
+				prev->next = NULL;
+				prev->varnum = -1;
+				prev->reg = -1;
 			}
 		}
 	}
@@ -151,6 +152,14 @@ static int process_expression(int num, bool param)
 	{
 		int offs=0;
 		if(mem == MEMORY_LOC) {
+			struct var_node*i = var0;
+			do {
+				if(i->varnum == num) {
+					offs = i->arrregoffset;
+				}
+				i = i->next;
+			} while(i != NULL);
+
 			if(var_has_reg(num)) {
 				struct var_node*i = var0;
 				do {
@@ -231,7 +240,7 @@ static int process_expression(int num, bool param)
 			start++;/* inside array expr */
 			int lm = min_level_binop(start, end);
 			var_t var_offs, var;
-			var_get_local(num, MEMORY_LOC, &var);
+			var_get_local(id, MEMORY_LOC, &var);
 			int reg_offs = var.arrreg_offset;
 			var_get_local(reg_offs, REGISTER, &var_offs);
 			res_for_arrays[reg_offs] = true;
@@ -272,14 +281,16 @@ static int process_expression(int num, bool param)
 			if(!strcmp(str_get(num-1)->inst, "]")) {
 				int start = prev_brace_opening(num-1);
 				int end =  next_brace_closing(start);
-				start++;/* inside array expr */
+				int arr = start-1;
+				start++;// inside array expr
 				int lm = min_level_binop(start, end);
-				int reg_offs = reserve_reg(C_LONG_T);
-				res_for_arrays[reg_offs] = true;
-				var_t var_offs;
-				var_get_local(reg_offs, REGISTER, &var_offs);
-				get_rvalue(start, end, lm, &var_offs);
-				lvalue.arrreg_offset = reg_offs;
+				var_t arr_var;
+				var_get_local(arr, MEMORY_LOC, &arr_var);
+				//res_for_arrays[reg_offs] = true;
+				//var_t var_offs;
+				//var_get_local(reg_offs, REGISTER, &var_offs);
+				//get_rvalue(start, end, lm, &var_offs);
+				lvalue.arrreg_offset = arr_var.arrreg_offset;
 			}
 			main_type = str_get(num-1)->ctype;
 			break;
