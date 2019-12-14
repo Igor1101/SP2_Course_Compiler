@@ -35,5 +35,6 @@ void out_decl(void);
 void out_init(void);
 void out_deinit(void);
 void out_decl_printf(void);
+char* type_to_nasmtype(ctypes_t t);
 
 #endif /* GEN_NASM_H_ */

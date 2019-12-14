@@ -296,7 +296,7 @@ static int process_expression(int num, bool param)
 		switch(str_get(num)->synt) {
 		case S_OPERAT_UNARY:
 		{
-			int var = num+1;
+			int var = next_var_expr(num, next_delimiter(num, 0, param));
 			if(str_get(var)->lext == L_IDENTIFIER) {
 					/*ignore + */
 				if(!strcmp(str_get(num)->inst, "-")) {
@@ -349,6 +349,36 @@ static int process_expression(int num, bool param)
 		}
 		free_reg(reg_result);
 	}
+	/* unary op last <var>++ (changeable) */
+	for(num=savenum;num<next_delimiter(num, 0, param);) {
+		switch(str_get(num)->synt) {
+		case S_OPERAT_UNARY:
+		{
+			if(str_get(num+1)->lext == L_IDENTIFIER) {
+				num++;
+				continue;
+			}
+			int var = prev_var_expr(savenum, num);
+			if(str_get(var)->lext == L_IDENTIFIER) {
+				if(!strcmp(str_get(num)->inst, "++")) {
+					var_t v;
+					var_get_local(var, MEMORY_LOC, &v);
+					inc(&v);
+				}
+				if(!strcmp(str_get(num)->inst, "--")) {
+					var_t v;
+					var_get_local(var, MEMORY_LOC, &v);
+					dec(&v);
+				}
+			}
+			num++;
+			break;
+		}
+		default:
+			num++;
+		}
+	}
+
 	free_vars();
 	add_noarg(EXPR_FINI);
 	free_allregs();

@@ -25,6 +25,7 @@ static void process_mul(int num);
 static void process_sub(int num);
 static void process_beq(int num);
 static void process_dec(int num);
+static void process_inc(int num);
 
 static void mov_simple(var_t * a0, var_t* a1);
 static void mov_floating(var_t * a0, var_t* a1);
@@ -84,13 +85,21 @@ static int process_cmd(int num)
 		process_sub(num);
 		break;
 	case MUL:
+		pr_debug("processing mul");
 		process_mul(num);
 		break;
 	case CMP_BEQ:
+		pr_debug("processing beq");
 		process_beq(num);
 		break;
 	case DEC:
+		pr_debug("processing dec");
 		process_dec(num);
+		break;
+	case INC:
+		pr_debug("processing dec");
+		process_inc(num);
+		break;
 	}
 	return ++num;
 }
@@ -424,7 +433,14 @@ static void process_dec(int num)
 {
 	assert(get_instr(num)->argc == 1);
 	var_t* arg = get_arg(num, 0);
-	out("DEC    %s", var_to_str_offset(arg));
+	out("DEC    %s    %s\n", type_to_nasmtype(arg->type), var_to_str_offset(arg));
+}
+
+static void process_inc(int num)
+{
+	assert(get_instr(num)->argc == 1);
+	var_t* arg = get_arg(num, 0);
+	out("INC    %s    %s\n", type_to_nasmtype(arg->type), var_to_str_offset(arg));
 }
 /*
  * var_to_str_offset decorator
@@ -449,4 +465,28 @@ static char* var_to_str_offset(var_t*v)
 			);
 	return outbuf[buf_current++];
 #undef BUFS
+}
+
+char* type_to_nasmtype(ctypes_t t)
+{
+	switch(t) {
+	case C_CHAR_T:
+		return "BYTE";
+	case C_DOUBLE_T:
+		return "QWORD";
+	case C_FLOAT_T:
+		return "DWORD";
+	case C_INT_T:
+		return "DWORD";
+	case C_LONG_T:
+		return "QWORD";
+	case C_SHORT_T:
+		return "WORD";
+	case C_SIGNED_T:
+		return "DWORD";
+	case C_UKNOWN:
+		return "QWORD";
+	case C_UNSIGNED_T:
+		return "DWORD";
+	}
 }
