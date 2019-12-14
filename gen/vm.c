@@ -60,11 +60,9 @@ struct var_node{
 	struct var_node* next;
 };
 
-bool res_for_arrays[REGS_AMOUNT];
 
 static int process_expression(int num, bool param)
 {
-	memset(res_for_arrays, 0, sizeof res_for_arrays);
 	int savenum = num;
 	bool has_assignment=false;
 	var_t rvalue;
@@ -240,7 +238,6 @@ static int process_expression(int num, bool param)
 			var_get_local(id, MEMORY_LOC, &var);
 			int reg_offs = var.arrreg_offset;
 			var_get_local(reg_offs, REGISTER, &var_offs);
-			res_for_arrays[reg_offs] = true;
 			get_rvalue(start, end, lm, &var_offs);
 			var.arrreg_offset = reg_offs;
 		}
@@ -353,12 +350,6 @@ static int process_expression(int num, bool param)
 		free_reg(reg_result);
 	}
 	free_vars();
-	for(int i=0; i<REGS_AMOUNT; i++) {
-		if(res_for_arrays[i]) {
-			free_reg(i);
-			res_for_arrays[i] = false;
-		}
-	}
 	add_noarg(EXPR_FINI);
 	free_allregs();
 	return num;
