@@ -438,12 +438,12 @@ static void sete(var_t* v)
 	if(v->memtype == REGISTER) {
 		/* change type temporarily */
 		v = get_reg_force(v->num, C_CHAR_T);
-		out("SETE %s\n", var_to_str_offset(v));
+		out("SETE    %s\n", var_to_str_offset(v));
 	} else {
 		if(regnum!= RAX)
 			regsafetely_use(RAX);
 		var_t* rax = get_reg_force(RAX, C_CHAR_T);
-		out("SETE %s\n", var_to_str_offset(rax));
+		out("SETE    %s\n", var_to_str_offset(rax));
 		mov_int(v, rax);
 		if(regnum!= RAX)
 			regsafetely_unuse(RAX);

@@ -273,10 +273,12 @@ static int process_expression(int num, int level, bool inside_expr, bool inside_
 	syn_t prev = S_NOTDEFINED;
 	syn_t expect = S_NOTDEFINED;
 	bool unary_been = false;
-	int numlevel = level + 4;
-	int arithlevel0 = level + 3;
-	int arithlevel1 = level + 2;
-	int arithlevel2 = level + 1;
+	/* operator precedence */
+	int numlevel = level + 5;
+	int arithlevel0 = level + 4;
+	int arithlevel1 = level + 3;
+	int arithlevel2 = level + 2;
+	int arithlevel3 = level + 1;
 	int arithlevel = level + 1;
 	int next_del = next_delimiter(num, level, true);
 	if(next_del<0) {
@@ -348,6 +350,9 @@ static int process_expression(int num, int level, bool inside_expr, bool inside_
 			const char* bin_prio2[] = {
 					 "<<", ">>"
 			};
+			const char* bin_prio3[] = {
+					 "<", ">", "<=", ">=", "==", "!="
+			};
 			if(is_str_in(str_get(num)->inst, unary, sizeof unary)) {
 				pr_debug("unary op detected num=%d", num);
 				if(prev == S_ID_VARIABLE || str_get(num+1)->lext == L_IDENTIFIER) {
@@ -406,6 +411,8 @@ static int process_expression(int num, int level, bool inside_expr, bool inside_
 						set_synt(num, S_OPERAT_BINARY, arithlevel1);
 					else if(is_str_in(str_get(num)->inst, bin_prio2, sizeof bin_prio2))
 						set_synt(num, S_OPERAT_BINARY, arithlevel2);
+					else if(is_str_in(str_get(num)->inst, bin_prio3, sizeof bin_prio3))
+						set_synt(num, S_OPERAT_BINARY, arithlevel3);
 					else
 						set_synt(num, S_OPERAT_BINARY, arithlevel);
 					num++;
