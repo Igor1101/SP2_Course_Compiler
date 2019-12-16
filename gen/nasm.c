@@ -30,6 +30,7 @@ static void process_inc(int num);
 static void mov_int(var_t * a0, var_t* a1);
 static void mov_floating(var_t * a0, var_t* a1);
 static void cmp(var_t* a0, var_t* a1);
+static void sete(var_t* v);
 
 static char* var_to_str_offset(var_t*v);
 
@@ -427,6 +428,22 @@ static void process_eq(int num)
 	var_t* a1 = get_arg(num, 1);
 	var_t* a2 = get_arg(num, 2);
 	cmp(a1, a2);
+	sete(a0);
+}
+
+static void sete(var_t* v)
+{
+	if(v->memtype == REGISTER) {
+		/* change type */
+		v = get_reg_force(v->num, C_CHAR_T);
+		out("SETE %s\n", var_to_str_offset(v));
+	} else {
+		regsafetely_use(RAX);
+		var_t* rax = get_reg_force(RAX, C_CHAR_T);
+		out("SETE %s\n", var_to_str_offset(rax));
+		mov_int(v, rax);
+		regsafetely_unuse(RAX);
+	}
 }
 
 static void cmp(var_t* a0, var_t* a1)
