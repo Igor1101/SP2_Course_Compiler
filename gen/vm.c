@@ -211,8 +211,14 @@ static int process_expression(int num, bool param)
 					firstop = false;
 					if(str_get(op_num)->lext != L_OPERAT_RELATION)
 						binary_op(op_num, result, &from);
-					else
-						comparison_op(op_num, result, result, &from);
+					else {
+						int operand1 = reserve_reg((to.conv == C_UKNOWN)?to.type:to.conv);
+						var_t operand1_v;
+						var_get_local(operand1, REGISTER, &operand1_v);
+						mov(&operand1_v, &to);
+						comparison_op(op_num, result, &operand1_v, &from);
+						free_reg(operand1);
+					}
 				} else {
 					return num-1;
 				}
