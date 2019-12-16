@@ -100,14 +100,6 @@ static int process_cmd(int num)
 		pr_debug("processing dec");
 		process_inc(num);
 		break;
-	case DEC:
-		pr_debug("processing dec");
-		process_dec(num);
-		break;
-	case INC:
-		pr_debug("processing dec");
-		process_inc(num);
-		break;
 	}
 	return ++num;
 }
