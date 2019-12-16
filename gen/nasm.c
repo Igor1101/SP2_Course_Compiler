@@ -23,13 +23,9 @@ static void process_exprfini(int num);
 static void process_add(int num);
 static void process_mul(int num);
 static void process_sub(int num);
-<<<<<<< HEAD
 static void process_eq(int num);
-=======
-static void process_beq(int num);
 static void process_dec(int num);
 static void process_inc(int num);
->>>>>>> 7e6423499910b8e6b8c763fa24dd412be3a7a498
 
 static void mov_int(var_t * a0, var_t* a1);
 static void mov_floating(var_t * a0, var_t* a1);
@@ -95,6 +91,14 @@ static int process_cmd(int num)
 		break;
 	case CMP_EQ:
 		process_eq(num);
+		break;
+	case DEC:
+		pr_debug("processing dec");
+		process_dec(num);
+		break;
+	case INC:
+		pr_debug("processing dec");
+		process_inc(num);
 		break;
 	case DEC:
 		pr_debug("processing dec");
@@ -430,15 +434,12 @@ static void process_eq(int num)
 	var_t* a0 = get_arg(num, 0);
 	var_t* a1 = get_arg(num, 1);
 	var_t* a2 = get_arg(num, 2);
-<<<<<<< HEAD
 	cmp(a1, a2);
 }
 
 static void cmp(var_t* a0, var_t* a1)
 {
 	out("CMP    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
-=======
-	out("ADD   %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
 }
 
 static void process_dec(int num)
@@ -446,7 +447,6 @@ static void process_dec(int num)
 	assert(get_instr(num)->argc == 1);
 	var_t* arg = get_arg(num, 0);
 	out("DEC    %s    %s\n", type_to_nasmtype(arg->type), var_to_str_offset(arg));
->>>>>>> 7e6423499910b8e6b8c763fa24dd412be3a7a498
 }
 
 static void process_inc(int num)
