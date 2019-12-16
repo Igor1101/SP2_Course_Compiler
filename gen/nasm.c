@@ -23,10 +23,11 @@ static void process_exprfini(int num);
 static void process_add(int num);
 static void process_mul(int num);
 static void process_sub(int num);
-static void process_beq(int num);
+static void process_eq(int num);
 
-static void mov_simple(var_t * a0, var_t* a1);
+static void mov_int(var_t * a0, var_t* a1);
 static void mov_floating(var_t * a0, var_t* a1);
+static void cmp(var_t* a0, var_t* a1);
 
 static char* var_to_str_offset(var_t*v);
 
@@ -85,8 +86,8 @@ static int process_cmd(int num)
 	case MUL:
 		process_mul(num);
 		break;
-	case CMP_BEQ:
-		process_beq(num);
+	case CMP_EQ:
+		process_eq(num);
 		break;
 	}
 	return ++num;
@@ -188,7 +189,7 @@ static void process_mov(int num)
 			mov_floating(a0, a1);
 			break;
 		default:
-			mov_simple(a0, a1);
+			mov_int(a0, a1);
 			break;
 	}
 }
@@ -395,7 +396,7 @@ static void process_sub(int num)
 	}
 }
 
-static void mov_simple(var_t * a0, var_t* a1)
+static void mov_int(var_t * a0, var_t* a1)
 {
 	if(a0->memtype == MEMORY_LOC
 		&& a1->memtype == REGISTER) {
@@ -466,25 +467,18 @@ char* ctype_sz(ctypes_t t)
 	return 0;
 }
 
-static void process_beq(int num)
+static void process_eq(int num)
 {
 	assert(get_instr(num)->argc == 3);
 	var_t* a0 = get_arg(num, 0);
 	var_t* a1 = get_arg(num, 1);
 	var_t* a2 = get_arg(num, 2);
-	if(a0->memtype == MEMORY_LOC
-		&& a1->memtype == REGISTER) {
-		out("ADD   [%s],    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
-	} else if(a0->memtype == REGISTER
-		&& a1->memtype == MEMORY_LOC) {
-		out("ADD    %s,    [%s]\n", var_to_str_offset(a0), var_to_str_offset(a1));
-	} else if(a0->memtype == REGISTER
-		&& a1->memtype == CONSTANT) {
-		out("ADD    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
-	} else if(a0->memtype == REGISTER
-		&& a1->memtype == REGISTER) {
-		out("ADD    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
-	}
+	cmp(a1, a2);
+}
+
+static void cmp(var_t* a0, var_t* a1)
+{
+	out("CMP    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
 }
 
 /*
