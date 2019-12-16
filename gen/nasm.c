@@ -433,16 +433,20 @@ static void process_eq(int num)
 
 static void sete(var_t* v)
 {
+	ctypes_t maintype = v->type;
+	int regnum = v->num;
 	if(v->memtype == REGISTER) {
-		/* change type */
+		/* change type temporarily */
 		v = get_reg_force(v->num, C_CHAR_T);
 		out("SETE %s\n", var_to_str_offset(v));
 	} else {
-		regsafetely_use(RAX);
+		if(regnum!= RAX)
+			regsafetely_use(RAX);
 		var_t* rax = get_reg_force(RAX, C_CHAR_T);
 		out("SETE %s\n", var_to_str_offset(rax));
 		mov_int(v, rax);
-		regsafetely_unuse(RAX);
+		if(regnum!= RAX)
+			regsafetely_unuse(RAX);
 	}
 }
 
