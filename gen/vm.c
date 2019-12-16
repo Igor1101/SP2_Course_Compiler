@@ -73,7 +73,7 @@ static int process_expression(int num, bool param)
 	int min_level_binop(int start, int end)
 	{
 		int min = 5000;
-		for(num=start;num<end;num++) {
+		for(int num=start;num<end;num++) {
 			if(str_get(num)->synt == S_OPERAT_BINARY) {
 				if(str_get(num)->level < min)
 					min = str_get(num)->level;
