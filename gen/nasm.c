@@ -23,7 +23,13 @@ static void process_exprfini(int num);
 static void process_add(int num);
 static void process_mul(int num);
 static void process_sub(int num);
+<<<<<<< HEAD
 static void process_eq(int num);
+=======
+static void process_beq(int num);
+static void process_dec(int num);
+static void process_inc(int num);
+>>>>>>> 7e6423499910b8e6b8c763fa24dd412be3a7a498
 
 static void mov_int(var_t * a0, var_t* a1);
 static void mov_floating(var_t * a0, var_t* a1);
@@ -84,10 +90,19 @@ static int process_cmd(int num)
 		process_sub(num);
 		break;
 	case MUL:
+		pr_debug("processing mul");
 		process_mul(num);
 		break;
 	case CMP_EQ:
 		process_eq(num);
+		break;
+	case DEC:
+		pr_debug("processing dec");
+		process_dec(num);
+		break;
+	case INC:
+		pr_debug("processing dec");
+		process_inc(num);
 		break;
 	}
 	return ++num;
@@ -326,19 +341,7 @@ static void process_add(int num)
 	assert(get_instr(num)->argc == 2);
 	var_t* a0 = get_arg(num, 0);
 	var_t* a1 = get_arg(num, 1);
-	if(a0->memtype == MEMORY_LOC
-		&& a1->memtype == REGISTER) {
-		out("ADD   [%s],    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
-	} else if(a0->memtype == REGISTER
-		&& a1->memtype == MEMORY_LOC) {
-		out("ADD    %s,    [%s]\n", var_to_str_offset(a0), var_to_str_offset(a1));
-	} else if(a0->memtype == REGISTER
-		&& a1->memtype == CONSTANT) {
-		out("ADD    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
-	} else if(a0->memtype == REGISTER
-		&& a1->memtype == REGISTER) {
-		out("ADD    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
-	}
+	out("ADD    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
 }
 
 static void process_mul(int num)
@@ -351,27 +354,8 @@ static void process_mul(int num)
 	var_get(RAX, REGISTER, &rax);
 	regsafetely_use(RAX);
 	regsafetely_use(RDX);
-	if(a0->memtype == MEMORY_LOC
-		&& a1->memtype == REGISTER) {
-		out("MOV   %s,    %s\n", var_to_str_offset(&rax), var_to_str_offset(a1));
-	} else if(a0->memtype == REGISTER
-		&& a1->memtype == MEMORY_LOC) {
-		out("MOV   %s,    [%s]\n", var_to_str_offset(&rax), var_to_str_offset(a1));
-	} else if(a0->memtype == REGISTER
-		&& a1->memtype == CONSTANT) {
-		out("MOV   %s,    %s\n", var_to_str_offset(&rax), var_to_str_offset(a1));
-	}
+	out("MOV   %s,    %s\n", var_to_str_offset(&rax), var_to_str_offset(a1));
 	out("MUL    %s\n", var_to_str_offset(a0));
-	if(a0->memtype == MEMORY_LOC
-		&& a1->memtype == REGISTER) {
-		out("MOV   [%s],    %s\n", var_to_str_offset(a0), var_to_str_offset(&rax));
-	} else if(a0->memtype == REGISTER
-		&& a1->memtype == MEMORY_LOC) {
-		out("MOV   %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(&rax));
-	} else if(a0->memtype == REGISTER
-		&& a1->memtype == CONSTANT) {
-		out("MOV   %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(&rax));
-	}
 	regsafetely_unuse(RDX);
 	regsafetely_unuse(RAX);
 }
@@ -381,39 +365,12 @@ static void process_sub(int num)
 	assert(get_instr(num)->argc == 2);
 	var_t* a0 = get_arg(num, 0);
 	var_t* a1 = get_arg(num, 1);
-	if(a0->memtype == MEMORY_LOC
-		&& a1->memtype == REGISTER) {
-		out("SUB   [%s],    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
-	} else if(a0->memtype == REGISTER
-		&& a1->memtype == MEMORY_LOC) {
-		out("SUB    %s,    [%s]\n", var_to_str_offset(a0), var_to_str_offset(a1));
-	} else if(a0->memtype == REGISTER
-		&& a1->memtype == CONSTANT) {
-		out("SUB    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
-	} else if(a0->memtype == REGISTER
-		&& a1->memtype == REGISTER) {
-		out("SUB    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
-	}
+	out("SUB    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
 }
 
 static void mov_int(var_t * a0, var_t* a1)
 {
-	if(a0->memtype == MEMORY_LOC
-		&& a1->memtype == REGISTER) {
-		out("MOV   [%s],    %s\n", var_to_str_offset(a0),
-						var_to_str_offset(a1));
-	} else if(a0->memtype == REGISTER
-		&& a1->memtype == MEMORY_LOC) {
-		out("MOV   %s,     [%s]\n", var_to_str_offset(a0),
-				var_to_str_offset(a1)
-						);
-	} else if(a0->memtype == REGISTER
-		&& a1->memtype == CONSTANT) {
-		out("MOV    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
-	} else if(a0->memtype == REGISTER
-		&& a1->memtype == REGISTER) {
-		out("MOV    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
-	}
+	out("MOV    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
 }
 
 static void mov_floating(var_t * a0, var_t* a1)
@@ -421,10 +378,10 @@ static void mov_floating(var_t * a0, var_t* a1)
 	static int floating_num = 0;
 	if(a0->memtype == MEMORY_LOC
 		&& a1->memtype == REGISTER) {
-		out("MOVQ   [%s],    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
+		out("MOVQ   %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
 	} else if(a0->memtype == REGISTER
 		&& a1->memtype == MEMORY_LOC) {
-		out("MOVQ    %s,    [%s]\n", var_to_str_offset(a0), var_to_str_offset(a1));
+		out("MOVQ    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
 	} else if(a0->memtype == REGISTER
 		&& a1->memtype == CONSTANT) {
 		out("section .rodata\n");
@@ -473,14 +430,31 @@ static void process_eq(int num)
 	var_t* a0 = get_arg(num, 0);
 	var_t* a1 = get_arg(num, 1);
 	var_t* a2 = get_arg(num, 2);
+<<<<<<< HEAD
 	cmp(a1, a2);
 }
 
 static void cmp(var_t* a0, var_t* a1)
 {
 	out("CMP    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
+=======
+	out("ADD   %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
 }
 
+static void process_dec(int num)
+{
+	assert(get_instr(num)->argc == 1);
+	var_t* arg = get_arg(num, 0);
+	out("DEC    %s    %s\n", type_to_nasmtype(arg->type), var_to_str_offset(arg));
+>>>>>>> 7e6423499910b8e6b8c763fa24dd412be3a7a498
+}
+
+static void process_inc(int num)
+{
+	assert(get_instr(num)->argc == 1);
+	var_t* arg = get_arg(num, 0);
+	out("INC    %s    %s\n", type_to_nasmtype(arg->type), var_to_str_offset(arg));
+}
 /*
  * var_to_str_offset decorator
  * array offset calculation if needed
@@ -493,13 +467,39 @@ static char* var_to_str_offset(var_t*v)
 	if(buf_current >= BUFS)
 		buf_current = 0;
 	memset(outbuf[buf_current], 0 , sizeof outbuf[buf_current]);
-	snprintf(outbuf[buf_current], sizeof outbuf[buf_current], "%s%s%s%s%s",
+	snprintf(outbuf[buf_current], sizeof outbuf[buf_current], "%s%s%s%s%s%s%s",
+			(v->memtype==MEMORY_LOC)?"[":"",
 			var_to_str(v),
 			v->arrayel?"+":"",
 			v->arrayel?reg_to_str(v->arrreg_offset):"",
 			v->arrayel?"*":"",
-			v->arrayel?ctype_sz(v->type):""
+			v->arrayel?ctype_sz(v->type):"",
+			(v->memtype==MEMORY_LOC)?"]":""
 			);
 	return outbuf[buf_current++];
 #undef BUFS
+}
+
+char* type_to_nasmtype(ctypes_t t)
+{
+	switch(t) {
+	case C_CHAR_T:
+		return "BYTE";
+	case C_DOUBLE_T:
+		return "QWORD";
+	case C_FLOAT_T:
+		return "DWORD";
+	case C_INT_T:
+		return "DWORD";
+	case C_LONG_T:
+		return "QWORD";
+	case C_SHORT_T:
+		return "WORD";
+	case C_SIGNED_T:
+		return "DWORD";
+	case C_UKNOWN:
+		return "QWORD";
+	case C_UNSIGNED_T:
+		return "DWORD";
+	}
 }
