@@ -333,6 +333,7 @@ static int process_expression(int num, int level, bool inside_expr, bool inside_
 		case L_OPERAT_RELATION:
 		case L_OPERAT_LOGIC:
 		{
+			/* operator precedence */
 			const char* unary[] = { "++", "--"};
 			const char* sign[] = { "-", "+", "!"};
 			const char* binary[] = {

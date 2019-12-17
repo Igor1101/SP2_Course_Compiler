@@ -197,12 +197,24 @@ static int process_expression(int num, bool param)
 					int var_prev = prev_var_expr(start, num);
 					int var_nxt = next_var_expr(num, end);
 					var_t from, to;
-					var_get_local(var_prev, MEMORY_LOC, &to);
+					/* if current op is already more than level */
+					int curlevel = str_get(num)->level;
+					if(curlevel > level) {
+						int reg = reserve_reg(main_type);
+						var_get_local(reg, REGISTER, &to);
+						num = get_rvalue(prev_var_expr(start, num), end, curlevel, &to);
+						op_num = next_binop(num, end);
+						num = op_num;
+						free_reg(reg);
+					}
+					else
+						var_get_local(var_prev, MEMORY_LOC, &to);
 					int nxtlevel = str_get(next_binop(num+1, end))->level;
+					int nxtminlevel = min_level_binop(num+1, end);
 					if(next_binop(num+1, end) >=0 && nxtlevel > level) {
 						int reg = reserve_reg(main_type);
 						var_get_local(reg, REGISTER, &from);
-						num = get_rvalue(num+1, end, nxtlevel, &from);
+						num = get_rvalue(num+1, end, nxtminlevel, &from);
 						free_reg(reg);
 					} else
 						var_get_local(var_nxt, MEMORY_LOC, &from);
@@ -278,10 +290,12 @@ static int process_expression(int num, bool param)
 		if(str_get(num)->synt == S_OPERAT_ASSIGNMENT) {
 			has_assignment = true;
 			/* get lvalue */
+			int id = num - 1;
 			if(!strcmp(str_get(num-1)->inst, "]")) {
 				int start = prev_brace_opening(num-1);
 				int end =  next_brace_closing(start);
 				int arr = start-1;
+				id = arr;
 				start++;// inside array expr
 				int lm = min_level_binop(start, end);
 				var_t arr_var;
@@ -292,7 +306,7 @@ static int process_expression(int num, bool param)
 				//get_rvalue(start, end, lm, &var_offs);
 				lvalue.arrreg_offset = arr_var.arrreg_offset;
 			}
-			main_type = str_get(num-1)->ctype;
+			main_type = str_get(id)->ctype;
 			break;
 		}
 	}

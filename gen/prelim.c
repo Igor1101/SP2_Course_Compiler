@@ -466,7 +466,8 @@ char* reg_to_str(int r)
 		}
 		break;
 	}
-		return "invalid reg";
+	pr_info("reg type is <%s> invalid", type_to_str(regs_vm.regs[r].type));
+	return "invalid reg";
 }
 
 void free_ops(void)
