@@ -72,7 +72,7 @@ int main(int argc, char**argv)
 	free(buffer);
 	/* print result */
 	for(int i=0; i<str_array.amount;i++) {
-		pr_debug("lexem:\t%s\t\t:\t<%s> ", str_get_inst(i), lex_to_str(str_get(i)->lext));
+		pr_debug("%i\tlexem:\t%s\t\t:\t<%s> ", i, str_get_inst(i), lex_to_str(str_get(i)->lext));
 	}
     if(lerr_amount > 0) {
         lex_printf();
