@@ -43,19 +43,10 @@ typedef enum {
 	S_POINTER
 }syn_t;
 
-typedef struct {
-	int num;
-	int symbols_after_del;
-	int curlybrace_nest;
-	int parensis_nest;
-	int square_braces_nest;
-	int nesting;
-	bool assignment;
-	bool arithmetic;
-	syn_t op[MAX_DEPTH];
-	int __op_p;
-}syn_state_t;
-extern syn_state_t st;
+extern int parensis_nest;
+extern int curlybrace_nest;
+extern int array_nest;
+
 /* syn utils */
 char* syn_to_str(syn_t t);
 void set_synt(int num, syn_t s, int level);

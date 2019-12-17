@@ -13,8 +13,10 @@
 #include <stdlib.h>
 #include <stddef.h>
 
-syn_state_t st;
 int err_amount = 0;
+int parensis_nest = 0;
+int curlybrace_nest = 0;
+int array_nest = 0;
 
 static int process_ident(int num, int level, bool maybeparam, bool inside_expr);
 static int process_expression(int num, int level, bool inside_expr, bool inside_array);
@@ -98,13 +100,13 @@ int close_brace(int num)
 	int ret;
 	switch(*(str_get(num)->inst)) {
 	case ')':
-		ret = --st.parensis_nest;
+		ret = --parensis_nest;
 		break;
 	case '}':
-		ret = --st.curlybrace_nest;
+		ret = --curlybrace_nest;
 		break;
 	case ']':
-		ret = --st.parensis_nest;
+		ret = --array_nest;
 		break;
 	default:
 		pr_warn("close_brace garbage detected");
@@ -117,13 +119,13 @@ int open_brace(int num)
 	int ret;
 	switch(*(str_get(num)->inst)) {
 	case '(':
-		ret = ++st.parensis_nest;
+		ret = ++parensis_nest;
 		break;
 	case '{':
-		ret = ++st.curlybrace_nest;
+		ret = ++curlybrace_nest;
 		break;
 	case '[':
-		ret = ++st.parensis_nest;
+		ret = ++array_nest;
 		break;
 	default:
 		pr_warn("open_brace garbage detected %c", *(str_get(num)->inst));
@@ -173,7 +175,7 @@ static int process_ident(int num, int level, bool maybeparam, bool inside_expr)
 			return ++num;
 		}
 	}
-	if(st.symbols_after_del > 0 && num > 0) {
+	if(num > 0) {
 		if(
 				str_get(num-1)->lext == L_OPERAT_ARITHMETIC||
 				str_get(num-1)->lext == L_OPERAT_ASSIGNMENT||
@@ -215,7 +217,7 @@ static int process_function(int num, int level)
 				return i+1;
 			}
 			/* unexpected brace */
-			set_synt_err(num, S_FUNC_BRACE_CLOSE);
+			set_synt_err(i, S_FUNC_BRACE_CLOSE);
 
 			return i+1;
 		case L_IDENTIFIER:
@@ -259,7 +261,7 @@ static int process_function(int num, int level)
 			i++;
 			break;
 		default:
-			set_synt_err_unexp(i, S_ID_UNDEFINED, lex_to_syn(str_get(i)->lext));
+			set_synt_err_unexp(i, S_ID_PARAM, lex_to_syn(str_get(i)->lext));
 			i++;
 		}
 	}
@@ -445,6 +447,8 @@ static int process_expression(int num, int level, bool inside_expr, bool inside_
 			} else if(!strcmp(str_get(num)->inst, ")")&& inside_expr) {
 				return num;
 			}
+			set_synt_err_unexp(num, S_NOTDEFINED, S_BRACE_CLOSE);
+			num++;
 			break;
 		default:
 			pr_err("Unexpected operator");
