@@ -290,12 +290,13 @@ static int process_expression(int num, int level, bool inside_expr, bool inside_
 		pr_warn("could not find delimiter when processing expression");
 		next_del = str_array.amount;
 	}
+	/*
 	if(inside_expr) {
 		int brace = next_closing_brace(num, level);
 		if(brace>=0 && brace < next_del) {
 			next_del = brace;
 		}
-	}
+	}*/
 	for(; num<next_del;) {
 		switch(str_get(num)->lext) {
 		case L_CONSTANT:
