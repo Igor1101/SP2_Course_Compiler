@@ -448,6 +448,8 @@ static void sete(var_t* v)
 		if(regnum!= RAX)
 			regsafetely_unuse(RAX);
 	}
+	/* unchange type */
+	v = get_reg_force(v->num, maintype);
 }
 
 static void cmp(var_t* a0, var_t* a1)
