@@ -315,7 +315,10 @@ static int process_expression(int num, int level, bool inside_expr, bool inside_
 			break;
 		case L_OPERAT_ASSIGNMENT:
 			if(prev == S_ID_VARIABLE &&
-					(str_get(num+1)->lext == L_CHAR ||
+					(
+					/* op inside parensis */
+					!strcmp(str_get(num+1)->inst, "(") ||
+					str_get(num+1)->lext == L_CHAR ||
 					str_get(num+1)->lext == L_CONSTANT||
 					str_get(num+1)->lext == L_CONSTANT_BIN||
 					str_get(num+1)->lext == L_CONSTANT_FLOAT||
@@ -326,6 +329,11 @@ static int process_expression(int num, int level, bool inside_expr, bool inside_
 					) {
 				set_synt(num, S_OPERAT_ASSIGNMENT, arithlevel);
 				num++;
+				if(!strcmp(str_get(num)->inst, "(")) {
+					prev = S_ID_VARIABLE;
+					num = process_parensis(num, level+5, false, true);
+					break;
+				}
 				return process_expression(num, level+1, inside_expr, inside_array);
 			} else {
 				err_amount++;
@@ -399,13 +407,15 @@ static int process_expression(int num, int level, bool inside_expr, bool inside_
 						str_get(num+1)->lext == L_CONSTANT ||
 						str_get(num+1)->lext == L_CONSTANT_FLOAT ||
 						str_get(num+1)->lext == L_CONSTANT_BIN ||
-						str_get(num+1)->lext == L_CONSTANT_HEX
+						str_get(num+1)->lext == L_CONSTANT_HEX ||
+						!strcmp(str_get(num+1)->inst, "(")
 						)&& (
 						str_get(num-1)->lext == L_IDENTIFIER||
 						str_get(num-1)->lext == L_CONSTANT ||
 						str_get(num-1)->lext == L_CONSTANT_FLOAT ||
 						str_get(num-1)->lext == L_CONSTANT_BIN ||
 						str_get(num-1)->lext == L_CONSTANT_HEX ||
+						!strcmp(str_get(num-1)->inst, ")") ||
 						prev == S_ID_VARIABLE
 						)) {
 					expect = S_ID_VARIABLE;
@@ -453,6 +463,11 @@ static int process_expression(int num, int level, bool inside_expr, bool inside_
 			set_synt_err_unexp(num, S_NOTDEFINED, S_BRACE_CLOSE);
 			num++;
 			break;
+		case L_BRACE_OPENING:
+			if(!strcmp(str_get(num)->inst, "(")) {
+				num = process_parensis(num, level, false, inside_expr);
+				break;
+			}
 		default:
 			pr_err("Unexpected operator");
 			set_synt_err_unexp(num, S_NOTDEFINED, lex_to_syn(str_get(num)->lext));
@@ -584,14 +599,14 @@ static int process_parensis(int num, int level, bool maybeparam, bool inside_exp
 	if( !strcmp(str_get(num)->inst, "(")
 			) {
 		set_synt(num, S_PARENSIS_OPEN, level);
-		num = process_expression(num+1, level+1, true, true);
+		num = process_expression(num+1, level+5, true, true);
 		if(num>=str_array.amount)
 			return num++;
 		if( !strcmp(str_get(num)->inst, ")")) {
 			set_synt(num, S_PARENSIS_CLOSE, level);
 			if(str_get(num+1)->lext == L_OPERAT_ASSIGNMENT && !inside_expr) {
 				set_synt(num+1, S_OPERAT_ASSIGNMENT, level);
-				return process_expression(num+2, level, inside_expr, false);
+				return process_expression(num+2, level+1, inside_expr, false);
 			}
 			return num+1;
 		} else {
