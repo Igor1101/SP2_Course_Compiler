@@ -95,6 +95,7 @@ int main(int argc, char**argv)
 #if (defined DEBUG_APP)
 	pr_debug("Code analyzed result:");
 	for(int i=0; i<str_array.amount;i++) {
+		printf("%i\t", i);
 		for(int j=0; j<str_get(i)->level; j++) {
 			printf(" ");// print level
 		}
