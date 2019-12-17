@@ -26,6 +26,8 @@ static int process_main(int num, int level, bool inside_block);
 static int process_block(int num, int level);
 static int process_declaration(int num, int level, bool param);
 static int process_array(int num, int level, bool maybeparam, bool inside_expr);
+static int process_parensis(int num, int level, bool maybeparam, bool inside_expr);
+
 int syn_analyze(void)
 {
 	init_syn_analyzer();
@@ -50,6 +52,9 @@ static int process_main(int num, int level, bool inside_block)
 		}
 		int prev = num;
 		switch(str_get(num)->lext) {
+		case L_BRACE_OPENING:
+			num = process_parensis(num, level, inside_block, false);
+			break;
 		case L_IDENTIFIER:
 			num = process_ident(num, level+1, false, false);
 			break;
@@ -58,8 +63,6 @@ static int process_main(int num, int level, bool inside_block)
 			break;
 		case L_BRACE_CLOSING:
 			//close_brace(num);
-		case L_BRACE_OPENING:
-			//open_brace(num);
 		case L_DELIMITER:
 			num = is_delimiter_next_expected(num, level, true);
 			break;
@@ -575,3 +578,29 @@ static int process_declaration(int num, int level, bool param)
 	}
 	return num;
 }
+
+static int process_parensis(int num, int level, bool maybeparam, bool inside_expr)
+{
+	if( !strcmp(str_get(num)->inst, "(")
+			) {
+		set_synt(num, S_PARENSIS_OPEN, level);
+		num = process_expression(num+1, level+1, true, true);
+		if(num>=str_array.amount)
+			return num++;
+		if( !strcmp(str_get(num)->inst, ")")) {
+			set_synt(num, S_PARENSIS_CLOSE, level);
+			if(str_get(num+1)->lext == L_OPERAT_ASSIGNMENT && !inside_expr) {
+				set_synt(num+1, S_OPERAT_ASSIGNMENT, level);
+				return process_expression(num+2, level, inside_expr, false);
+			}
+			return num+1;
+		} else {
+			set_synt_err(num, S_PARENSIS_CLOSE);
+			return num+1;
+		}
+	} else {
+		return ++num;
+	}
+	return num++;
+}
+

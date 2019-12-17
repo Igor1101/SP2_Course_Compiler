@@ -131,6 +131,10 @@ char* syn_to_str(syn_t t)
 		return "BRACE CLOSE";
 	case S_BRACE_OPEN:
 		return "BRACE OPEN";
+	case S_PARENSIS_OPEN:
+		return "PARENSIS OPEN";
+	case S_PARENSIS_CLOSE:
+		return "PARENSIS CLOSE";
 	case S_VARIABLE:
 		return "VARIABLE";
 	case S_CONST:
