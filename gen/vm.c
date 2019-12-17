@@ -194,10 +194,9 @@ static int process_expression(int num, bool param)
 				int op_num = num;
 				/* use current function to calc*/
 				if(str_get(num)->level >= level) {
-					int var_prev = prev_var_expr(start, num);
-					int var_nxt = next_var_expr(num, end);
 					var_t from, to;
 					/* if current op is already more than level */
+					int var_prev = prev_var_expr(start, num);
 					int curlevel = str_get(num)->level;
 					if(curlevel > level) {
 						int reg = reserve_reg(main_type);
@@ -209,6 +208,7 @@ static int process_expression(int num, bool param)
 					}
 					else
 						var_get_local(var_prev, MEMORY_LOC, &to);
+					int var_nxt = next_var_expr(num, end);
 					int nxtlevel = str_get(next_binop(num+1, end))->level;
 					int nxtminlevel = min_level_binop(num+1, end);
 					if(next_binop(num+1, end) >=0 && nxtlevel > level) {
