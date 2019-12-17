@@ -269,7 +269,10 @@ void out_decl_printf(void)
 		ident_t* id = ident_get(j);
 		for(int i=0; i<id->amount; i++){
 			out("section .rodata\n");
-			out(STR_DATA ": DB \"%s[%i]=%%", id->inst, i, id->inst, i);
+			if(id->array)
+				out(STR_DATA ": DB \"%s[%i]=%%", id->inst, i, id->inst, i);
+			else
+				out(STR_DATA ": DB \"%s=%%", id->inst, i, id->inst);
 			switch(id->type) {
 			case C_CHAR_T:
 				out("c");
