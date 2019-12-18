@@ -181,7 +181,7 @@ static int process_expression(int num, bool param, bool inside_array)
 			ctypes_t t = ident_get_str(str_get_inst(num))->type;
 			if(inside_array) {
 				if(t == C_DOUBLE_T || t == C_FLOAT_T) {
-					set_err(num, "type <%s> inside array elem", t);
+					set_err(num, "type <%s> inside array elem", type_to_str(t));
 					num++;
 					break;
 				}
