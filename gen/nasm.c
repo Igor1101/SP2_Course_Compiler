@@ -27,6 +27,7 @@ static void process_eq(int num);
 static void process_dec(int num);
 static void process_inc(int num);
 static void process_conv(int num);
+static void process_sign(int num);
 
 static void mov_int(var_t * a0, var_t* a1);
 static void mov_floating(var_t * a0, var_t* a1);
@@ -108,6 +109,9 @@ static int process_cmd(int num)
 	case CONV:
 		pr_debug("processing conv");
 		process_conv(num);
+	case SIGN:
+		pr_debug("processing sign");
+		process_sign(num);
 	}
 	return ++num;
 }
@@ -376,6 +380,16 @@ static void process_sub(int num)
 	var_t* a0 = get_arg(num, 0);
 	var_t* a1 = get_arg(num, 1);
 	out("SUB    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
+}
+
+static void process_sign(int num)
+{
+	if(get_instr(num)->argc == 2) {
+		var_t* a0 = get_arg(num, 0);
+		var_t* a1 = get_arg(num, 1);
+		mov_int(a0, a1);
+		out("NEG    %s\n", var_to_str_offset(a0) );
+	}
 }
 
 static void mov_int(var_t * a0, var_t* a1)
