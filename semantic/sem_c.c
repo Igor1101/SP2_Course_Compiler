@@ -19,6 +19,11 @@ static int prev_var_expr(int start, int end);
 static int next_var_expr(int start, int end);
 static bool expr_has_relation(int start, int end);
 
+static int next_brace_opening(int num);
+static int prev_brace_opening(int num);
+static int prev_brace_closing(int num);
+static int next_brace_closing(int num);
+
 int sem_analyze(void)
 {
 	ident_array_remove();
@@ -45,10 +50,11 @@ int sem_analyze(void)
 
 static int process_declaration(int num)
 {
+	int end = next_delimiter(num, 0, false);
 	/* getting type of variables */
 	ctypes_t t = str_to_type(str_get(num)->inst);
 	/* getting declared vars */
-	for(; num<next_delimiter(num, 0, false); ) {
+	for(; num<end; ) {
 		switch(str_get(num)->synt) {
 		case S_ID_VARIABLE:
 		{
@@ -63,13 +69,17 @@ static int process_declaration(int num)
 			}
 			break;
 		}
+
 		case S_ID_ARRAY:
+		{
+			int index = next_var_expr(num+1, next_brace_closing(num));
 			if(ident_add(str_get_inst(num), t, true,
-					strtol(str_get(num+2)->inst, NULL, 10))<0) {
+					strtol(str_get(index)->inst, NULL, 10))<0) {
 				set_err_already_decl(num);
 			}
 			str_get(num)->ctype = t;
 			num = process_array(num, false);
+		}
 			break;
 
 		default:
@@ -313,3 +323,39 @@ static bool expr_has_relation(int start, int end)
 	} while(num<end);
 	return false;
 }
+static int next_brace_closing(int num)
+{
+	while(true) {
+		num++;
+		if(str_get(num)->synt == S_BRACE_CLOSE)
+			return num;
+	}
+}
+
+static int prev_brace_closing(int num)
+{
+	while(true) {
+		num--;
+		if(str_get(num)->synt == S_BRACE_CLOSE)
+			return num;
+	}
+}
+
+static int prev_brace_opening(int num)
+{
+	while(true) {
+		num--;
+		if(str_get(num)->synt == S_BRACE_OPEN)
+			return num;
+	}
+}
+
+static int next_brace_opening(int num)
+{
+	while(true) {
+		num++;
+		if(str_get(num)->synt == S_BRACE_OPEN)
+			return num;
+	}
+}
+
