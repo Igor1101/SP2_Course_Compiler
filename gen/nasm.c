@@ -248,6 +248,8 @@ void out_init(void)
 	out("extern printf\n");
 	out("global main\n");
 	out("main:\n");
+	out("PUSH RBP\n");
+	out("MOV RBP, RSP\n");
 	out("\n");
 	out("\n");
 }
@@ -258,6 +260,7 @@ void out_deinit(void)
 	out("\n");
 	out("MOV RCX, 0\n");
 	out("CALL exit\n");
+	out("POP RBP\n");
 	out("RET\n");
 }
 
