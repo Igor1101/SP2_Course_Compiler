@@ -26,11 +26,14 @@ static void process_sub(int num);
 static void process_eq(int num);
 static void process_dec(int num);
 static void process_inc(int num);
+static void process_conv(int num);
 
 static void mov_int(var_t * a0, var_t* a1);
 static void mov_floating(var_t * a0, var_t* a1);
 static void cmp(var_t* a0, var_t* a1);
 static void sete(var_t* v);
+
+static void cvtsi2sd(var_t*a0, var_t*a1);
 
 static char* var_to_str_offset(var_t*v);
 
@@ -101,6 +104,9 @@ static int process_cmd(int num)
 		pr_debug("processing dec");
 		process_inc(num);
 		break;
+	case CONV:
+		pr_debug("processing conv");
+		process_conv(num);
 	}
 	return ++num;
 }
@@ -475,6 +481,30 @@ static void process_inc(int num)
 	assert(get_instr(num)->argc == 1);
 	var_t* arg = get_arg(num, 0);
 	out("INC    %s    %s\n", type_to_nasmtype(arg->type), var_to_str_offset(arg));
+}
+
+static void process_conv(int num)
+{
+	if(get_instr(num)->argc ==2) {
+		var_t* a0 = get_arg(num, 0);
+		var_t* a1 = get_arg(num, 1);
+		if((a1->type == C_LONG_T ||
+		   a1->type == C_INT_T  ||
+		   a1->type == C_SIGNED_T) &&(
+				a0->type == C_DOUBLE_T ||
+				a0->type == C_FLOAT_T)) {
+			cvtsi2sd(a0, a1);
+		}
+	}
+}
+
+/* conv funcs */
+static void cvtsi2sd(var_t*a0, var_t*a1)
+{
+	if(a1->memtype == REGISTER &&
+			a0->memtype == REGISTER) {
+		out("CVTSI2SD    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
+	}
 }
 /*
  * var_to_str_offset decorator

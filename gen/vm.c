@@ -346,11 +346,14 @@ static int process_expression(int num, bool param)
 				str_get(num)->lext == L_IDENTIFIER||
 				str_get(num)->synt == S_CONST)) {
 			int cvt = num;
-			var_t from, to;
+			var_t from, to, rfrom;
 			int reg_to = reserve_reg(str_get(num)->conv_to);
+			int reg_from = reserve_reg(str_get(num)->ctype);
 			var_get_local(reg_to, REGISTER, &to);
+			var_get_local(reg_from, REGISTER, &rfrom);
 			var_get_local(cvt, MEMORY_LOC, &from);
-			conv(&to, &from);
+			mov(&rfrom, &from);
+			conv(&to, &rfrom);
 			set_var_reg(reg_to, cvt, str_get(cvt)->conv_to);
 		}
 	}
