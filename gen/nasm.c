@@ -31,6 +31,7 @@ static void process_conv(int num);
 static void mov_int(var_t * a0, var_t* a1);
 static void mov_floating(var_t * a0, var_t* a1);
 static void cmp(var_t* a0, var_t* a1);
+static void movsx(var_t*a0, var_t*a1);
 static void sete(var_t* v);
 
 static void cvtsi2sd(var_t*a0, var_t*a1);
@@ -382,6 +383,11 @@ static void mov_int(var_t * a0, var_t* a1)
 	out("MOV    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
 }
 
+static void movsx(var_t*a0, var_t*a1)
+{
+	out("MOVSX    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
+}
+
 static void mov_floating(var_t * a0, var_t* a1)
 {
 	static int floating_num = 0;
@@ -447,19 +453,27 @@ static void sete(var_t* v)
 {
 	ctypes_t maintype = v->type;
 	int regnum = v->num;
-	if(v->memtype == REGISTER) {
-		/* change type temporarily */
-		v = get_reg_force(v->num, C_CHAR_T);
-		out("SETE    %s\n", var_to_str_offset(v));
-	} else {
-		if(regnum!= RAX)
-			regsafetely_use(RAX);
-		var_t* rax = get_reg_force(RAX, C_CHAR_T);
-		out("SETE    %s\n", var_to_str_offset(rax));
-		mov_int(v, rax);
-		if(regnum!= RAX)
-			regsafetely_unuse(RAX);
-	}
+	/* change type temporarily */
+	if(regnum!= RAX)
+		regsafetely_use(RAX);
+	if(regnum!= RBX)
+		regsafetely_use(RBX);
+	var_t* rax = get_reg_force(RAX, C_CHAR_T);
+	var_t* rbx = get_reg_force(RBX, (!strcmp(ctype_sz(maintype), "8"))?C_LONG_T:C_INT_T);
+	out("SETE    %s\n", var_to_str_offset(rax));
+	if(v->type != C_CHAR_T)
+		movsx(rbx, rax);
+	if(v->type == C_LONG_T ||
+			v->type == C_INT_T ||
+			v->type == C_SHORT_T
+			)
+		mov_int(v, rbx);
+	else
+		cvtsi2sd(v, rbx);
+	if(regnum!= RBX)
+		regsafetely_unuse(RBX);
+	if(regnum!= RAX)
+		regsafetely_unuse(RAX);
 	/* unchange type */
 	v = get_reg_force(v->num, maintype);
 }
