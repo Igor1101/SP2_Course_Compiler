@@ -346,12 +346,13 @@ static void process_mul(int num)
 	var_t* a0 = get_arg(num, 0);
 	var_t* a1 = get_arg(num, 1);
 	var_t rax;
-	get_reg_force(RAX, (a1->conv==C_UKNOWN)?a1->type:a1->conv);
+	get_reg_force(RAX, a1->type);
 	var_get(RAX, REGISTER, &rax);
 	regsafetely_use(RAX);
 	regsafetely_use(RDX);
 	out("MOV   %s,    %s\n", var_to_str_offset(&rax), var_to_str_offset(a1));
 	out("MUL    %s\n", var_to_str_offset(a0));
+	out("MOV   %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(&rax));
 	regsafetely_unuse(RDX);
 	regsafetely_unuse(RAX);
 }
