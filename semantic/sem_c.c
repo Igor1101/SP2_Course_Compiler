@@ -17,6 +17,7 @@ static int process_expression(int num, bool param, bool inside_array);
 static int process_array(int num, bool param);
 static int prev_var_expr(int start, int end);
 static int next_var_expr(int start, int end);
+static bool expr_has_relation(int start, int end);
 
 int sem_analyze(void)
 {
@@ -82,6 +83,7 @@ static int process_expression(int num, bool param, bool inside_array)
 {
 	int start = num;
 	int end = next_delimiter(num, 0, param);
+	bool has_relation = expr_has_relation(start, end);
 	bool assign_used = false;
 	int assigned_var;
 	ctypes_t main_type = C_UKNOWN;
@@ -207,7 +209,7 @@ static int process_expression(int num, bool param, bool inside_array)
 				main_type = t;
 			}
 			ident_set_used(str_get_inst(num));
-			if(!strcmp(str_get(num+1)->inst, "=")) {
+			if(!strcmp(str_get(num+1)->inst, "=") && !has_relation) {
 				ident_set_init(str_get_inst(num));
 				assign_used = true;
 				assigned_var = num;
@@ -296,3 +298,18 @@ static int next_var_expr(int start, int end)
 	return num;
 }
 
+static bool expr_has_relation(int start, int end)
+{
+	int num = start;
+	do {
+		num++;
+		/* if array found */
+		if(str_get(num)->synt == S_BRACE_OPEN) {
+			while(str_get(num)->synt != S_BRACE_CLOSE)
+				num++;
+		}
+		if(str_get(num)->synt == S_OPERAT_RELATION)
+			return true;
+	} while(num<end);
+	return false;
+}
