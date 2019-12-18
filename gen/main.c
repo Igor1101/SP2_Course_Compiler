@@ -109,7 +109,9 @@ int main(int argc, char**argv)
 #endif
 	init_prelim();
 	preliminary_gen();
+#if (defined DEBUG_APP)
 	prelim_print_debug();
+#endif
 	pr_debug("assembly generation");
 	gen_nasm();
 	return 0;

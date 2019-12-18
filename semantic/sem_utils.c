@@ -239,6 +239,7 @@ void sem_printf(void)
 
 void sem_database_print(void)
 {
+#if (defined DEBUG_APP)
 	pr_info("database:");
 	for(int i=0; i<ident_array.amount; i++) {
 		pr_info("\t%s:\t%s,\t<%s>,\t%s\t %s %d", ident_get(i)->inst,
@@ -249,4 +250,5 @@ void sem_database_print(void)
 				ident_get(i)->amount
 						);
 	}
+#endif
 }
