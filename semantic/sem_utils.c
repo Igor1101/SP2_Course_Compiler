@@ -20,8 +20,7 @@ void set_err(int num, char* format, ...)
 #define MAX_SERRSZ 1000
 	va_list argp;
 	va_start(argp, format);
-	char* output = malloc(MAX_SERRSZ);
-	memset(output, 0, MAX_SERRSZ);
+	char* output = calloc(MAX_SERRSZ, 1);
 	if(output == NULL) {
 		pr_err("malloc err");
 		va_end(argp);
@@ -211,8 +210,8 @@ int sem_err_amount(void)
 void sem_printf(void)
 {
 	pr_info("sem output:");
-	char *arr = malloc(1000);
-	size_t *sz = malloc(str_array.amount*sizeof(size_t));
+	char *arr = calloc(1000,1);
+	size_t *sz = calloc(str_array.amount, sizeof(size_t));
 	size_t sz_cur = 0;
 
 	for(int i=0; i<str_array.amount; i++) {
