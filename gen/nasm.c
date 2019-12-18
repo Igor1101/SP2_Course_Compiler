@@ -266,6 +266,9 @@ void out_deinit(void)
 
 void out_decl_printf(void)
 {
+	/* fix RBP if used*/
+	out("POP\t RBP\n");
+	out("PUSH\tRBP\n");
 #define STR_DATA "STR_%s_%d"
 	/* setting rodata strings for vars */
 	for(int j=0; j<ident_array.amount; j++) {
