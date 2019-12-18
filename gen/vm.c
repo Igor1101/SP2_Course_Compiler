@@ -22,6 +22,7 @@ static int process_expression(int num, bool param);
 static int process_declaration(int num, bool param);
 static int next_binop(int start, int end);
 static int last_assignment(int start, int end);
+static int next_binop_level(int start, int end, int level);
 
 int vm_run(void)
 {
@@ -181,7 +182,8 @@ static int process_expression(int num, bool param)
 			mov(result, &from);
 			return ++num;
 		}
-		for(int num=start; num<end; num++) {
+		int num;
+		for(num=start; num<end; num++) {
 			if(next_binop(num, end) < 0) {
 				return num;
 			}
@@ -199,9 +201,11 @@ static int process_expression(int num, bool param)
 					int var_prev = prev_var_expr(start, num);
 					int curlevel = str_get(num)->level;
 					if(curlevel > level) {
+						int nxt_curlevelop = next_binop_level(start, end, level);
+						int min_level = min_level_binop(start, nxt_curlevelop-1);
 						int reg = reserve_reg(main_type);
 						var_get_local(reg, REGISTER, &to);
-						num = get_rvalue(prev_var_expr(start, num), end, curlevel, &to);
+						num = get_rvalue(prev_var_expr(start, num), nxt_curlevelop-1, min_level, &to);
 						op_num = next_binop(num, end);
 						num = op_num;
 						free_reg(reg);
@@ -214,7 +218,7 @@ static int process_expression(int num, bool param)
 					if(next_binop(num+1, end) >=0 && nxtlevel > level) {
 						int reg = reserve_reg(main_type);
 						var_get_local(reg, REGISTER, &from);
-						num = get_rvalue(num+1, end, nxtminlevel, &from);
+						num = get_rvalue(num+1, end, nxtlevel, &from);
 						free_reg(reg);
 					} else
 						var_get_local(var_nxt, MEMORY_LOC, &from);
@@ -522,3 +526,20 @@ static int next_brace_opening(int num)
 			return num;
 	}
 }
+
+static int next_binop_level(int start, int end, int level)
+{
+	for(int num=start; num<end; num++)  {
+		/* if array found */
+		if(str_get(num)->synt == S_BRACE_OPEN) {
+			while(str_get(num)->synt != S_BRACE_CLOSE)
+				num++;
+		}
+		if((str_get(num)->synt == S_OPERAT_BINARY ||
+				str_get(num)->synt == S_OPERAT_RELATION) &&
+				str_get(num)->level == level)
+			return num;
+	}
+	return end;
+}
+
