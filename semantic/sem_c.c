@@ -15,6 +15,8 @@
 static int process_declaration(int num);
 static int process_expression(int num, bool param, bool inside_array);
 static int process_array(int num, bool param);
+static int prev_var_expr(int start, int end);
+static int next_var_expr(int start, int end);
 
 int sem_analyze(void)
 {
@@ -78,17 +80,21 @@ static int process_declaration(int num)
 
 static int process_expression(int num, bool param, bool inside_array)
 {
+	int start = num;
+	int end = next_delimiter(num, 0, param);
 	bool assign_used = false;
 	int assigned_var;
 	ctypes_t main_type = C_UKNOWN;
-	for(; num<next_delimiter(num, 0, param);) {
+	for(; num<end;) {
 		switch(str_get(num)->synt) {
 		case S_OPERAT_BINARY:
 			if(str_get(num)->lext== L_OPERAT_RELATION) {
-				if(ident_present(str_get(num-1)->inst) &&
-						ident_present(str_get(num+1)->inst)) {
-				if(ident_get_str(str_get(num-1)->inst)->type !=
-						ident_get_str(str_get(num+1)->inst)->type
+				int prev = prev_var_expr(start, num);
+				int next = next_var_expr(num, end);
+				if(ident_present(str_get(prev)->inst) &&
+						ident_present(str_get(next)->inst)) {
+				if(ident_get_str(str_get(prev)->inst)->type !=
+						ident_get_str(str_get(next)->inst)->type
 						) {
 					set_err(num, "relation with different types");
 				}
@@ -253,3 +259,40 @@ static int process_array(int num, bool param)
 	/* at ] */
 	return num+1;
 }
+
+static int prev_var_expr(int start, int end)
+{
+	int num = end;
+	do {
+		num--;
+		/* if array found */
+		if(str_get(num)->synt == S_BRACE_CLOSE) {
+			while(str_get(num)->synt != S_BRACE_OPEN)
+				num--;
+		}
+		if(str_get(num)->synt == S_ID_VARIABLE
+				|| str_get(num)->synt == S_CONST ||
+				str_get(num)->synt == S_ID_ARRAY)
+			return num;
+	} while(num>=start);
+	return num;
+}
+
+static int next_var_expr(int start, int end)
+{
+	int num = start;
+	do {
+		num++;
+		/* if array found */
+		if(str_get(num)->synt == S_BRACE_OPEN) {
+			while(str_get(num)->synt != S_BRACE_CLOSE)
+				num++;
+		}
+		if(str_get(num)->synt == S_ID_VARIABLE
+				|| str_get(num)->synt == S_CONST ||
+				str_get(num)->synt == S_ID_ARRAY)
+			return num;
+	} while(num<end);
+	return num;
+}
+
