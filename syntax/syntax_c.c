@@ -409,7 +409,9 @@ static int process_expression(int num, int level, bool inside_expr, bool inside_
 						str_get(num+1)->lext == L_CONSTANT_FLOAT ||
 						str_get(num+1)->lext == L_CONSTANT_BIN ||
 						str_get(num+1)->lext == L_CONSTANT_HEX ||
-						!strcmp(str_get(num+1)->inst, "(")
+						!strcmp(str_get(num+1)->inst, "(") ||
+						!strcmp(str_get(num+1)->inst, "+") ||
+						!strcmp(str_get(num+1)->inst, "-")
 						)&& (
 						str_get(num-1)->lext == L_IDENTIFIER||
 						str_get(num-1)->lext == L_CONSTANT ||
