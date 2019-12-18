@@ -113,7 +113,8 @@ static int process_expression(int num, bool param)
 		struct var_node* prev = var0;
 		for(num=savenum; num<next_delimiter(num, 0, param);num++) {
 			if(str_get(num)->synt == S_ID_VARIABLE||
-					str_get(num)->synt == S_ID_ARRAY) {
+					str_get(num)->synt == S_ID_ARRAY||
+					str_get(num)->synt == S_CONST) {
 				prev->inst.num = num;
 				prev->inst.type = str_get(num)->ctype;
 				if(str_get(num)->synt == S_ID_ARRAY) {
@@ -321,7 +322,7 @@ static int process_expression(int num, bool param)
 		case S_OPERAT_UNARY:
 		{
 			int var = next_var_expr(num, next_delimiter(num, 0, param));
-			if(str_get(var)->lext == L_IDENTIFIER) {
+			//if(str_get(var)->lext == L_IDENTIFIER) {
 					/*ignore + */
 				if(!strcmp(str_get(num)->inst, "-")) {
 					int reg = reserve_reg(str_get(var)->ctype);
@@ -331,7 +332,7 @@ static int process_expression(int num, bool param)
 					sign(&to, &from);
 					set_var_reg(reg, var, str_get(var)->ctype);
 				}
-			}
+			//}
 			num++;
 			break;
 		}
