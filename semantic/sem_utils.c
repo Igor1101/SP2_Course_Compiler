@@ -21,6 +21,7 @@ void set_err(int num, char* format, ...)
 	va_list argp;
 	va_start(argp, format);
 	char* output = malloc(MAX_SERRSZ);
+	memset(output, 0, MAX_SERRSZ);
 	if(output == NULL) {
 		pr_err("malloc err");
 		va_end(argp);
