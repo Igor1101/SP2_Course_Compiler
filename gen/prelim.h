@@ -23,10 +23,10 @@
 #define RBP 8
 #define RSI 9
 #define RDI 10
-#define RAX 11
-#define RBX 12
-#define RCX 13
-#define RDX 14
+#define RCX 11
+#define RDX 12
+#define RBX 13
+#define RAX 14
 /*
  * SSE2 - XMM REGISTERS
  */
