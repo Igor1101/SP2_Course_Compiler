@@ -137,6 +137,7 @@ static int process_expression(int num, bool param, bool inside_array)
 			}
 			{
 				ctypes_t t = str_get(num)->ctype;
+				bool isconst = (str_get(num)->synt == S_CONST)?true:false;
 				if(main_type != C_UKNOWN) {
 				switch(type0_to_type1_acc(t, main_type)) {
 				case ACCEPT:
@@ -145,7 +146,8 @@ static int process_expression(int num, bool param, bool inside_array)
 					set_err_type(num, t, main_type);
 					break;
 				case CONVERT:
-					str_get(num)->conv_to = main_type;
+					if(!isconst)
+						str_get(num)->conv_to = main_type;
 					break;
 				}
 				}
