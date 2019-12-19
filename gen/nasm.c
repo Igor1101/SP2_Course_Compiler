@@ -34,6 +34,7 @@ static void process_sign(int num);
 static void mov_int(var_t * a0, var_t* a1);
 static void mov_floating(var_t * a0, var_t* a1);
 static void cmp(var_t* a0, var_t* a1);
+static void cmp_float(var_t*a0, var_t*a1);
 static void movsx(var_t*a0, var_t*a1);
 static void neg(var_t*v);
 static void sete(var_t* v);
@@ -470,8 +471,12 @@ static void process_eq(int num)
 	var_t* a0 = get_arg(num, 0);
 	var_t* a1 = get_arg(num, 1);
 	var_t* a2 = get_arg(num, 2);
-	cmp(a1, a2);
-	sete(a0);
+	if(a0->type != C_FLOAT_T && a0->type != C_DOUBLE_T) {
+		cmp(a1, a2);
+	} else {
+		cmp_float(a1, a2);
+	}
+		sete(a0);
 }
 
 static void sete(var_t* v)
@@ -503,11 +508,16 @@ static void sete(var_t* v)
 	v = get_reg_force(v->num, maintype);
 }
 
+
 static void cmp(var_t* a0, var_t* a1)
 {
 	out("CMP    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
 }
 
+static void cmp_float(var_t*a0, var_t*a1)
+{
+	out("UCOMISD %s,   %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
+}
 static void process_dec(int num)
 {
 	assert(get_instr(num)->argc == 1);
