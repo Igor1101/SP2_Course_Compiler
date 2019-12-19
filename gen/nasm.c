@@ -113,9 +113,11 @@ static int process_cmd(int num)
 	case CONV:
 		pr_debug("processing conv");
 		process_conv(num);
+		break;
 	case SIGN:
 		pr_debug("processing sign");
 		process_sign(num);
+		break;
 	}
 	return ++num;
 }
