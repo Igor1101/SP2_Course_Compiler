@@ -33,6 +33,7 @@ static void mov_int(var_t * a0, var_t* a1);
 static void mov_floating(var_t * a0, var_t* a1);
 static void cmp(var_t* a0, var_t* a1);
 static void movsx(var_t*a0, var_t*a1);
+static void neg(var_t*v);
 static void sete(var_t* v);
 
 static void cvtsi2sd(var_t*a0, var_t*a1);
@@ -366,11 +367,9 @@ static void process_mul(int num)
 	get_reg_force(RAX, a1->type);
 	var_get(RAX, REGISTER, &rax);
 	regsafetely_use(RAX);
-	regsafetely_use(RDX);
 	out("MOV   %s,    %s\n", var_to_str_offset(&rax), var_to_str_offset(a1));
 	out("MUL    %s\n", var_to_str_offset(a0));
 	out("MOV   %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(&rax));
-	regsafetely_unuse(RDX);
 	regsafetely_unuse(RAX);
 }
 
@@ -387,8 +386,12 @@ static void process_sign(int num)
 	if(get_instr(num)->argc == 2) {
 		var_t* a0 = get_arg(num, 0);
 		var_t* a1 = get_arg(num, 1);
-		mov_int(a0, a1);
-		out("NEG    %s\n", var_to_str_offset(a0) );
+		if((a1->type == C_FLOAT_T || a1->type == C_DOUBLE_T) &&
+				(a0->type == C_FLOAT_T || a0->type == C_DOUBLE_T))
+			mov_floating(a0, a1);
+		else
+			mov_int(a0, a1);
+		neg(a0);
 	}
 }
 
@@ -478,8 +481,8 @@ static void sete(var_t* v)
 	if(v->type != C_CHAR_T)
 		movsx(rbx, rax);
 	if(v->type == C_LONG_T ||
-			v->type == C_INT_T ||
-			v->type == C_SHORT_T
+		v->type == C_INT_T ||
+		v->type == C_SHORT_T
 			)
 		mov_int(v, rbx);
 	else
@@ -532,6 +535,26 @@ static void cvtsi2sd(var_t*a0, var_t*a1)
 	if(a1->memtype == REGISTER &&
 			a0->memtype == REGISTER) {
 		out("CVTSI2SD    %s,    %s\n", var_to_str_offset(a0), var_to_str_offset(a1));
+	}
+}
+
+static void neg(var_t*v)
+{
+	static int negnum = 0;
+	if(v->type == C_FLOAT_T || v->type == C_DOUBLE_T) {
+		out("section .rodata\n");
+		out(".NEG%d:\n"
+        "DQ    -0.0\n", negnum);
+		out("section .text\n");
+		regsafetely_use(RAX);
+		out("MOV     RAX,    [.NEG%d]\n", negnum);
+		out("MOVQ     XMM15,    RAX\n");
+		out("XORPD    %s,    XMM15\n", var_to_str_offset(v));
+		regsafetely_unuse(RAX);
+		negnum++;
+	}
+	else {
+		out("NEG    %s\n", var_to_str_offset(v) );
 	}
 }
 /*
