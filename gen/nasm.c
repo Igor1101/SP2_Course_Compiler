@@ -25,7 +25,7 @@ static void process_exprfini(int num);
 static void process_add(int num);
 static void process_mul(int num);
 static void process_sub(int num);
-static void process_eq(int num);
+static void process_eq(int num, bool eq);
 static void process_dec(int num);
 static void process_inc(int num);
 static void process_conv(int num);
@@ -37,7 +37,7 @@ static void cmp(var_t* a0, var_t* a1);
 static void cmp_float(var_t*a0, var_t*a1);
 static void movsx(var_t*a0, var_t*a1);
 static void neg(var_t*v);
-static void sete(var_t* v);
+static void sete(var_t* v, bool eq);
 
 static void cvtsi2sd(var_t*a0, var_t*a1);
 
@@ -101,7 +101,10 @@ static int process_cmd(int num)
 		process_mul(num);
 		break;
 	case CMP_EQ:
-		process_eq(num);
+		process_eq(num, true);
+		break;
+	case CMP_NEQ:
+		process_eq(num, false);
 		break;
 	case DEC:
 		pr_debug("processing dec");
@@ -465,7 +468,7 @@ char* ctype_sz(ctypes_t t)
 	return 0;
 }
 
-static void process_eq(int num)
+static void process_eq(int num, bool eq)
 {
 	assert(get_instr(num)->argc == 3);
 	var_t* a0 = get_arg(num, 0);
@@ -476,10 +479,10 @@ static void process_eq(int num)
 	} else {
 		cmp_float(a1, a2);
 	}
-		sete(a0);
+	sete(a0, eq);
 }
 
-static void sete(var_t* v)
+static void sete(var_t* v, bool eq)
 {
 	ctypes_t maintype = v->type;
 	int regnum = v->num;
@@ -490,7 +493,10 @@ static void sete(var_t* v)
 		regsafetely_use(RBX);
 	var_t* rax = get_reg_force(RAX, C_CHAR_T);
 	var_t* rbx = get_reg_force(RBX, (!strcmp(ctype_sz(maintype), "8"))?C_LONG_T:C_INT_T);
-	out("SETE    %s\n", var_to_str_offset(rax));
+	if(eq)
+		out("SETE    %s\n", var_to_str_offset(rax));
+	else
+		out("SETNE    %s\n", var_to_str_offset(rax));
 	if(v->type != C_CHAR_T)
 		movsx(rbx, rax);
 	if(v->type == C_LONG_T ||
