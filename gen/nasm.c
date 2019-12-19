@@ -474,7 +474,7 @@ static void process_eq(int num, bool eq)
 	var_t* a0 = get_arg(num, 0);
 	var_t* a1 = get_arg(num, 1);
 	var_t* a2 = get_arg(num, 2);
-	if(a0->type != C_FLOAT_T && a0->type != C_DOUBLE_T) {
+	if(a1->type != C_FLOAT_T && a1->type != C_DOUBLE_T) {
 		cmp(a1, a2);
 	} else {
 		cmp_float(a1, a2);
