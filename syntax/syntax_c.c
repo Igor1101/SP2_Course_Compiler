@@ -393,6 +393,7 @@ static int process_expression(int num, int level, bool inside_expr, bool inside_
 						)&&
 						str_get(num-1)->lext != L_IDENTIFIER  &&
 						str_get(num-1)->lext != L_CONSTANT &&
+						strcmp(str_get(num-1)->inst, ")")&&
 						prev != S_ID_VARIABLE) {
 					prev = S_OPERAT_UNARY;
 					expect = S_ID_VARIABLE;
