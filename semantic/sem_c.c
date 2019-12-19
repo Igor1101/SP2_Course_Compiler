@@ -146,7 +146,7 @@ static int process_expression(int num, bool param, bool inside_array)
 					set_err_type(num, t, main_type);
 					break;
 				case CONVERT:
-					if(!isconst)
+					if(!isconst || main_type == C_DOUBLE_T || main_type == C_FLOAT_T)
 						str_get(num)->conv_to = main_type;
 					break;
 				}
