@@ -17,6 +17,8 @@
 r_stat_t rstate[ALL_REGS_AMOUNT];
 FILE* asmfile;
 
+void stackalloc(unsigned capacity);
+
 static int process_cmd(int num);
 static void process_mov(int num);
 static void process_exprfini(int num);
@@ -43,6 +45,7 @@ static char* var_to_str_offset(var_t*v);
 int gen_nasm(void)
 {
 	asmfile = fopen("result.asm", "w");
+	stackalloc(100);
 	out_decl();
 	out_init();
 	for(int i=0; i<pre_code.amount; ) {
@@ -123,6 +126,7 @@ struct Stack {
     unsigned capacity;
     r64_t* array;
 };
+
 static struct Stack* stack ;
 // function to create a stack of given capacity. It initializes size of
 // stack as 0
